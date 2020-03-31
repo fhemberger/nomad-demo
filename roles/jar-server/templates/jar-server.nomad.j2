@@ -35,7 +35,7 @@ job "jar-server" {
 
       service {
         name = "jar-server"
-        tags = ["http"]
+        tags = ["http", "prometheus"]
         port = "http"
         check {
           type     = "http"

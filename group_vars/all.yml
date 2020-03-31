@@ -6,5 +6,8 @@ nomad_version: "0.11.0-beta1"
 coredns_version: "1.6.9"
 traefik_version: "2.2.0"
 
+prometheus_version: "2.17.1"
+consul_exporter_version: "0.6.0"
+
 random_hash: "{{ lookup('password', '/tmp/randomhash chars=ascii_letters,digits,hexdigits length=32') }}"
 interface: enp0s8

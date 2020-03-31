@@ -12,6 +12,10 @@ http:
       rule: "Host(`consul.{{ domain }}`)"
       service: "consul"
       entrypoints: "web"
+    prometheus:
+      rule: "Host(`prometheus.{{ domain }}`)"
+      service: "prometheus"
+      entrypoints: "web"
 
   services:
     consul:
@@ -20,3 +24,7 @@ http:
 {% for host in consul_nomad_ips %}
           - url: "http://{{ host }}:8500"
 {% endfor %}
+    prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://localhost:9100"

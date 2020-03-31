@@ -11,6 +11,7 @@
   roles:
     - name: coredns
     - name: traefik
+    - name: prometheus
 
 - hosts: consul-nomad-node1
   roles:

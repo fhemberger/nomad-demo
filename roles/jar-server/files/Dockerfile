@@ -9,5 +9,8 @@ RUN git clone --depth=1 https://github.com/bjrbhre/hello-http-java \
   && javac HelloWorld.java \
   && jar cmvf META-INF/MANIFEST.MF HelloWorld.jar *.class
 
+RUN sh -c 'echo "jar_server 1" > /metrics'
+
 FROM halverneus/static-file-server:latest
 COPY --from=build /hello-http-java/HelloWorld.jar /web/
+COPY --from=build /metrics /web/

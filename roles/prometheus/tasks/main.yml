@@ -1,0 +1,60 @@
+---
+- name: Download and extract Prometheus if needed
+  unarchive:
+    src: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    dest: /usr/bin
+    creates: "prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    remote_src: yes
+    extra_opts:
+      - --strip-components=1
+
+- name: Download and extract consul_exporter if needed
+  unarchive:
+    src: "https://github.com/prometheus/consul_exporter/releases/download/v{{ consul_exporter_version }}/consul_exporter-{{ consul_exporter_version }}.linux-amd64.tar.gz"
+    dest: /usr/bin
+    creates: "consul_exporter-{{ consul_exporter_version }}.linux-amd64.tar.gz"
+    remote_src: yes
+    extra_opts:
+      - --strip-components=1
+
+- name: Create prometheus user
+  user:
+    name: prometheus
+    home: /etc/prometheus
+    system: yes
+    shell: /usr/bin/false
+    state: present
+
+- name: Create data directory
+  file:
+    path: /var/lib/prometheus
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+
+- name: Copy config
+  copy:
+    src: "prometheus.yml"
+    dest: "/etc/prometheus/prometheus.yml"
+    mode: 0644
+
+- name: Copy systemd service
+  copy:
+    src: "{{ item }}.service"
+    dest: "/etc/systemd/system/{{ item }}.service"
+    mode: 0644
+  loop:
+    - consul_exporter
+    - prometheus
+
+- name: Start services
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  loop:
+    - consul_exporter
+    - prometheus
+

@@ -1,0 +1,14 @@
+---
+- name: Build and push Docker image (localhost)
+  include_tasks: localhost.yml
+
+- name: Copy 'jar-server' job config
+  become: true
+  template:
+    src: "jar-server.nomad.j2"
+    dest: "{{ ansible_env.HOME }}/jar-server.nomad"
+    mode: 0644
+
+- name: Run 'jar-server' job on Nomad # noqa 301
+  become: true
+  command: nomad job run "{{ ansible_env.HOME }}/jar-server.nomad"

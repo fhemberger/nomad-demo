@@ -1,0 +1,17 @@
+---
+- hosts: consul_nomad
+  become: yes
+  roles:
+    - name: consul-nomad-dependencies
+    - name: consul
+    - name: nomad
+
+- hosts: loadbalancer
+  become: yes
+  roles:
+    - name: coredns
+    - name: traefik
+
+- hosts: consul-nomad-node1
+  roles:
+    - name: jar-server

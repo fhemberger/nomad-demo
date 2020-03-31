@@ -1,0 +1,45 @@
+---
+- name: Download and extract CoreDNS if needed
+  unarchive:
+    src: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_amd64.tgz"
+    dest: /usr/bin
+    creates: "coredns_{{ coredns_version }}_linux_amd64.tgz"
+    remote_src: yes
+
+- name: Create coredns user
+  user:
+    name: coredns
+    home: /etc/coredns
+    system: yes
+    shell: /usr/bin/false
+    state: present
+
+- name: Copy config
+  template:
+    src: "Corefile.j2"
+    dest: "/etc/coredns/Corefile"
+    mode: 0644
+
+- name: Copy systemd service
+  copy:
+    src: "coredns.service"
+    dest: "/etc/systemd/system/coredns.service"
+    mode: 0644
+
+- name: Disable systemd-resolved service
+  systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: no
+
+- name: Set nameserver to localhost
+  copy:
+    content: 'nameserver 127.0.0.1'
+    dest: /etc/resolv.conf
+
+- name: Start coredns service
+  systemd:
+    name: coredns
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

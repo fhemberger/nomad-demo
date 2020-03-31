@@ -1,0 +1,48 @@
+---
+- name: Download and extract Consul if needed
+  unarchive:
+    src: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
+    dest: /usr/bin
+    creates: "consul_{{ consul_version }}_linux_amd64.zip"
+    remote_src: yes
+
+- name: Create config directory
+  file:
+    path: /etc/consul.d
+    state: directory
+    mode: 0755
+
+- name: Create consul user
+  user:
+    name: consul
+    home: /etc/consul.d
+    system: yes
+    shell: /usr/bin/false
+    state: present
+
+- name: Create data directory
+  file:
+    path: /opt/consul
+    state: directory
+    owner: consul
+    group: consul
+    mode: 0755
+
+- name: Copy config
+  template:
+    src: "consul.hcl.j2"
+    dest: "/etc/consul.d/consul.hcl"
+    mode: 0644
+
+- name: Copy systemd service
+  template:
+    src: "consul.service.j2"
+    dest: "/etc/systemd/system/consul.service"
+    mode: 0644
+
+- name: Start consul service
+  systemd:
+    name: consul
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

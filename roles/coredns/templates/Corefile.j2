@@ -1,0 +1,24 @@
+consul {
+  hosts {
+{% for host in consul_nomad_ips %}
+    {{ host }} consul
+{% endfor %}
+    fallthrough
+  }
+
+  forward . {{ consul_nomad_ips | join(':8600 ') }}:8600
+}
+
+. {
+  # Point all `.demo` queries to localhost
+  template IN A demo {
+    answer "{% raw %}{{ .Name }}{% endraw %} 60 IN A {{ hostvars[inventory_hostname]['ansible_' + interface]['ipv4']['address'] }}"
+    fallthrough
+  }
+
+  forward . tls://1.1.1.1 tls://1.0.0.1 {
+   tls_servername cloudflare-dns.com
+   health_check 5s
+  }
+  cache 30
+}

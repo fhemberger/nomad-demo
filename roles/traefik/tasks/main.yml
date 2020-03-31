@@ -1,0 +1,43 @@
+---
+- name: Download and extract Traefik if needed
+  unarchive:
+    src: "https://github.com/containous/traefik/releases/download/v{{ traefik_version }}/traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
+    dest: /usr/bin
+    creates: "traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
+    remote_src: yes
+
+- name: Create traefik user
+  user:
+    name: traefik
+    create_home: no
+    system: yes
+    shell: /usr/bin/false
+    state: present
+
+- name: Create config directory
+  file:
+    path: /etc/traefik
+    state: directory
+    mode: 0755
+
+- name: Copy config
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/traefik/{{ item }}"
+    mode: 0644
+  loop:
+    - dynamic_conf.yaml
+    - traefik.yaml
+
+- name: Copy systemd service
+  copy:
+    src: "traefik.service"
+    dest: "/etc/systemd/system/traefik.service"
+    mode: 0644
+
+- name: Start traefik service
+  systemd:
+    name: traefik
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

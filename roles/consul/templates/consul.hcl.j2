@@ -1,0 +1,9 @@
+bootstrap_expect = {{ groups['consul_nomad'] | length }}
+# Make consul UI accessible from everywhere
+client_addr = "0.0.0.0"
+data_dir = "/opt/consul"
+datacenter = "dc1"
+encrypt = "{{ random_hash }}"
+retry_join = ["{{ consul_nomad_ips | join('","') }}"]
+server = true
+ui = true

@@ -1,0 +1,22 @@
+# Dynamic configuration
+http:
+  routers:
+    api:
+      rule: "Host(`traefik.{{ domain }}`)"
+      service: "api@internal"
+      entrypoints: "web"
+      loadbalancer:
+        server:
+          port: "8080"
+    consul:
+      rule: "Host(`consul.{{ domain }}`)"
+      service: "consul"
+      entrypoints: "web"
+
+  services:
+    consul:
+      loadBalancer:
+        servers:
+{% for host in consul_nomad_ips %}
+          - url: "http://{{ host }}:8500"
+{% endfor %}

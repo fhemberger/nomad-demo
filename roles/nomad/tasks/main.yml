@@ -1,0 +1,48 @@
+---
+- name: Download and extract Consul if needed
+  unarchive:
+    src: "https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_linux_amd64.zip"
+    dest: /usr/bin
+    creates: "nomad_{{ nomad_version }}_linux_amd64.zip"
+    remote_src: yes
+
+- name: Create config directory
+  file:
+    path: /etc/nomad.d
+    state: directory
+    mode: 0755
+
+- name: Create nomad user
+  user:
+    name: nomad
+    home: /etc/nomad.d
+    system: yes
+    shell: /usr/bin/false
+    state: present
+
+- name: Create data directory
+  file:
+    path: /opt/nomad
+    state: directory
+    owner: nomad
+    group: nomad
+    mode: 0755
+
+- name: Copy config
+  template:
+    src: "nomad.hcl.j2"
+    dest: "/etc/nomad.d/nomad.hcl"
+    mode: 0644
+
+- name: Copy systemd service
+  copy:
+    src: "nomad.service"
+    dest: "/etc/systemd/system/nomad.service"
+    mode: 0644
+
+- name: Start nomad service
+  systemd:
+    name: nomad
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

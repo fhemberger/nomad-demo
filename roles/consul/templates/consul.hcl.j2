@@ -4,6 +4,6 @@ client_addr = "0.0.0.0"
 data_dir = "/opt/consul"
 datacenter = "dc1"
 encrypt = "{{ random_hash }}"
-retry_join = ["{{ consul_nomad_ips | join('","') }}"]
+retry_join = {{ consul_nomad_ips | to_json }}
 server = true
 ui = true

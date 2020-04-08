@@ -10,4 +10,14 @@ prometheus_version: "2.17.1"
 consul_exporter_version: "0.6.0"
 
 random_hash: "{{ lookup('password', '/tmp/randomhash chars=ascii_letters,digits,hexdigits length=32') }}"
-interface: enp0s8
+
+# If multiple network interfaces exist in the VM, specify the one matching
+# the IP range defined in Vagrant.
+network_interface: enp0s8
+
+# Set interface manually (see above) or fall back to default IPv4 address.
+network_interface_ipv4: "{{ hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}"
+
+# When provisioned with Vagrant, use the list `vagrant_consul_nomad_ips` passed
+# as group variable. Otherwise use `ansible_host` from the inventory file.
+consul_nomad_ips: "{{ vagrant_consul_nomad_ips | default(groups['consul_nomad'] | map('extract', hostvars, 'ansible_host') | list) }}"

@@ -3,21 +3,22 @@ data_dir = "/opt/nomad"
 
 bind_addr = "0.0.0.0"
 advertise {
-  http = "{{ hostvars[inventory_hostname]['ansible_' + interface]['ipv4']['address'] }}:4646"
-  rpc  = "{{ hostvars[inventory_hostname]['ansible_' + interface]['ipv4']['address'] }}:4647"
-  serf = "{{ hostvars[inventory_hostname]['ansible_' + interface]['ipv4']['address'] }}:4648"
+  http = "{{ network_interface_ipv4 }}:4646"
+  rpc  = "{{ network_interface_ipv4 }}:4647"
+  serf = "{{ network_interface_ipv4 }}:4648"
 }
 
 client {
   enabled = true
-  network_interface = "{{ interface }}"
+  {# loopback interface is `lo` on Linux, but `lo0` on macOS/BSD #}
+  network_interface = "{{ network_interface | default(ansible_interfaces | select('match', '^lo\d?') | first) }}"
 }
 
 server {
   enabled = true
   bootstrap_expect = {{ groups['consul_nomad'] | length }}
   server_join {
-    retry_join = ["{{ consul_nomad_ips | join('","') }}"]
+    retry_join = {{ consul_nomad_ips | to_json }}
     retry_max = 3
     retry_interval = "15s"
   }

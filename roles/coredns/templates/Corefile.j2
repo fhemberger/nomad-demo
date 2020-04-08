@@ -12,7 +12,7 @@ consul {
 . {
   # Point all `.demo` queries to localhost
   template IN A demo {
-    answer "{% raw %}{{ .Name }}{% endraw %} 60 IN A {{ hostvars[inventory_hostname]['ansible_' + interface]['ipv4']['address'] }}"
+    answer "{% raw %}{{ .Name }}{% endraw %} 60 IN A {{ network_interface_ipv4 }}"
     fallthrough
   }
 

@@ -1,7 +1,7 @@
 ---
 - name: Check if Docker is installed on the host
   command: docker version
-  register: docker_result
+  register: _docker_result
   failed_when: false
   changed_when: false
 
@@ -37,7 +37,7 @@
         name: docker
         state: started
         enabled: yes
-  when: docker_result.rc == 2
+  when: _docker_result.rc == 2
 
 - name: Install base dependencies
   package:

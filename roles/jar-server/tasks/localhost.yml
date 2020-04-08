@@ -37,6 +37,6 @@
       path: "{{ playbook_dir }}/roles/jar-server/files"
       pull: yes
     name: jar-server-demo
-    repository: docker.io/fhemberger/jar-server-demo
+    repository: "docker.io/{{ lookup('env','ANSIBLE_DOCKER_USERNAME') }}/jar-server-demo"
     push: yes
     source: build

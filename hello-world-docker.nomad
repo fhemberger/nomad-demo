@@ -13,7 +13,7 @@ job "hello-world-docker" {
   # placed on the same host.
   group "web" {
     # Specify the number of these tasks we want.
-    count = 3
+    count = 1
 
     task "frontend" {
       driver = "docker"

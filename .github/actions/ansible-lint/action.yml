@@ -1,0 +1,6 @@
+---
+name: 'Ansible Lint'
+description: 'Lints Ansible files'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

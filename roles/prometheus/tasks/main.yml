@@ -57,4 +57,3 @@
   loop:
     - consul_exporter
     - prometheus
-

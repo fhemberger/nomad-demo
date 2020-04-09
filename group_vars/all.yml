@@ -15,7 +15,7 @@ random_hash: "{{ lookup('password', '/tmp/randomhash chars=ascii_letters,digits,
 network_interface: enp0s8
 
 # Set interface manually (see above) or fall back to default IPv4 address.
-network_interface_ipv4: "{{ hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}"
+network_interface_ipv4: "{{ hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}" # noqa 204
 
 # When provisioned with Vagrant, use the list `vagrant_consul_nomad_ips` passed
 # as group variable. Otherwise use `ansible_host` from the inventory file.

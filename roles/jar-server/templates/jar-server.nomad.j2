@@ -17,7 +17,7 @@ job "jar-server" {
       driver = "docker"
 
       config {
-        image = ""{{ lookup('env','ANSIBLE_DOCKER_USERNAME') | default ('fhemberger') }}"/jar-server-demo"
+        image = "{{ lookup('env','ANSIBLE_DOCKER_USERNAME') | default ('fhemberger') }}/jar-server-demo"
       }
 
       env {

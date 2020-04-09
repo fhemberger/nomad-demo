@@ -10,7 +10,7 @@
 
 - name: Download and extract consul_exporter if needed
   unarchive:
-    src: "https://github.com/prometheus/consul_exporter/releases/download/v{{ consul_exporter_version }}/consul_exporter-{{ consul_exporter_version }}.linux-amd64.tar.gz"
+    src: "https://github.com/prometheus/consul_exporter/releases/download/v{{ consul_exporter_version }}/consul_exporter-{{ consul_exporter_version }}.linux-amd64.tar.gz" # noqa 204
     dest: /usr/bin
     creates: "consul_exporter-{{ consul_exporter_version }}.linux-amd64.tar.gz"
     remote_src: yes

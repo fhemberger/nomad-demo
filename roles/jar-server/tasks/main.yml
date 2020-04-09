@@ -10,8 +10,8 @@
   include_tasks: localhost.yml
   when:
     - _docker_result.rc == 0
-    - "{{ lookup('env','ANSIBLE_DOCKER_USERNAME') }}" is defined
-    - "{{ lookup('env','ANSIBLE_DOCKER_PASSWORD') }}" is defined
+    - lookup('env','ANSIBLE_DOCKER_USERNAME') is defined
+    - lookup('env','ANSIBLE_DOCKER_PASSWORD') is defined
 
 - name: Copy 'jar-server' job config
   become: true

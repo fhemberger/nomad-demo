@@ -1,4 +1,4 @@
-# Consul/Nomad Demo
+# Nomad Demo
 
 Kubernetes is ubiquitous and an excellent platform, especially if you use the integrated offers of the big cloud providers like Amazon Web Services, Google Cloud or Microsoft Azure. But installing it on-premise can be quite a challenge: Many new concepts and abstraction layers need to be understood and managed in production, including several options for software defined networking and storage adapters.
 
@@ -57,8 +57,8 @@ brew install ansible
 1. **Clone this Git repository:**
 
    ```sh
-   git clone --depth=1 https://github.com/fhemberger/consul-nomad-demo.git
-   cd consul-nomad-demo
+   git clone --depth=1 https://github.com/fhemberger/nomad-demo.git
+   cd nomad-demo
    ```
 
 2. **Create and provision virtual machines with Vagrant:**  

@@ -8,9 +8,9 @@ advertise {
   serf = "{{ network_interface_ipv4 }}:4648"
 }
 
+{# loopback interface is `lo` on Linux, but `lo0` on macOS/BSD #}
 client {
   enabled = true
-  {# loopback interface is `lo` on Linux, but `lo0` on macOS/BSD #}
   network_interface = "{{ network_interface | default(ansible_interfaces | select('match', '^lo\d?') | first) }}"
 }
 

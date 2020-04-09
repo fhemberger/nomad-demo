@@ -67,6 +67,9 @@ brew install ansible
    ```sh
    vagrant up --no-provision
    vagrant provision
+
+   # If you want to try the included Java demo, you also need to run:
+   ansible-playbook playbook.yml
    ```
 
 3. <strong id="etc-hosts">Configure host names for all services:</strong>  
@@ -101,13 +104,19 @@ Sites that are available from the start:
 
 ### Deploying jobs
 
-Two example applications are included with this demo: [`hello-world-docker.nomad`](hello-world-docker.nomad) and [`hello-world-java.nomad`](hello-world-java.nomad)<sup id="a2">[2](#f2)</sup>. Go to http://nomad.demo/ui/jobs/run, copy and paste one of the jobs into the editor and click "Plan".
+Two example applications are included with this demo: [`hello-world-docker.nomad`](roles/nomad/templates/jobs/hello-world-docker.nomad) and [`hello-world-java.nomad`](roles/nomad/templates/jobs/hello-world-java.nomad)<sup id="a2">[2](#f2)</sup>. Go to http://nomad.demo/ui/jobs/run, copy and paste one of the jobs into the editor and click "Plan".
 
 Nomad performs a syntax check by dry-running the job on the scheduler without applying the changes yet. If you change settings in your job file later on, this step will also show a diff of all the changes (e.g. number of instances):
 
 <img src=".images/screenshot-nomad.png" alt="Screenshot of Nomad: Planning jobs">
 
 Click "Run" to deploy the job to the Nomad cluster.
+
+If you prefer to run the demos from the command line you can use `vagrant ssh` to execute the command on the VM. As the files are copied to all instances, the node number doesn't matter in this case:
+
+```sh
+vagrant ssh consul-nomad-node1 -c 'nomad job run ~/jar-server.nomad'
+```
 
 #### Collecting application metrics with Prometheus
 
@@ -141,7 +150,7 @@ You can launch jobs that claim storage volumes from AWS Elastic Block Storage (E
 
 ## On Security
 
-For this demo I tried to keep the setup simple, but already a bit closer to a practical use than just "start it in development mode on your laptop". I think that it provides a good, stable basis which can be extended (especially through Ansible) if the following security considerations are taken into account:
+For this demo I tried to keep the setup simple, but already a bit closer to a practical use than "just start it in development mode on your laptop". I think that it provides a good, stable basis which can be extended (especially through Ansible) if the following security considerations are taken into account:
 
 - Separate the control plane (Consul, Nomad Server) from the worker pool running the applications (Nomad Client), so faulty or malicious workloads have less impact on the overall system integrity and stability.
 
@@ -180,4 +189,4 @@ Afterwards run the provisioning step with `ansible-playbook -i <inventory file> 
 
 ---
 
-<sup id="f2">2</sup> To get the Java demo up and running, I had to provide a Jar file and the opportunity for Nomad to download it. So I decided to use [this simple "Hello World" app](https://github.com/bjrbhre/hello-http-java), compile it in a Dockerfile and use a static web server for the resulting Jar file. This server also includes a "metrics" text file to fake a scraping endpoint for [Prometheus](#collecting-application-metrics-with-prometheus). [↩](#user-content-a2)
+<sup id="f2">2</sup> To get the Java demo up and running, I had to provide a Jar file and the opportunity for Nomad to download it. So I decided to use [this "Hello World" app](https://github.com/bjrbhre/hello-http-java), compile it in a Dockerfile and use a static web server for downloads. This server also includes a "metrics" text file to fake a scraping endpoint for [Prometheus](#collecting-application-metrics-with-prometheus). [↩](#user-content-a2)

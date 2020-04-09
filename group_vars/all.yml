@@ -2,7 +2,7 @@
 domain: demo
 
 consul_version: "1.7.2"
-nomad_version: "0.11.0-beta2"
+nomad_version: "0.11.0"
 coredns_version: "1.6.9"
 traefik_version: "2.2.0"
 prometheus_version: "2.17.1"

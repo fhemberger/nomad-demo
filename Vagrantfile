@@ -6,6 +6,14 @@ $max_nodes = 3
 $ip_range = '10.1.10.2xx'
 $all_nodes = Array.new($max_nodes).fill { |i| "#{get_ip(i + 1)}" }
 
+$ansible_groups = {
+  "consul_nomad" => ["consul-nomad-node[1:#{$max_nodes}]"],
+  "all:vars" => {
+    "vagrant_consul_nomad_ips" => $all_nodes,
+    "vagrant_loadbalancer_ip" => "#{get_ip(0)}"
+  }
+}
+
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/bionic64"
 
@@ -23,15 +31,19 @@ Vagrant.configure(2) do |config|
     lb.vm.hostname = "loadbalancer"
   end
 
-  config.vm.provision "ansible" do |ansible|
+  # First, we need our Consul cluster up and running
+  config.vm.provision "consul", type: "ansible", run: "never" do |ansible|
+    ansible.playbook = "playbook-consul.yml"
+    ansible.groups = $ansible_groups
+    ansible.limit = "consul_nomad"
+  end
+
+  # Vault requires a running Consul cluster with an elected leader
+  # Nomad in turn requires tokens from Vault
+  # This playbook also includes the load balancer and DNS configuration
+  config.vm.provision "all", type: "ansible", run: "never" do |ansible|
     ansible.playbook = "playbook.yml"
-    ansible.groups = {
-      "consul_nomad" => ["consul-nomad-node[1:#{$max_nodes}]"],
-      "all:vars" => {
-        "vagrant_consul_nomad_ips" => $all_nodes,
-        "vagrant_loadbalancer_ip" => "#{get_ip(0)}"
-      }
-    }
+    ansible.groups = $ansible_groups
   end
 
   # Increase memory for Parallels Desktop

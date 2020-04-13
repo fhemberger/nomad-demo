@@ -69,6 +69,12 @@ job "prometheus" {
         change_mode   = "signal"
         change_signal = "SIGHUP"
       }
+
+      vault {
+        policies      = ["prometheus"]
+        change_mode   = "signal"
+        change_signal = "SIGHUP"
+      }
     }
 
     task "alertmanager" {

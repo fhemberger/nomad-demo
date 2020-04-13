@@ -55,3 +55,17 @@ scrape_configs:
     relabel_configs:
       - target_label: instance
         replacement: "loadbalancer"
+
+  - job_name: 'vault'
+    metrics_path: "/v1/sys/metrics"
+    params:
+      format: ['prometheus']
+    # scheme: https
+    # tls_config:
+    #   ca_file: your_ca_here.pem
+    # bearer_token: "your_vault_token_here"
+    static_configs:
+      - targets: ["active.vault.service.consul:8200"]
+    relabel_configs:
+      - source_labels: [__meta_consul_node]
+        target_label: instance

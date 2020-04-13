@@ -1,0 +1,81 @@
+---
+- name: Download and extract Vault if needed
+  unarchive:
+    src: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+    dest: /usr/bin
+    creates: "vault_{{ vault_version }}_linux_amd64.zip"
+    remote_src: yes
+
+- name: Create config directory
+  file:
+    path: /etc/vault.d
+    state: directory
+    mode: 0755
+
+- name: Create vault user
+  user:
+    name: vault
+    home: /etc/vault.d
+    system: yes
+    shell: /usr/bin/false
+    state: present
+
+- name: Create data directory
+  file:
+    path: /opt/vault
+    state: directory
+    owner: vault
+    group: vault
+    mode: 0755
+
+- name: Copy config
+  template:
+    src: "vault.hcl.j2"
+    dest: "/etc/vault.d/vault.hcl"
+    mode: 0644
+
+- name: Copy systemd service
+  copy:
+    src: "vault.service"
+    dest: "/etc/systemd/system/vault.service"
+    mode: 0644
+
+- name: Start vault service
+  systemd:
+    name: vault
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+
+- name: Get Vault status # noqa 301
+  shell: "vault status -format json"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+  register: _vault_status_results
+  failed_when: _vault_status_results.rc == 1
+
+- name: Parse output of 'vault status'
+  set_fact: _vault_status_parsed="{{ _vault_status_results.stdout | from_json }}"
+
+- name: Initialize Vault
+  run_once: true
+  include_tasks: init.yml
+  when: not _vault_status_parsed.initialized
+
+- name: Unseal Vault
+  include_tasks: unseal.yml
+  when: _vault_status_parsed.sealed
+
+- name: Load root token
+  delegate_to: localhost
+  no_log: yes
+  set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
+  when: _vault_status_parsed.initialized
+
+- name: Create policy and token for Nomad
+  run_once: true
+  include_tasks: nomad.yml
+
+- name: Setup 'hello-world-vault' demo values
+  run_once: true
+  include_tasks: demo.yml

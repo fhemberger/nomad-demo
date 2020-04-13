@@ -6,12 +6,14 @@ Smaller administration teams in particular are often not immediately up to this 
 
 It may be worth considering alternatives, especially if not only containers are to be managed centrally, but also other traditional workloads such as Java applications or VMs.
 
-This demo project uses both Consul and Nomad from Hashicorp:
+This demo project uses Consul, Nomad and Vault from HashiCorp:
 
 <img src=".images/consul-logo.svg" align="left" width="200" alt=""> 
 Consul is a service networking solution to connect services across any runtime platform. Service registry, integrated health checks, and DNS and HTTP interfaces enable any service to discover and be discovered by other services.<br clear="both"><br>
 
 <img src=".images/nomad-logo.svg" align="left" width="200" alt=""> Nomad is a workload orchestrator that deploys and manages containers and non-containerized applications at scale. It addresses the technical complexity of workload orchestration across the cloud, on-prem, and hybrid infrastructure.
+
+<img src=".images/vault-logo.svg" align="left" width="200" alt=""> Vault allows you to store, access, and deploy secrets across applications, systems, and infrastructure. Vault centrally manages and enforces access to secrets and systems based on trusted sources of application and user identity.
 
 
 ## Overview
@@ -22,9 +24,9 @@ Consul is a service networking solution to connect services across any runtime p
 
 [CoreDNS](http://coredns.io/): Provides name resolution for the `consul.` root domain and forwards DNS queries to either the local `*.consul.` zone or Cloudflare 1.1.1.1 as upstream DNS.
 
-[Prometheus](https://prometheus.io/): Collects basic metrics form Traefik, Consul (via [consul_exporter](https://github.com/prometheus/consul_exporter/)) and applications tagged with `prometheus`.
+[Prometheus](https://prometheus.io/): Collects basic metrics form Traefik, Consul (via [consul_exporter](https://github.com/prometheus/consul_exporter/)), Nomad and applications tagged with `prometheus`.
 
-All three nodes run [Consul](https://consul.io/) and [Nomad](https://nomadproject.io/), the latter configured both as server (= control plane) and client (= node running the actual workload). With Docker and a Java Runtime Environment installed, Nomad can run containerized workloads and jar files.
+All three nodes run [Consul](https://consul.io/), [Nomad](https://nomadproject.io/) and [Vault](https://www.vaultproject.io/), with Nomad configured both as server (= control plane) and client (= node running the actual workload). As both Docker and a Java Runtime Environment is installed, Nomad can run containerized workloads and jar files.
 
 An example deployment configuration for each is included in this setup.
 
@@ -65,14 +67,23 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    ```
 
 2. **Create and provision virtual machines with Vagrant:**  
-   This will create four virtual machines with IPs _10.1.10.20–23_. If your local network already uses this address range, you can define an alternate range in the `Vagrantfile` before continuing with the installation:
+   Vagrant will create four virtual machines with IPs _10.1.10.20–23_. If your local network already uses this address range, you can define an alternate range in the `Vagrantfile` before continuing with the installation.
+
+   As there are some logical dependencies in the setup, it is split up in multiple parts:
+
+     1. Create the four VMs in VirtualBox
+     2. Setup the Consul cluster and elect a leader
+     3. Setup Vault (which requires the working Consul cluster),  
+        Nomad (which in turn requires a token from Vault) and the load balancer VM.
+     4. Deploy the provided demo jobs on Nomad
+
+     <br>
 
    ```sh
-   vagrant up --no-provision
-   vagrant provision
-
-   # To deploy Prometheus, Grafana and the demo application run:
-   ansible-playbook playbook.yml
+   vagrant up --no-provision \
+     && vagrant provision --provision-with consul \
+     && vagrant provision --provision-with all \
+     && ansible-playbook -i localhost playbook.yml
    ```
 
 3. <strong id="etc-hosts">Configure host names for all services:</strong>  
@@ -82,11 +93,13 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    10.1.10.20 traefik.demo
    10.1.10.20 consul.demo
    10.1.10.20 nomad.demo
+   10.1.10.20 vault.demo
    10.1.10.20 grafana.demo
    10.1.10.20 prometheus.demo
    10.1.10.20 alertmanager.demo
    10.1.10.20 hello-docker.demo
    10.1.10.20 hello-java.demo
+   10.1.10.20 hello-vault.demo
    ```
 
 To check if everything is working correctly, go to http://traefik.demo, you should see the UI of the load balancer with a list of registered services:
@@ -96,11 +109,12 @@ To check if everything is working correctly, go to http://traefik.demo, you shou
 
 <br clear="both"><br>
 
-Sites that are available from the start:
+Sites available after installation:
 
 - http://traefik.demo - Load balancer UI, see all registered services
 - http://consul.demo - Consul UI
 - http://nomad.demo - Nomad UI
+- http://vault.demo - Vault UI
 - http://grafana.demo - Grafana Dashboards
 - http://prometheus.demo - Prometheus metrics UI
 - http://alertmanager.demo - Prometheus Alertmanager UI
@@ -110,7 +124,13 @@ Sites that are available from the start:
 
 ### Deploying jobs
 
-Two example applications are included with this demo: [`hello-world-docker.nomad`](nomad_jobs/hello-world-docker.nomad) and [`hello-world-java.nomad`](nomad_jobs/hello-world-java.nomad). Go to http://nomad.demo/ui/jobs/run, copy and paste one of the jobs into the editor and click "Plan".
+If you followed step 2 above, Prometheus, Grafana and the demo jobs will already be running on Nomad.
+
+If you want to edit those jobs or deploy one of your own, there are two ways to do so:
+
+#### Running jobs from the UI
+
+Three example applications are included with this demo: [`hello-world-docker.nomad`](nomad_jobs/hello-world-docker.nomad), [`hello-world-java.nomad`](nomad_jobs/hello-world-java.nomad) and [`hello-world-vault.nomad`](nomad_jobs/hello-world-vault.nomad). Go to http://nomad.demo/ui/jobs/run, copy and paste one of the jobs into the editor and click "Plan".
 
 Nomad performs a syntax check by dry-running the job on the scheduler without applying the changes yet. If you change settings in your job file later on, this step will also show a diff of all the changes (e.g. number of instances):
 
@@ -118,20 +138,16 @@ Nomad performs a syntax check by dry-running the job on the scheduler without ap
 
 Click "Run" to deploy the job to the Nomad cluster.
 
-If you prefer to run the demos from the command line you can use `vagrant ssh` to deploy them directly from the VM. As the files are copied to the vagrant user's home directory on all instances, the node number doesn't matter, e.g.:
+#### Running jobs using the CLI
+
+If you prefer to run the demos from the command line, you can use `vagrant ssh` to login to one of the nodes and the `nomad` CLI command to deploy them directly from the VM. The three example jobs are copied to the vagrant user's home directory on all instances, the node number doesn't matter, e.g.:
 
 ```sh
-vagrant ssh consul-nomad-node1 -c 'nomad job run ~/nomad_jobs/hello-world-docker.nomad'
+vagrant ssh consul-nomad-node1
+
+# Inside the VM
+nomad job run ~/nomad_jobs/hello-world-docker.nomad
 ```
-
-#### Collecting application metrics with Prometheus
-
-This setup also includes a [Prometheus](https://prometheus.io/) instance, which uses Consul for service discovery. If your application's Nomad job is tagged with `prometheus` and has a metrics endpoint under `/metrics`, it will be scraped automatically and appear in the Prometheus target overview under http://prometheus.demo.
-
-#### Grafana Dashboards
-
-There are some basic dashboards for Consul, Nomad and Traefik available under http://grafana.demo. Username/password is `admin`.
-
 
 ### Stopping jobs
 
@@ -142,18 +158,65 @@ Go to the [Job overview page](http://nomad.demo/ui/jobs), select a job, click "S
 Dead/completed jobs are cleaned up in accordance to the garbage collection interval (default: `1h`). You can force garbage collection using the System API endpoint which will run the global garbage collector:
 
 ```sh
-vagrant ssh consul-nomad-node1
-
-# Inside the VM:
-curl -X PUT http://localhost:4646/v1/system/gc
+vagrant ssh consul-nomad-node1 -c 'curl -X PUT http://localhost:4646/v1/system/gc'
 ```
 
-If you wish to lower the GC interval permanently for jobs, you can use the [`job_gc_threshold`](https://www.nomadproject.io/docs/agent/configuration/server.html#job_gc_threshold) configuration parameter within the server config stanza.
+If you wish to lower the GC interval permanently for jobs, you can use the [`job_gc_threshold`](https://www.nomadproject.io/docs/agent/configuration/server.html#job_gc_threshold) configuration parameter within Nomad's [server config stanza](https://github.com/fhemberger/nomad-demo/blob/master/roles/nomad/templates/nomad.hcl.j2#L27).
+
+
+## What is Vault?
+
+Vault is the Swiss Army knife for managing secrets and access rights across your entire platform, e.g.:
+
+- Store arbitrary passwords, API keys, etc. for your applications in the [key/value store](https://www.vaultproject.io/docs/secrets/kv).
+- Create custom, short lived credentials for [databases](https://www.vaultproject.io/docs/secrets/databases) and rotate root passwords regularly.
+- Generate dynamic API tokens for [Consul](https://www.vaultproject.io/docs/secrets/consul) and [Nomad](https://www.vaultproject.io/docs/secrets/nomad).
+- Create [X.509 certificates](https://www.vaultproject.io/docs/secrets/pki) and manage the [SSH access](https://www.vaultproject.io/docs/secrets/ssh/signed-ssh-certificates) to your machines.
+- Manage access to your cloud environment ([AWS](https://www.vaultproject.io/docs/secrets/aws), [Azure](https://www.vaultproject.io/docs/secrets/azure), [Google Cloud](https://www.vaultproject.io/docs/secrets/gcp), etc.) for users and applications.
+- Authenticate users through [LDAP](https://www.vaultproject.io/docs/auth/ldap), [username/password](https://www.vaultproject.io/docs/auth/userpass), [GitHub](https://www.vaultproject.io/docs/auth/github), [Okta](https://www.vaultproject.io/docs/auth/okta), etc.
+
+And all this with granular access control and full audit trail.
+
+
+### Working with Vault
+
+> This Vault integration is based on a [blog post](https://medium.com/hashicorp-engineering/nomad-integration-with-vault-42b0e5feca78) by Patrick Gryzan from HashiCorp.
+
+The process of [initializing](https://www.vaultproject.io/docs/commands/operator/init) and [unsealing](https://www.vaultproject.io/docs/commands/operator/unseal) vault are already automated in Ansible for this demo, however you should familiarize yourself with the concept:
+
+> When a Vault server is started, it starts in a *sealed* state. In this state, Vault is configured to know where and how to access the physical storage, but doesn't know how to decrypt any of it.
+> 
+> *Unsealing* is the process of constructing the master key necessary to read the decryption key to decrypt the data, allowing access to the Vault.
+
+– [»Concepts: Seal/Unseal«](https://www.vaultproject.io/docs/concepts/seal) (from the Vault documentation)
+
+Whenever you stop the Vault service on the server or shut down the VM, the node will be sealed again, making sure your encrypted data is always safe.
+The Consul dashboard will show a failed service check for that particular Vault node.
+
+To unseal Vault again, run the following Ansible playbook:
+
+```sh
+ansible-playbook \
+  -i .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory \
+  unseal-vault.yml
+```
+
+The keys for unsealing and the user tokens to access Vault are stored under `credentials`. 
+
+
+## Collecting application metrics with Prometheus
+
+This setup also includes a [Prometheus](https://prometheus.io/) instance, which uses Consul for service discovery. If your application's Nomad job is tagged with `prometheus` and has a metrics endpoint under `/metrics`, it will be scraped automatically and appear in the Prometheus target overview under http://prometheus.demo.
+
+
+## Grafana Dashboards
+
+There are some basic dashboards for Consul, Nomad and Traefik available under http://grafana.demo. Username/password is `admin`.
 
 
 ## Taking it further
 
-Dive deeper into the [Job specification](https://nomadproject.io/docs/job-specification/): learn about the [`template`](https://nomadproject.io/docs/job-specification/template/) and [`volume`](https://nomadproject.io/docs/job-specification/volume/) stanza to add storage to your jobs. Starting 0.11 beta, Nomad also supports [Container Storage Interface (CSI)](https://www.hashicorp.com/blog/hashicorp-nomad-container-storage-interface-csi-beta/).
+Dive deeper into the [Job specification](https://nomadproject.io/docs/job-specification/): learn about the [`artifact`](https://nomadproject.io/docs/job-specification/artifact/), [`template`](https://nomadproject.io/docs/job-specification/template/) and [`volume`](https://nomadproject.io/docs/job-specification/volume/) stanzas to add config files and storage to your jobs. Starting 0.11 beta, Nomad also supports [Container Storage Interface (CSI)](https://www.hashicorp.com/blog/hashicorp-nomad-container-storage-interface-csi-beta/).
 
 You can launch jobs that claim storage volumes from AWS Elastic Block Storage (EBS) or Elastic File System (EFS) volumes, GCP persistent disks, Digital Ocean droplet storage volumes, Ceph, vSphere, or vendor-agnostic third-party providers like Portworx. This means that the same plugins written by storage providers to support Kubernetes also support Nomad out of the box.
 
@@ -164,7 +227,7 @@ For this demo I tried to keep the setup simple, but already a bit closer to a pr
 
 - Separate the control plane from the worker pool running the applications, so faulty or malicious workloads have less impact on the overall system integrity and stability. Three nodes running a Consul and Nomad server are required to run in high availability (HA) mode. This allows Consul to reach a quorum, even in one node should go down. Each worker node however should run a Consul and Nomad Client, with the Nomad client talking to the Consul client and the Consul client talking to the Consul server.
 
-- Access Control Lists (ACLs) are indispensable to secure UI, API, CLI, service and agent communications on both [Consul](https://www.consul.io/docs/acl/index.html) and [Nomad](https://learn.hashicorp.com/nomad/acls/fundamentals). 
+- Access Control Lists (ACLs) are indispensable to secure UI, API, CLI, service and agent communications on [Consul](https://www.consul.io/docs/acl/index.html), [Nomad](https://learn.hashicorp.com/nomad/acls/fundamentals) and [Vault](https://www.vaultproject.io/docs/concepts/policies). 
 
 - Apply thorough network security measures (firewall, isolation, etc.) both from the outside and in between the machines.
 

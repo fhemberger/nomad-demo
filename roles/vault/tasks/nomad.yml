@@ -1,0 +1,76 @@
+---
+- name: Copy 'nomad-server-policy'
+  run_once: true
+  copy:
+    src: "nomad-server-policy.vault"
+    dest: "/home/{{ ansible_ssh_user }}/nomad-server-policy.vault"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0644
+
+- name: Write 'nomad-server-policy' to Vault
+  no_log: yes
+  run_once: true
+  command: "vault policy write nomad-server /home/{{ ansible_ssh_user }}/nomad-server-policy.vault"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: Check if Nomad token exists
+  delegate_to: localhost
+  stat: path="{{ vault_token_dir }}/nomad-token"
+  register: _vault_nomad_token_file
+
+- block:
+  - name: Create new token based on 'nomad-server' policy
+    no_log: yes
+    run_once: true
+    command: vault token create -policy nomad-server -period 72h -orphan -format json
+    environment:
+      VAULT_ADDR: "http://127.0.0.1:8200"
+      VAULT_TOKEN: "{{ vault_root_token }}"
+    register: _vault_nomad_token_results
+
+  - name: Parse output of 'vault token create'
+    no_log: yes
+    run_once: true
+    set_fact: _vault_nomad_token_parsed="{{ _vault_nomad_token_results.stdout | from_json }}"
+
+  - name: Save Nomad token
+    no_log: yes
+    run_once: true
+    set_fact: vault_nomad_token="{{ _vault_nomad_token_parsed.auth.client_token }}"
+
+  - name: Write nomad token to file
+    delegate_to: localhost
+    no_log: yes
+    copy:
+      content: "{{ vault_nomad_token }}"
+      dest: "{{ vault_token_dir }}/nomad-token"
+  when: not _vault_nomad_token_file.stat.exists
+
+- name: Load nomad token
+  no_log: yes
+  set_fact: vault_nomad_token="{{ lookup('file', vault_token_dir + '/nomad-token') }}"
+  when: _vault_nomad_token_file.stat.exists
+
+- name: Copy 'nomad-cluster-role'
+  run_once: true
+  copy:
+    src: "nomad-cluster-role.json"
+    dest: "/home/{{ ansible_ssh_user }}/nomad-cluster-role.json"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0644
+
+# NOTE: The cluster role is VERY permissive – it allows all policies to be used
+# by any job in the Nomad cluster except for the ones you specifically prohibit.
+# While this is totally fine in this demo, you might want to consider this setting
+# for a productive environment.
+- name: Create Nomad cluster role
+  no_log: yes
+  run_once: true
+  command: "vault write /auth/token/roles/nomad-cluster @/home/{{ ansible_ssh_user }}/nomad-cluster-role.json"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"

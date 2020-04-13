@@ -44,3 +44,20 @@ telemetry {
   publish_allocation_metrics = true
   publish_node_metrics = true
 }
+
+{% if vault_nomad_token is defined %}
+{% if nomad_is_server %}
+vault {
+  enabled = true
+  address = "http://active.vault.service.consul:8200"
+  task_token_ttl = "1h"
+  create_from_role = "nomad-cluster"
+  token = "{{ vault_nomad_token }}"
+}
+{% else %}
+vault {
+    enabled = true
+    address = "http://active.vault.service.consul:8200"
+}
+{% endif %}
+{% endif %}

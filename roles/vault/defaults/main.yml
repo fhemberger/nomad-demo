@@ -1,0 +1,6 @@
+---
+vault_key_shares: 1
+vault_key_threshold: 1
+
+vault_unseal_keys_dir: "{{ playbook_dir }}/credentials/vault-keys"
+vault_token_dir: "{{ playbook_dir }}/credentials/vault-tokens"

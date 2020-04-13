@@ -2,12 +2,11 @@
 - hosts: consul_nomad
   become: yes
   roles:
-    - name: base
     - name: jre
     - name: docker
       tags: ['docker']
-    - name: consul
-      tags: ['consul']
+    - name: vault
+      tags: ['vault']
     - name: nomad
       tags: ['nomad']
 

@@ -1,5 +1,5 @@
 ---
-- name: Download and extract Consul if needed
+- name: Download and extract Nomad if needed
   unarchive:
     src: "https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_linux_amd64.zip"
     dest: /usr/bin

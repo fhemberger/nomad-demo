@@ -52,6 +52,9 @@ brew cask install vagrant virtualbox
 brew install ansible
 ```
 
+Also your host system needs at least 4GB of RAM available.
+
+
 ### Installation
 
 1. **Clone this Git repository:**
@@ -152,7 +155,7 @@ You can launch jobs that claim storage volumes from AWS Elastic Block Storage (E
 
 For this demo I tried to keep the setup simple, but already a bit closer to a practical use than "just start it in development mode on your laptop". I think that it provides a good, stable basis which can be extended (especially through Ansible) if the following security considerations are taken into account:
 
-- Separate the control plane (Consul, Nomad Server) from the worker pool running the applications (Nomad Client), so faulty or malicious workloads have less impact on the overall system integrity and stability.
+- Separate the control plane from the worker pool running the applications, so faulty or malicious workloads have less impact on the overall system integrity and stability. Three nodes running a Consul and Nomad server are required to run in high availability (HA) mode. This allows Consul to reach a quorum, even in one node should go down. Each worker node however should run a Consul and Nomad Client each, with the Nomad client talking to the Consul client and the Consul client talking to the Consul server.
 
 - Access Control Lists (ACLs) are indispensable to secure UI, API, CLI, service and agent communications on both [Consul](https://www.consul.io/docs/acl/index.html) and [Nomad](https://learn.hashicorp.com/nomad/acls/fundamentals). 
 

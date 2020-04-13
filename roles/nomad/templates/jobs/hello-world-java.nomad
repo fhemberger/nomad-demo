@@ -21,9 +21,25 @@ job "hello-world-java" {
       # https://github.com/bjrbhre/hello-http-java
       artifact {
         source = "http://jar-server.demo/HelloWorld.jar"
+        # `destination `defaults to "local/" (see below)
       }
 
       config {
+        # Nomad makes the following directories available to tasks:
+        #
+        # alloc/:   This directory is shared across all tasks in a task group and
+        #           can be used to store data that needs to be used by multiple
+        #           tasks, such as a log shipper.
+        # local/:   This directory is private to each task. It can be used to
+        #           store arbitrary data that should not be shared by tasks in
+        #           the task group.
+        # secrets/: This directory is private to each task, not accessible via
+        #           the nomad alloc fs command or filesystem APIs and where
+        #           possible backed by an in-memory filesystem. It can be used
+        #           to store secret data that should not be visible
+        #           outside the task.
+        #
+        # See: https://nomadproject.io/docs/runtime/environment/#task-directories
         jar_path = "local/HelloWorld.jar"
         jvm_options = ["-Dhelloworld.port=${NOMAD_PORT_http}"]
       }

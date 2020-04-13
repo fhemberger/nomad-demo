@@ -14,6 +14,13 @@ client {
   network_interface = "{{ network_interface | default(ansible_interfaces | select('match', '^lo\d?') | first) }}"
 }
 
+consul {
+  address = "127.0.0.1:8500"
+  # If the configuration is separated for server and client nodes, the tag
+  # "controlplane" should only be used on the server nodes.
+  tags = ["controlplane"]
+}
+
 server {
   enabled = true
   # MUST be 16 bytes, Base64-encoded

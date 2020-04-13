@@ -16,6 +16,8 @@ client {
 
 server {
   enabled = true
+  # MUST be 16 bytes, Base64-encoded
+  encrypt = "{{ lookup('password', '/tmp/nomadhash length=16') | b64encode }}"
   bootstrap_expect = {{ groups['consul_nomad'] | length }}
   server_join {
     retry_join = {{ consul_nomad_ips | to_json }}

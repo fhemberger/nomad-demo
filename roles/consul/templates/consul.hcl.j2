@@ -3,7 +3,8 @@ bootstrap_expect = {{ groups['consul_nomad'] | length }}
 client_addr = "0.0.0.0"
 data_dir = "/opt/consul"
 datacenter = "dc1"
-encrypt = "{{ random_hash }}"
+# MUST be 32 bytes, Base64-encoded
+encrypt = "{{ lookup('password', '/tmp/consulhash length=32') | b64encode }}"
 retry_join = {{ consul_nomad_ips | to_json }}
 server = true
 ui = true

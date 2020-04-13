@@ -8,8 +8,6 @@ traefik_version: "2.2.0"
 prometheus_version: "2.17.1"
 consul_exporter_version: "0.6.0"
 
-random_hash: "{{ lookup('password', '/tmp/randomhash chars=ascii_letters,digits,hexdigits length=32') }}"
-
 # If multiple network interfaces exist in the VM, specify the one matching
 # the IP range defined in Vagrant.
 network_interface: enp0s8

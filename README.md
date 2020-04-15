@@ -85,7 +85,6 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    10.1.10.20 prometheus.demo
    10.1.10.20 hello-docker.demo
    10.1.10.20 hello-java.demo
-   10.1.10.20 jar-server.demo
    ```
 
 To check if everything is working correctly, go to http://traefik.demo, you should see the UI of the load balancer with a list of registered services:
@@ -107,7 +106,7 @@ Sites that are available from the start:
 
 ### Deploying jobs
 
-Two example applications are included with this demo: [`hello-world-docker.nomad`](roles/nomad/templates/jobs/hello-world-docker.nomad) and [`hello-world-java.nomad`](roles/nomad/templates/jobs/hello-world-java.nomad)<sup id="a2">[2](#f2)</sup>. Go to http://nomad.demo/ui/jobs/run, copy and paste one of the jobs into the editor and click "Plan".
+Two example applications are included with this demo: [`hello-world-docker.nomad`](nomad_jobs/hello-world-docker.nomad) and [`hello-world-java.nomad`](nomad_jobs/hello-world-java.nomad). Go to http://nomad.demo/ui/jobs/run, copy and paste one of the jobs into the editor and click "Plan".
 
 Nomad performs a syntax check by dry-running the job on the scheduler without applying the changes yet. If you change settings in your job file later on, this step will also show a diff of all the changes (e.g. number of instances):
 
@@ -115,10 +114,10 @@ Nomad performs a syntax check by dry-running the job on the scheduler without ap
 
 Click "Run" to deploy the job to the Nomad cluster.
 
-If you prefer to run the demos from the command line you can use `vagrant ssh` to execute the command on the VM. As the files are copied to all instances, the node number doesn't matter in this case:
+If you prefer to run the demos from the command line you can use `vagrant ssh` to deploy them directly from the VM. As the files are copied to the vagrant user's home directory on all instances, the node number doesn't matter, e.g.:
 
 ```sh
-vagrant ssh consul-nomad-node1 -c 'nomad job run ~/jar-server.nomad'
+vagrant ssh consul-nomad-node1 -c 'nomad job run ~/hello-world-docker.nomad'
 ```
 
 #### Collecting application metrics with Prometheus
@@ -189,7 +188,3 @@ consul-nomad-nodeN     ansible_host=your.vm.ip.address
 ```
 
 Afterwards run the provisioning step with `ansible-playbook -i <inventory file> playbook.yml` [↩](#user-content-a1)
-
----
-
-<sup id="f2">2</sup> To get the Java demo up and running, I had to provide a Jar file and the opportunity for Nomad to download it. So I decided to use [this "Hello World" app](https://github.com/bjrbhre/hello-http-java), compile it in a Dockerfile and use a static web server for downloads. This server also includes a "metrics" text file to fake a scraping endpoint for [Prometheus](#collecting-application-metrics-with-prometheus). [↩](#user-content-a2)

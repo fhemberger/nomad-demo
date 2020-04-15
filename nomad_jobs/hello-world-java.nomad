@@ -15,12 +15,18 @@ job "hello-world-java" {
     # Specify the number of these tasks we want.
     count = 1
 
+    restart {
+      attempts = 3
+      interval = "2m"
+      delay    = "15s"
+      mode     = "fail"
+    }
+
     task "frontend" {
       driver = "java"
 
-      # https://github.com/bjrbhre/hello-http-java
       artifact {
-        source = "http://jar-server.demo/HelloWorld.jar"
+        source = "git::https://github.com/fhemberger/nomad-demo.git//nomad_jobs/artifacts/hello-world-java/"
         # `destination `defaults to "local/" (see below)
       }
 
@@ -49,9 +55,7 @@ job "hello-world-java" {
         memory = 100
         network {
           mbits = 1
-          port "http" {
-            static = "8000"
-          }
+          port "http" {}
         }
       }
 

@@ -34,25 +34,15 @@
     dest: "/etc/nomad.d/nomad.hcl"
     mode: 0644
 
-- name: Copy 'jar-server' job config
-  template:
-    src: "jobs/jar-server.nomad.j2"
-    dest: "/home/{{ ansible_ssh_user }}/jar-server.nomad"
-    owner: "{{ ansible_ssh_user }}"
-    group: "{{ ansible_ssh_user }}"
-    mode: 0644
-  when: copy_nomad_demo_jobs
-
 - name: Copy example jobs config
-  template:
-    src: "jobs/{{ item }}"
+  copy:
+    src: "{{ item }}"
     dest: "/home/{{ ansible_ssh_user }}/{{ item }}"
     owner: "{{ ansible_ssh_user }}"
     group: "{{ ansible_ssh_user }}"
     mode: 0644
-  loop:
-    - hello-world-docker.nomad
-    - hello-world-java.nomad
+  with_fileglob:
+    - "{{ playbook_dir }}/nomad_jobs/*.nomad"
   when: copy_nomad_demo_jobs
 
 - name: Copy systemd service

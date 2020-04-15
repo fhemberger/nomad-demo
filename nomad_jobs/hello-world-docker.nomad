@@ -15,6 +15,13 @@ job "hello-world-docker" {
     # Specify the number of these tasks we want.
     count = 1
 
+    restart {
+      attempts = 3
+      interval = "2m"
+      delay    = "15s"
+      mode     = "fail"
+    }
+
     task "frontend" {
       driver = "docker"
 

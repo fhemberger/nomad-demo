@@ -13,12 +13,4 @@
     - name: traefik
     - name: prometheus
 
-- hosts: localhost
-  connection: local
-  gather_facts: False
-  roles:
-    - name: jar-server-dockerimage
-
   post_tasks:
-    - name: Run 'jar-server' job on Nomad # noqa 301
-      command: vagrant ssh consul-nomad-node1 -c 'nomad job run ~/jar-server.nomad'

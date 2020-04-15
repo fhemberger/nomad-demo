@@ -23,6 +23,6 @@ providers:
     constraints: "Tag(`http`)"
     defaultRule: "Host(`{% raw %}{{ normalize .Name }}{% endraw %}.{{ domain }}`)"
     endpoint:
-      address: http://consul:8500
+      address: http://consul.service.consul:8500
   file:
     filename: /etc/traefik/dynamic_conf.yaml

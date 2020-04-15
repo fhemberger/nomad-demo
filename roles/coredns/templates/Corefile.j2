@@ -1,12 +1,11 @@
 consul {
-  hosts {
-{% for host in consul_nomad_ips %}
-    {{ host }} consul
-{% endfor %}
-    fallthrough
-  }
+  # Point `consul` to `consul.service.consul`
+  rewrite name exact consul consul.service.consul
 
   forward . {{ consul_nomad_ips | join(':8600 ') }}:8600
+
+  log
+  errors
 }
 
 . {
@@ -20,5 +19,8 @@ consul {
    tls_servername cloudflare-dns.com
    health_check 5s
   }
+
   cache 30
+  log
+  errors
 }

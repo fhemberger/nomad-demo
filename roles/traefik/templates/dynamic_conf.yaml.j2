@@ -21,9 +21,7 @@ http:
     consul:
       loadBalancer:
         servers:
-{% for host in consul_nomad_ips %}
-          - url: "http://{{ host }}:8500"
-{% endfor %}
+          - url: "http://consul.service.consul:8500"
     prometheus:
       loadBalancer:
         servers:

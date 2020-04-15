@@ -1,20 +1,4 @@
 ---
-- name: Install base dependencies
-  package:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - curl
-    - dnsutils
-    - jq
-    - unzip
-
-- name: Install Java Runtime Environment
-  package:
-    name: "default-jre-headless"
-    state: present
-  when: install_jre|bool
-
 - name: Check if Docker is installed on the host
   command: docker version
   register: _docker_result
@@ -55,4 +39,3 @@
         enabled: yes
   when:
     - _docker_result.rc == 2
-    - install_docker|bool

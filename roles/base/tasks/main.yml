@@ -1,0 +1,10 @@
+---
+- name: Install base dependencies
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - curl
+    - dnsutils
+    - jq
+    - unzip

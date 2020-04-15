@@ -2,7 +2,9 @@
 - hosts: consul_nomad
   become: yes
   roles:
-    - name: consul-nomad-dependencies
+    - name: base
+    - name: jre
+    - name: docker
     - name: consul
     - name: nomad
 

@@ -1,0 +1,10 @@
+---
+- name: Add OpenJDK PPA
+  apt_repository:
+    repo: "ppa:openjdk-r/ppa"
+    state: present
+
+- name: Install OpenJDK 11 Java Runtime Environment
+  package:
+    name: "openjdk-11-jre"
+    state: present

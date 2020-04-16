@@ -70,9 +70,6 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    ```sh
    vagrant up --no-provision
    vagrant provision
-
-   # If you want to try the included Java demo, you also need to run:
-   ansible-playbook playbook.yml
    ```
 
 3. <strong id="etc-hosts">Configure host names for all services:</strong>  
@@ -83,6 +80,7 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    10.1.10.20 consul.demo
    10.1.10.20 nomad.demo
    10.1.10.20 prometheus.demo
+   10.1.10.20 alertmanager.demo
    10.1.10.20 hello-docker.demo
    10.1.10.20 hello-java.demo
    ```
@@ -100,6 +98,7 @@ Sites that are available from the start:
 - http://consul.demo - Consul UI
 - http://nomad.demo - Nomad UI
 - http://prometheus.demo - Prometheus metrics UI
+- http://alertmanager.demo - Prometheus Alertmanager UI
 
 
 ## Working with Nomad
@@ -122,7 +121,7 @@ vagrant ssh consul-nomad-node1 -c 'nomad job run ~/hello-world-docker.nomad'
 
 #### Collecting application metrics with Prometheus
 
-The load balancer also includes a [Prometheus](https://prometheus.io/) instance, which also uses Consul for service discovery. If your application's Nomad job is tagged with `prometheus` and has a metrics endpoint under `/metrics`, it will be scraped automatically and appear in the Prometheus target overview under http://prometheus.demo.
+The load balancer also includes a [Prometheus](https://prometheus.io/) instance, which uses Consul for service discovery. If your application's Nomad job is tagged with `prometheus` and has a metrics endpoint under `/metrics`, it will be scraped automatically and appear in the Prometheus target overview under http://prometheus.demo.
 
 
 ### Stopping jobs

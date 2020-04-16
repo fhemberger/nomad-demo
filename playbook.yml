@@ -26,6 +26,8 @@
   roles:
     - name: coredns
     - name: traefik
-    - name: prometheus
 
   post_tasks:
+    - name: Run all jobs on Nomad # noqa 301
+      command: vagrant ssh consul-nomad-node1 -c 'find . -name "*.nomad" -exec nomad job run {} \;'
+      when: copy_nomad_demo_jobs

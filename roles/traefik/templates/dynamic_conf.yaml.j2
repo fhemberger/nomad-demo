@@ -12,17 +12,9 @@ http:
       rule: "Host(`consul.{{ domain }}`)"
       service: "consul"
       entrypoints: "web"
-    prometheus:
-      rule: "Host(`prometheus.{{ domain }}`)"
-      service: "prometheus"
-      entrypoints: "web"
 
   services:
     consul:
       loadBalancer:
         servers:
           - url: "http://consul.service.consul:8500"
-    prometheus:
-      loadBalancer:
-        servers:
-          - url: "http://localhost:9090"

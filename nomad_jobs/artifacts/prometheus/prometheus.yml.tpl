@@ -2,6 +2,12 @@
 global:
   scrape_interval: 15s
 
+alerting:
+  alertmanagers:
+    - consul_sd_configs:
+        - server: "consul.service.consul:8500"
+          services: ["alertmanager"]
+
 scrape_configs:
   - job_name: "consul"
     consul_sd_configs:
@@ -15,6 +21,8 @@ scrape_configs:
         replacement: ${2}
       - source_labels: [__meta_consul_node]
         target_label: instance
+      - source_labels: [__meta_consul_service]
+        target_label: service
 
   - job_name: "nomad"
     consul_sd_configs:
@@ -29,6 +37,8 @@ scrape_configs:
         action: keep
       - source_labels: [__meta_consul_node]
         target_label: instance
+      - source_labels: [__meta_consul_service]
+        target_label: service
 
   - job_name: "prometheus"
     static_configs:
@@ -36,6 +46,8 @@ scrape_configs:
     relabel_configs:
       - target_label: instance
         replacement: "{{ env "attr.unique.hostname" }}"
+      - target_label: service
+        replacement: "prometheus"
 
   - job_name: "traefik"
     static_configs:

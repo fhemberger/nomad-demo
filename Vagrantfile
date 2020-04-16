@@ -28,7 +28,8 @@ Vagrant.configure(2) do |config|
     ansible.groups = {
       "consul_nomad" => ["consul-nomad-node[1:#{$max_nodes}]"],
       "all:vars" => {
-        "vagrant_consul_nomad_ips" => $all_nodes
+        "vagrant_consul_nomad_ips" => $all_nodes,
+        "vagrant_loadbalancer_ip" => "#{get_ip(0)}"
       }
     }
   end

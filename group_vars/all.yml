@@ -18,3 +18,4 @@ network_interface_ipv4: "{{ hostvars[inventory_hostname]['ansible_' + network_in
 # When provisioned with Vagrant, use the list `vagrant_consul_nomad_ips` passed
 # as group variable. Otherwise use `ansible_host` from the inventory file.
 consul_nomad_ips: "{{ vagrant_consul_nomad_ips | default(groups['consul_nomad'] | map('extract', hostvars, 'ansible_host') | list) }}"
+loadbalancer_ip: "{{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer']['ansible_host']) }}"

@@ -8,6 +8,19 @@
     - name: consul
     - name: nomad
 
+  post_tasks:
+    - name: Disable systemd-resolved service
+      systemd:
+        name: systemd-resolved
+        state: stopped
+        enabled: no
+
+    - name: Set nameserver to localhost
+      copy:
+        content: "nameserver {{ loadbalancer_ip }}"
+        dest: /etc/resolv.conf
+
+
 - hosts: loadbalancer
   become: yes
   roles:

@@ -18,7 +18,7 @@ Consul is a service networking solution to connect services across any runtime p
 
 <img src=".images/vm-overview.png" align="left" alt="Overview of the created VMs and the deployed components">
 
-[Traefik](https://docs.traefik.io/): Load balancer using Consul Catalog service discovery. All services registered in Consul will be exposed as `<service name>.demo`. In context of this demo setup, you'll have to adjust your `/etc/hosts` file accordingly ([see below](#user-content-etc-hosts)).
+[Traefik](https://docs.traefik.io/): Load balancer using Consul Catalog service discovery. All services registered in Consul with the tag `http` will be exposed as `<service name>.demo`. In context of this demo setup, you'll have to adjust your `/etc/hosts` file accordingly ([see below](#user-content-etc-hosts)).
 
 [CoreDNS](http://coredns.io/): Provides name resolution for the `consul.` root domain and forwards DNS queries to either the local `*.consul.` zone or Cloudflare 1.1.1.1 as upstream DNS.
 

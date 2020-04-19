@@ -31,4 +31,4 @@
 - hosts: localhost
   tasks:
     - name: Run all jobs on Nomad # noqa 301
-      command: vagrant ssh consul-nomad-node1 -c 'for job in *.nomad; do nomad job run "$job"; done'
+      command: vagrant ssh consul-nomad-node1 -c 'for job in nomad_jobs/*.nomad; do nomad job run "$job"; done'

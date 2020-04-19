@@ -34,10 +34,18 @@
     dest: "/etc/nomad.d/nomad.hcl"
     mode: 0644
 
+- name: Create jobs directory
+  file:
+    path: "/home/{{ ansible_ssh_user }}/nomad_jobs"
+    state: directory
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0755
+
 - name: Copy example jobs config
   copy:
     src: "{{ item }}"
-    dest: "/home/{{ ansible_ssh_user }}/{{ item }}"
+    dest: "/home/{{ ansible_ssh_user }}/nomad_jobs/{{ item | basename }}"
     owner: "{{ ansible_ssh_user }}"
     group: "{{ ansible_ssh_user }}"
     mode: 0644

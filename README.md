@@ -116,7 +116,7 @@ Click "Run" to deploy the job to the Nomad cluster.
 If you prefer to run the demos from the command line you can use `vagrant ssh` to deploy them directly from the VM. As the files are copied to the vagrant user's home directory on all instances, the node number doesn't matter, e.g.:
 
 ```sh
-vagrant ssh consul-nomad-node1 -c 'nomad job run ~/hello-world-docker.nomad'
+vagrant ssh consul-nomad-node1 -c 'nomad job run ~/nomad_jobs/hello-world-docker.nomad'
 ```
 
 #### Collecting application metrics with Prometheus

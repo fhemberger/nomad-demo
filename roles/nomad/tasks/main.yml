@@ -43,7 +43,6 @@
     mode: 0644
   with_fileglob:
     - "{{ playbook_dir }}/nomad_jobs/*.nomad"
-  when: copy_nomad_demo_jobs
 
 - name: Copy systemd service
   copy:

@@ -27,7 +27,8 @@
     - name: coredns
     - name: traefik
 
-  post_tasks:
+
+- hosts: localhost
+  tasks:
     - name: Run all jobs on Nomad # noqa 301
-      command: vagrant ssh consul-nomad-node1 -c 'find . -name "*.nomad" -exec nomad job run {} \;'
-      when: copy_nomad_demo_jobs
+      command: vagrant ssh consul-nomad-node1 -c 'for job in *.nomad; do nomad job run "$job"; done'

@@ -7,7 +7,7 @@ $ip_range = '10.1.10.2xx'
 $all_nodes = Array.new($max_nodes).fill { |i| "#{get_ip(i + 1)}" }
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/xenial64"
+  config.vm.box = "ubuntu/bionic64"
 
   (1..$max_nodes).each do |i|
     config.vm.define "consul-nomad-node#{i}" do |node|

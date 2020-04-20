@@ -57,7 +57,7 @@ job "prometheus" {
 
         check {
           type     = "http"
-          path     = "/"
+          path     = "/-/healthy"
           interval = "10s"
           timeout  = "2s"
         }
@@ -113,7 +113,7 @@ job "prometheus" {
 
         check {
           type     = "http"
-          path     = "/"
+          path     = "/-/healthy"
           interval = "10s"
           timeout  = "2s"
         }
@@ -153,7 +153,7 @@ job "prometheus" {
 
         check {
           type     = "http"
-          path     = "/"
+          path     = "/-/healthy"
           interval = "10s"
           timeout  = "2s"
         }

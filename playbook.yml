@@ -20,6 +20,11 @@
         content: "nameserver {{ loadbalancer_ip }}"
         dest: /etc/resolv.conf
 
+    - name: Restart Docker to pick up DNS change
+      systemd:
+        name: docker
+        state: restarted
+
 
 - hosts: loadbalancer
   become: yes

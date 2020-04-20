@@ -70,6 +70,9 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    ```sh
    vagrant up --no-provision
    vagrant provision
+
+   # To deploy Prometheus, Grafana and the demo application run:
+   ansible-playbook playbook.yml
    ```
 
 3. <strong id="etc-hosts">Configure host names for all services:</strong>  
@@ -79,6 +82,7 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    10.1.10.20 traefik.demo
    10.1.10.20 consul.demo
    10.1.10.20 nomad.demo
+   10.1.10.20 grafana.demo
    10.1.10.20 prometheus.demo
    10.1.10.20 alertmanager.demo
    10.1.10.20 hello-docker.demo
@@ -97,6 +101,7 @@ Sites that are available from the start:
 - http://traefik.demo - Load balancer UI, see all registered services
 - http://consul.demo - Consul UI
 - http://nomad.demo - Nomad UI
+- http://grafana.demo - Grafana Dashboards
 - http://prometheus.demo - Prometheus metrics UI
 - http://alertmanager.demo - Prometheus Alertmanager UI
 
@@ -121,7 +126,11 @@ vagrant ssh consul-nomad-node1 -c 'nomad job run ~/nomad_jobs/hello-world-docker
 
 #### Collecting application metrics with Prometheus
 
-The load balancer also includes a [Prometheus](https://prometheus.io/) instance, which uses Consul for service discovery. If your application's Nomad job is tagged with `prometheus` and has a metrics endpoint under `/metrics`, it will be scraped automatically and appear in the Prometheus target overview under http://prometheus.demo.
+This setup also includes a [Prometheus](https://prometheus.io/) instance, which uses Consul for service discovery. If your application's Nomad job is tagged with `prometheus` and has a metrics endpoint under `/metrics`, it will be scraped automatically and appear in the Prometheus target overview under http://prometheus.demo.
+
+#### Grafana Dashboards
+
+There are some basic dashboards for Consul, Nomad and Traefik available under http://grafana.demo. Username/password is `admin`.
 
 
 ### Stopping jobs

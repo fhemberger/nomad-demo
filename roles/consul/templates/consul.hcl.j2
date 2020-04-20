@@ -1,4 +1,6 @@
+{% if consul_is_server %}
 bootstrap_expect = {{ groups['consul_nomad'] | length }}
+{% endif %}
 # Make consul UI accessible from everywhere
 client_addr = "0.0.0.0"
 data_dir = "/opt/consul"
@@ -6,5 +8,7 @@ datacenter = "dc1"
 # MUST be 32 bytes, Base64-encoded
 encrypt = "{{ lookup('password', '/tmp/consulhash length=32') | b64encode }}"
 retry_join = {{ consul_nomad_ips | to_json }}
+{% if consul_is_server %}
 server = true
+{% endif %}
 ui = true

@@ -8,11 +8,13 @@ advertise {
   serf = "{{ network_interface_ipv4 }}:4648"
 }
 
+{% if nomad_is_client %}
 {# loopback interface is `lo` on Linux, but `lo0` on macOS/BSD #}
 client {
   enabled = true
   network_interface = "{{ network_interface | default(ansible_interfaces | select('match', '^lo\d?') | first) }}"
 }
+{% endif %}
 
 consul {
   address = "127.0.0.1:8500"
@@ -21,6 +23,7 @@ consul {
   tags = ["controlplane"]
 }
 
+{% if nomad_is_server %}
 server {
   enabled = true
   # MUST be 16 bytes, Base64-encoded
@@ -32,6 +35,7 @@ server {
     retry_interval = "15s"
   }
 }
+{% endif %}
 
 telemetry {
   collection_interval = "1s"

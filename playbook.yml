@@ -5,8 +5,11 @@
     - name: base
     - name: jre
     - name: docker
+      tags: ['docker']
     - name: consul
+      tags: ['consul']
     - name: nomad
+      tags: ['nomad']
 
   post_tasks:
     - name: Disable systemd-resolved service
@@ -14,16 +17,19 @@
         name: systemd-resolved
         state: stopped
         enabled: no
+      tags: ['always']
 
     - name: Set nameserver to localhost
       copy:
         content: "nameserver {{ loadbalancer_ip }}"
         dest: /etc/resolv.conf
+      tags: ['always']
 
     - name: Restart Docker to pick up DNS change
       systemd:
         name: docker
         state: restarted
+      tags: ['docker']
 
 
 - hosts: loadbalancer

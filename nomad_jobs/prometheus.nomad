@@ -2,7 +2,7 @@ job "prometheus" {
   datacenters = ["dc1"]
 
   update {
-    stagger = "30s"
+    stagger      = "30s"
     max_parallel = 1
   }
 
@@ -10,7 +10,7 @@ job "prometheus" {
     count = 1
 
     ephemeral_disk {
-      size = 600
+      size    = 600
       migrate = true
     }
 
@@ -25,9 +25,11 @@ job "prometheus" {
 
       config {
         image = "prom/prometheus:latest"
+
         volumes = [
-          "local/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+          "local/prometheus.yml:/etc/prometheus/prometheus.yml:ro",
         ]
+
         port_map {
           prometheus_ui = 9090
         }
@@ -41,15 +43,18 @@ job "prometheus" {
 
       service {
         name = "prometheus"
+
         tags = [
           "http",
           # See: https://docs.traefik.io/routing/services/
           "traefik.http.services.prometheus.loadbalancer.sticky=true",
           "traefik.http.services.prometheus.loadbalancer.sticky.cookie.httponly=true",
           # "traefik.http.services.prometheus.loadbalancer.sticky.cookie.secure=true",
-          "traefik.http.services.prometheus.loadbalancer.sticky.cookie.samesite=strict"
+          "traefik.http.services.prometheus.loadbalancer.sticky.cookie.samesite=strict",
         ]
+
         port = "prometheus_ui"
+
         check {
           type     = "http"
           path     = "/"
@@ -75,9 +80,11 @@ job "prometheus" {
 
       config {
         image = "prom/alertmanager:latest"
+
         volumes = [
-          "local/alertmanager.yml:/etc/alertmanager/config.yml"
+          "local/alertmanager.yml:/etc/alertmanager/config.yml",
         ]
+
         port_map {
           alertmanager_ui = 9093
         }
@@ -91,6 +98,7 @@ job "prometheus" {
 
       service {
         name = "alertmanager"
+
         tags = [
           "http",
           "prometheus",
@@ -98,9 +106,11 @@ job "prometheus" {
           "traefik.http.services.alertmanager.loadbalancer.sticky=true",
           "traefik.http.services.alertmanager.loadbalancer.sticky.cookie.httponly=true",
           # "traefik.http.services.alertmanager.loadbalancer.sticky.cookie.secure=true",
-          "traefik.http.services.alertmanager.loadbalancer.sticky.cookie.samesite=strict"
+          "traefik.http.services.alertmanager.loadbalancer.sticky.cookie.samesite=strict",
         ]
+
         port = "alertmanager_ui"
+
         check {
           type     = "http"
           path     = "/"
@@ -119,9 +129,12 @@ job "prometheus" {
 
       config {
         image = "prom/consul-exporter:latest"
+
         args = [
-          "--consul.server", "consul.service.consul:8500"
+          "--consul.server",
+          "consul.service.consul:8500",
         ]
+
         port_map {
           consul_exporter = 9107
         }
@@ -137,6 +150,7 @@ job "prometheus" {
         name = "${TASK}"
         tags = ["prometheus"]
         port = "consul_exporter"
+
         check {
           type     = "http"
           path     = "/"
@@ -144,7 +158,6 @@ job "prometheus" {
           timeout  = "2s"
         }
       }
-
     }
   }
 }

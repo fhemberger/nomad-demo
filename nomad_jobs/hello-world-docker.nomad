@@ -1,10 +1,10 @@
 job "hello-world-docker" {
   datacenters = ["dc1"]
-  type = "service"
+  type        = "service"
 
   # Specify this job to have rolling updates, with 30 second intervals.
   update {
-    stagger = "30s"
+    stagger      = "30s"
     max_parallel = 1
   }
 
@@ -27,17 +27,19 @@ job "hello-world-docker" {
 
       config {
         image = "rancher/hello-world"
+
         port_map {
           http = 80
         }
       }
 
       resources {
-        cpu = 100
+        cpu    = 100
         memory = 100
+
         network {
           mbits = 1
-          port "http" {}
+          port  "http"{}
         }
       }
 
@@ -45,6 +47,7 @@ job "hello-world-docker" {
         name = "hello-docker"
         tags = ["http"]
         port = "http"
+
         check {
           type     = "http"
           path     = "/"

@@ -1,10 +1,10 @@
 job "hello-world-java" {
   datacenters = ["dc1"]
-  type = "service"
+  type        = "service"
 
   # Specify this job to have rolling updates, with 30 second intervals.
   update {
-    stagger = "30s"
+    stagger      = "30s"
     max_parallel = 1
   }
 
@@ -27,6 +27,7 @@ job "hello-world-java" {
 
       artifact {
         source = "git::https://github.com/fhemberger/nomad-demo.git//nomad_jobs/artifacts/hello-world-java/"
+
         # `destination `defaults to "local/" (see below)
       }
 
@@ -46,16 +47,18 @@ job "hello-world-java" {
         #           outside the task.
         #
         # See: https://nomadproject.io/docs/runtime/environment/#task-directories
-        jar_path = "local/HelloWorld.jar"
+
+        jar_path    = "local/HelloWorld.jar"
         jvm_options = ["-Dhelloworld.port=${NOMAD_PORT_http}"]
       }
 
       resources {
-        cpu = 100
+        cpu    = 100
         memory = 100
+
         network {
           mbits = 1
-          port "http" {}
+          port  "http"{}
         }
       }
 
@@ -63,6 +66,7 @@ job "hello-world-java" {
         name = "hello-java"
         tags = ["http"]
         port = "http"
+
         check {
           type     = "http"
           path     = "/"

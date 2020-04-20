@@ -43,6 +43,7 @@ job "grafana" {
       }
 
       env {
+        GF_INSTALL_PLUGINS         = "grafana-piechart-panel"
         GF_SERVER_ROOT_URL         = "http://grafana.demo"
         GF_SECURITY_ADMIN_PASSWORD = "admin"
       }

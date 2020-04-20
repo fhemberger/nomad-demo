@@ -80,7 +80,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": "host",
+      "repeat": "instance",
       "repeatDirection": "v",
       "seriesOverrides": [],
       "spaceLength": 10,
@@ -88,7 +88,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(nomad_client_allocs_cpu_total_percent{host=~\"$host\"}) by(exported_job, task)",
+          "expr": "avg(nomad_client_allocs_cpu_total_percent{instance=~\"$instance\"}) by(exported_job, task)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -168,7 +168,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": "host",
+      "repeat": "instance",
       "repeatDirection": "v",
       "seriesOverrides": [],
       "spaceLength": 10,
@@ -176,7 +176,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(nomad_client_allocs_cpu_total_ticks{host=~\"$host\"}) by(exported_job, task)",
+          "expr": "avg(nomad_client_allocs_cpu_total_ticks{instance=~\"$instance\"}) by(exported_job, task)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -256,7 +256,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": "host",
+      "repeat": "instance",
       "repeatDirection": "v",
       "seriesOverrides": [],
       "spaceLength": 10,
@@ -264,7 +264,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(nomad_client_allocs_memory_rss{host=~\"$host\"}) by(exported_job, task)",
+          "expr": "avg(nomad_client_allocs_memory_rss{instance=~\"$instance\"}) by(exported_job, task)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -344,7 +344,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": "host",
+      "repeat": "instance",
       "repeatDirection": "v",
       "seriesOverrides": [],
       "spaceLength": 10,
@@ -352,7 +352,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(nomad_client_allocs_memory_cache{host=~\"$host\"}) by(exported_job, task)",
+          "expr": "avg(nomad_client_allocs_memory_cache{instance=~\"$instance\"}) by(exported_job, task)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -433,11 +433,11 @@
         "datasource": "prometheus",
         "hide": 0,
         "includeAll": true,
-        "label": "Host",
+        "label": "instance",
         "multi": true,
-        "name": "host",
+        "name": "instance",
         "options": [],
-        "query": "label_values(nomad_client_uptime{datacenter=~\"$datacenter\"}, host)",
+        "query": "label_values(nomad_client_uptime{datacenter=~\"$datacenter\"}, instance)",
         "refresh": 2,
         "regex": "",
         "sort": 0,

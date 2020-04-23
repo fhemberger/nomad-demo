@@ -22,31 +22,31 @@
   register: _vault_nomad_token_file
 
 - block:
-  - name: Create new token based on 'nomad-server' policy
-    no_log: yes
-    run_once: true
-    command: vault token create -policy nomad-server -period 72h -orphan -format json
-    environment:
-      VAULT_ADDR: "http://127.0.0.1:8200"
-      VAULT_TOKEN: "{{ vault_root_token }}"
-    register: _vault_nomad_token_results
+    - name: Create new token based on 'nomad-server' policy
+      no_log: yes
+      run_once: true
+      command: vault token create -policy nomad-server -period 72h -orphan -format json
+      environment:
+        VAULT_ADDR: "http://127.0.0.1:8200"
+        VAULT_TOKEN: "{{ vault_root_token }}"
+      register: _vault_nomad_token_results
 
-  - name: Parse output of 'vault token create'
-    no_log: yes
-    run_once: true
-    set_fact: _vault_nomad_token_parsed="{{ _vault_nomad_token_results.stdout | from_json }}"
+    - name: Parse output of 'vault token create'
+      no_log: yes
+      run_once: true
+      set_fact: _vault_nomad_token_parsed="{{ _vault_nomad_token_results.stdout | from_json }}"
 
-  - name: Save Nomad token
-    no_log: yes
-    run_once: true
-    set_fact: vault_nomad_token="{{ _vault_nomad_token_parsed.auth.client_token }}"
+    - name: Save Nomad token
+      no_log: yes
+      run_once: true
+      set_fact: vault_nomad_token="{{ _vault_nomad_token_parsed.auth.client_token }}"
 
-  - name: Write nomad token to file
-    delegate_to: localhost
-    no_log: yes
-    copy:
-      content: "{{ vault_nomad_token }}"
-      dest: "{{ vault_token_dir }}/nomad-token"
+    - name: Write nomad token to file
+      delegate_to: localhost
+      no_log: yes
+      copy:
+        content: "{{ vault_nomad_token }}"
+        dest: "{{ vault_token_dir }}/nomad-token"
   when: not _vault_nomad_token_file.stat.exists
 
 - name: Load nomad token

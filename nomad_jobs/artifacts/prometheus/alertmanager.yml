@@ -1,3 +1,4 @@
+---
 route:
   group_by: ["instance"]
   group_wait: 2m

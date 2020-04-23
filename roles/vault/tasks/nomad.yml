@@ -8,7 +8,7 @@
     group: "{{ ansible_ssh_user }}"
     mode: 0644
 
-- name: Write 'nomad-server-policy' to Vault
+- name: Write 'nomad-server-policy' to Vault # noqa 301
   no_log: yes
   run_once: true
   command: "vault policy write nomad-server /home/{{ ansible_ssh_user }}/nomad-server-policy.vault"
@@ -67,7 +67,7 @@
 # by any job in the Nomad cluster except for the ones you specifically prohibit.
 # While this is totally fine in this demo, you might want to consider this setting
 # for a productive environment.
-- name: Create Nomad cluster role
+- name: Create Nomad cluster role # noqa 301
   no_log: yes
   run_once: true
   command: "vault write /auth/token/roles/nomad-cluster @/home/{{ ansible_ssh_user }}/nomad-cluster-role.json"

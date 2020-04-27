@@ -1,0 +1,48 @@
+---
+- name: Add apt key # noqa 204
+  apt_key:
+    url: "https://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_{{ ansible_distribution_version }}/Release.key"
+    state: present
+
+- name: Add apt repository # noqa 204
+  apt_repository:
+    repo: "deb https://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_{{ ansible_distribution_version }} ./"
+    filename: syslog-ng
+    state: present
+
+- name: Install syslog-ng-core
+  package:
+    name: syslog-ng-core
+    state: present
+
+- name: Extract major and minor version (reqired for config file) # noqa 301
+  shell: |
+    set -o pipefail
+    syslog-ng --version | grep -Po '\\(\\d+\\.\\d+' | cut -c2-
+  args:
+    executable: /bin/bash
+  register: _syslog_ng_version_parsed
+
+- name: Parse output of 'syslog-ng --version'
+  set_fact: syslog_ng_version={{ _syslog_ng_version_parsed.stdout }}
+
+- name: Deploy syslog-ng client config on Vault nodes
+  include_tasks: client.yml
+  when: "'consul_nomad' in group_names"
+
+- name: Deploy syslog-ng upstream config on load balancer
+  include_tasks: upstream.yml
+  when: "'consul_nomad' not in group_names"
+
+- name: Copy systemd service
+  copy:
+    src: "syslog-ng.service"
+    dest: "/etc/systemd/system/syslog-ng.service"
+    mode: 0644
+
+- name: Start syslog-ng service
+  systemd:
+    name: syslog-ng
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

@@ -239,6 +239,10 @@ For this demo I tried to keep the setup simple, but already a bit closer to a pr
 
 - Make all web-services only available via HTTPS. Traefik offers great support for [automatic certificate management with Let's Encrypt](https://docs.traefik.io/https/acme/), for example.
 
+- Monitor [Vault's audit log](https://www.vaultproject.io/docs/audit). All Vault API requests (internal and external) are logged to detect if someone tries to gain access to your secrets or tamper with them. This demo uses the `syslog` audit backend to send those logs to the `loadbalancer`, in lack of a different VM – **In production of course, audit logs *never* belong on an outside facing machine!**
+  
+  They are stored in `/var/log/vault/audit.log` and the file is rotated daily. However, it is better to send them to [Elasticsearch](https://www.elastic.co/elasticsearch/) for example and have them analyzed with [Kibana](https://www.elastic.co/elasticsearch/).
+
 
 ## Contributing
 

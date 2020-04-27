@@ -1,0 +1,33 @@
+# {{ ansible_managed }}
+#
+# References:
+# https://www.syslog-ng.com/community/b/blog/posts/how-to-forward-logs-to-elasticsearch-using-the-elasticsearch-http-destination-in-syslog-ng
+# https://www.syslog-ng.com/technical-documents/doc/syslog-ng-open-source-edition/3.25/administration-guide/
+#
+@version: {{ syslog_ng_version }}
+
+options {
+  time_reopen(3);
+  stats_level(3);
+  keep_hostname(yes);
+};
+
+source s_system {
+  system();
+};
+
+filter f_vault {
+  facility(auth);
+  program("vault");
+};
+
+destination d_upstream_syslog {
+  network("{{ loadbalancer_ip }}" port(514));
+};
+
+log {
+  source(s_system);
+  filter(f_vault);
+  destination(d_upstream_syslog);
+  flags(flow-control);
+};

@@ -1,0 +1,18 @@
+---
+- name: Create log directory
+  file:
+    path: /var/log/vault
+    state: directory
+    mode: 0755
+
+- name: Copy logrotate config
+  copy:
+    src: logrotate.conf
+    dest: /etc/logrotate.d/vault
+    mode: 0644
+
+- name: Copy config
+  template:
+    src: "syslog-ng-upstream.conf.j2"
+    dest: "/etc/syslog-ng/syslog-ng.conf"
+    mode: 0644

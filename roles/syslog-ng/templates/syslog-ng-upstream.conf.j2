@@ -1,0 +1,49 @@
+# {{ ansible_managed }}
+#
+# References:
+# https://www.syslog-ng.com/community/b/blog/posts/how-to-forward-logs-to-elasticsearch-using-the-elasticsearch-http-destination-in-syslog-ng
+# https://www.syslog-ng.com/technical-documents/doc/syslog-ng-open-source-edition/3.25/administration-guide/
+#
+@version: {{ syslog_ng_version }}
+
+options {
+  time_reopen(3);
+  stats_level(3);
+  keep_hostname(yes);
+};
+
+source s_network {
+  network(
+    ip("0.0.0.0")
+    log_iw_size(10000)
+    log_fetch_limit(1000)
+    port(514));
+};
+
+{% if elasticsearch_url is defined %}
+destination d_elasticsearch_http {
+  elasticsearch-http(
+    index("vault_audit_log-${DAY}")
+    type("")
+    template("${MESSAGE}")
+    url("http://{{ elasticsearch_url }}/_bulk")
+    workers(4)
+    batch_lines(100));
+};
+{% endif %}
+
+destination d_file {
+  file("/var/log/vault/audit.log"
+    template("${MESSAGE}\n")
+  );
+};
+
+log {
+  source(s_network);
+  {% if elasticsearch_url is defined %}
+  destination(d_elasticsearch_http);
+  {% else %}
+  destination(d_file);
+  {% endif %}
+  flags(flow-control);
+};

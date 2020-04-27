@@ -203,6 +203,10 @@ ansible-playbook \
 
 The keys for unsealing and the user tokens to access Vault are stored under `credentials`. 
 
+#### Workflow for requesting secrets from Vault in your app
+
+![](https://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/fhemberger/nomad-demo/master/.images/vault-flow.uml)
+
 
 ## Collecting application metrics with Prometheus
 

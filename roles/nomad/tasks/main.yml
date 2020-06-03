@@ -6,12 +6,6 @@
     creates: "nomad_{{ nomad_version }}_linux_amd64.zip"
     remote_src: yes
 
-- name: Create config directory
-  file:
-    path: /etc/nomad.d
-    state: directory
-    mode: 0755
-
 - name: Create nomad user
   user:
     name: nomad
@@ -42,6 +36,8 @@
   template:
     src: "nomad.hcl.j2"
     dest: "/etc/nomad.d/nomad.hcl"
+    owner: nomad
+    group: nomad
     mode: 0644
 
 - name: Create jobs directory

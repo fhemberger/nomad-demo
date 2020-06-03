@@ -6,12 +6,6 @@
     creates: "consul_{{ consul_version }}_linux_amd64.zip"
     remote_src: yes
 
-- name: Create config directory
-  file:
-    path: /etc/consul.d
-    state: directory
-    mode: 0755
-
 - name: Create consul user
   user:
     name: consul
@@ -32,6 +26,8 @@
   template:
     src: "consul.hcl.j2"
     dest: "/etc/consul.d/consul.hcl"
+    owner: consul
+    group: consul
     mode: 0644
 
 - name: Copy systemd service

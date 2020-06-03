@@ -266,4 +266,4 @@ consul-nomad-node1     ansible_host=your.vm.ip.address
 consul-nomad-nodeN     ansible_host=your.vm.ip.address
 ```
 
-Afterwards run the provisioning step with `ansible-playbook -i <inventory file> playbook.yml` [↩](#user-content-a1)
+Afterwards run the provisioning step with `ansible-playbook -i <inventory file> playbook-consul.yml && ansible-playbook -i <inventory file> playbook.yml` [↩](#user-content-a1)

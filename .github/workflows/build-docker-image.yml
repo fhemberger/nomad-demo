@@ -1,0 +1,21 @@
+---
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+          registry: ghcr.io
+          repository: ${{ github.repository }}-hello-world-vault
+          path: nomad_jobs/hello-world-vault
+          tag_with_ref: true

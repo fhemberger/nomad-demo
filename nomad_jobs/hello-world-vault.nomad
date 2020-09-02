@@ -15,7 +15,7 @@ job "hello-world-vault" {
       driver = "docker"
 
       config {
-        image = "fhemberger/nomad-demo-hello-world-vault"
+        image = "ghcr.io/fhemberger/nomad-demo-hello-world-vault"
 
         port_map {
           http = 8080

@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/nomad_jobs/hello-world-vault"
+    schedule:
+      interval: "weekly"

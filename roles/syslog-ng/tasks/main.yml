@@ -18,7 +18,7 @@
 - name: Extract major and minor version (reqired for config file) # noqa 301
   shell: |
     set -o pipefail
-    syslog-ng --version | grep -Po '\\(\\d+\\.\\d+' | cut -c2-
+    syslog-ng --version | grep -Po 'Config version: \K\d+\.\d+'
   args:
     executable: /bin/bash
   register: _syslog_ng_version_parsed

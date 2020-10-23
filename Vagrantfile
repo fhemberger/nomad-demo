@@ -15,7 +15,7 @@ $ansible_groups = {
 }
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/bionic64"
+  config.vm.box = "ubuntu/focal64"
 
   (1..$max_nodes).each do |i|
     config.vm.define "consul-nomad-node#{i}" do |node|

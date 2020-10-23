@@ -1,12 +1,14 @@
 ---
 - name: Create unseal directories
   delegate_to: localhost
+  become: no
   file:
     path: "{{ vault_unseal_keys_dir }}"
     state: directory
 
 - name: Create root key directories
   delegate_to: localhost
+  become: no
   file:
     path: "{{ vault_token_dir }}"
     state: directory
@@ -21,11 +23,13 @@
 
 - name: Parse output of 'vault init'
   delegate_to: localhost
+  become: no
   no_log: yes
   set_fact: _vault_init_parsed="{{ _vault_init_results.stdout | from_json }}"
 
 - name: Write unseal keys to files
   delegate_to: localhost
+  become: no
   no_log: yes
   copy:
     dest: "{{ vault_unseal_keys_dir }}/unseal_key_{{ item.0 }}"
@@ -34,11 +38,13 @@
 
 - name: Save root token
   delegate_to: localhost
+  become: no
   no_log: yes
   set_fact: vault_root_token="{{ _vault_init_parsed.root_token }}"
 
 - name: Write root token to file
   delegate_to: localhost
+  become: no
   no_log: yes
   copy:
     content: "{{ vault_root_token }}"

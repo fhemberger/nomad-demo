@@ -1,10 +1,10 @@
 ---
 - name: Reading unseal key contents # noqa 301
   delegate_to: localhost
+  become: no
   command: "cat {{ item }}"
   register: _vault_unseal_keys
   with_fileglob: "{{ vault_unseal_keys_dir }}/*"
-  become: no
 
 - name: Unseal Vault with unseal keys # noqa 301
   no_log: yes

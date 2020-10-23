@@ -24,6 +24,7 @@
 
 - name: Check if Nomad token for Vault exists
   delegate_to: localhost
+  become: no
   stat: path="{{ vault_token_dir }}/nomad-token"
   register: _vault_nomad_token_file
 

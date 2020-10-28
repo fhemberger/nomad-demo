@@ -38,7 +38,6 @@ job "hello-world-docker" {
         memory = 100
 
         network {
-          mbits = 1
           port  "http"{}
         }
       }

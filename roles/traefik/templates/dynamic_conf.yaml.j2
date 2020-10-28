@@ -5,9 +5,6 @@ http:
       rule: "Host(`traefik.{{ domain }}`)"
       service: "api@internal"
       entrypoints: "web"
-      loadbalancer:
-        server:
-          port: "8080"
     consul:
       rule: "Host(`consul.{{ domain }}`)"
       service: "consul"

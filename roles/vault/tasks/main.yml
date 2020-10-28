@@ -68,6 +68,7 @@
 
 - name: Load root token
   delegate_to: localhost
+  run_once: true
   become: no
   no_log: yes
   set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"

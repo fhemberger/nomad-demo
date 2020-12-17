@@ -53,7 +53,7 @@ job "grafana" {
         memory = 100
 
         network {
-          port  "http"{}
+          port "http" {}
         }
       }
 

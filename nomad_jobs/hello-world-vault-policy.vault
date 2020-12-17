@@ -1,4 +1,4 @@
 # Read-only permit
 path "kv/hello-vault" {
-  capabilities = [ "read" ]
+  capabilities = ["read"]
 }

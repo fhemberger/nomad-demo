@@ -57,7 +57,7 @@ job "hello-world-java" {
         memory = 100
 
         network {
-          port  "http"{}
+          port "http" {}
         }
       }
 

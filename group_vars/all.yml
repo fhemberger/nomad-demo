@@ -1,9 +1,9 @@
 ---
 domain: demo
 
-consul_version: "1.8.4"
-nomad_version: "1.0.0-beta2"
-vault_version: "1.5.5"
+consul_version: "1.9.0"
+nomad_version: "1.0.1"
+vault_version: "1.6.1"
 coredns_version: "1.8.0"
 traefik_version: "2.3.2"
 

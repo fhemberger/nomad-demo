@@ -1,10 +1,24 @@
 ---
-- name: Download and extract Traefik if needed
+- name: Create temporary download directory if it does not exist
+  delegate_to: localhost
+  become: no
+  file:
+    path: "{{ playbook_dir }}/.ansible_download_cache"
+    state: directory
+    mode: 0755
+
+- name: Download Traefik and verify SHA256 checksum
+  delegate_to: localhost
+  become: no
+  get_url:
+    url: "https://github.com/containous/traefik/releases/download/v{{ traefik_version }}/traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
+    dest: "{{ playbook_dir }}/.ansible_download_cache/traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
+    checksum: "sha256:https://github.com/containous/traefik/releases/download/v{{ traefik_version }}/traefik_v{{ traefik_version }}_checksums.txt"
+
+- name: Extract Traefik
   unarchive:
-    src: "https://github.com/containous/traefik/releases/download/v{{ traefik_version }}/traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
+    src: "{{ playbook_dir }}/.ansible_download_cache/traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
     dest: /usr/bin
-    creates: "traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
-    remote_src: yes
 
 - name: Create traefik user
   user:

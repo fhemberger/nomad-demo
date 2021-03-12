@@ -1,10 +1,26 @@
 ---
-- name: Download and extract Consul if needed
+- name: Create temporary download directory if it does not exist
+  delegate_to: localhost
+  run_once: true
+  become: no
+  file:
+    path: "{{ playbook_dir }}/.ansible_download_cache"
+    state: directory
+    mode: 0755
+
+- name: Download Consul and verify SHA256 checksum
+  delegate_to: localhost
+  run_once: true
+  become: no
+  get_url:
+    url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
+    dest: "{{ playbook_dir }}/.ansible_download_cache/consul_{{ consul_version }}_linux_amd64.zip"
+    checksum: "sha256:https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_SHA256SUMS"
+
+- name: Extract Consul
   unarchive:
-    src: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
+    src: "{{ playbook_dir }}/.ansible_download_cache/consul_{{ consul_version }}_linux_amd64.zip"
     dest: /usr/bin
-    creates: "consul_{{ consul_version }}_linux_amd64.zip"
-    remote_src: yes
 
 - name: Create consul user
   user:

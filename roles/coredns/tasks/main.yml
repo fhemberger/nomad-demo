@@ -1,10 +1,24 @@
 ---
-- name: Download and extract CoreDNS if needed
+- name: Create temporary download directory if it does not exist
+  delegate_to: localhost
+  become: no
+  file:
+    path: "{{ playbook_dir }}/.ansible_download_cache"
+    state: directory
+    mode: 0755
+
+- name: Download CoreDNS and verify SHA256 checksum
+  delegate_to: localhost
+  become: no
+  get_url:
+    url: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_amd64.tgz"
+    dest: "{{ playbook_dir }}/.ansible_download_cache/coredns_{{ coredns_version }}_linux_amd64.tgz"
+    checksum: "sha256:https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_amd64.tgz.SHA256"
+
+- name: Extract CoreDNS
   unarchive:
-    src: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_amd64.tgz"
+    src: "{{ playbook_dir }}/.ansible_download_cache/coredns_{{ coredns_version }}_linux_amd64.tgz"
     dest: /usr/bin
-    creates: "coredns_{{ coredns_version }}_linux_amd64.tgz"
-    remote_src: yes
 
 - name: Create coredns user
   user:

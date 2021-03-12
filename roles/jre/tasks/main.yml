@@ -4,7 +4,7 @@
     repo: "ppa:openjdk-r/ppa"
     state: present
 
-- name: Install OpenJDK 11 Java Runtime Environment
+- name: Install OpenJDK Java Runtime Environment (Headless)
   package:
-    name: "openjdk-11-jre"
+    name: "openjdk-{{ openjdk_version }}-jre-headless"
     state: present

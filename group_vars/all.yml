@@ -6,6 +6,7 @@ nomad_version: "1.0.1"
 vault_version: "1.6.1"
 coredns_version: "1.8.0"
 traefik_version: "2.3.2"
+openjdk_version: "15"
 
 # If multiple network interfaces exist in the VM, specify the one matching
 # the IP range defined in Vagrant.

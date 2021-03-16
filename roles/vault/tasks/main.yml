@@ -22,12 +22,6 @@
     src: "{{ playbook_dir }}/.ansible_download_cache/vault_{{ vault_version }}_linux_amd64.zip"
     dest: /usr/bin
 
-- name: Create config directory
-  file:
-    path: /etc/vault.d
-    state: directory
-    mode: 0755
-
 - name: Create vault user
   user:
     name: vault

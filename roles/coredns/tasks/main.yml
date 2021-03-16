@@ -50,6 +50,7 @@
   copy:
     content: 'nameserver 127.0.0.1'
     dest: /etc/resolv.conf
+    mode: 0644
 
 - name: Start coredns service
   systemd:

@@ -74,6 +74,7 @@
       copy:
         content: "{{ vault_nomad_token }}"
         dest: "{{ vault_token_dir }}/nomad-token"
+        mode: 0600
   when: not _vault_nomad_token_file.stat.exists or not (vault_nomad_token_valid | default(False, true))
 
 - name: Copy 'nomad-cluster-role'

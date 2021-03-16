@@ -24,6 +24,7 @@
       copy:
         content: "nameserver {{ loadbalancer_ip }}"
         dest: /etc/resolv.conf
+        mode: 0644
       tags: ['always']
 
     - name: Restart Docker to pick up DNS change

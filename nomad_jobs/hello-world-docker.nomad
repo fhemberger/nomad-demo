@@ -28,6 +28,10 @@ job "hello-world-docker" {
       config {
         image = "rancher/hello-world"
 
+        cap_drop = [
+          "ALL",
+        ]
+
         port_map {
           http = 80
         }

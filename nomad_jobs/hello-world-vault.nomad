@@ -17,6 +17,10 @@ job "hello-world-vault" {
       config {
         image = "ghcr.io/fhemberger/nomad-demo-hello-world-vault"
 
+        cap_drop = [
+          "ALL",
+        ]
+
         port_map {
           http = 8080
         }

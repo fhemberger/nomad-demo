@@ -26,6 +26,10 @@ job "prometheus" {
       config {
         image = "prom/prometheus:latest"
 
+        cap_drop = [
+          "ALL",
+        ]
+
         volumes = [
           "local/prometheus.yml:/etc/prometheus/prometheus.yml:ro",
         ]
@@ -87,6 +91,10 @@ job "prometheus" {
       config {
         image = "prom/alertmanager:latest"
 
+        cap_drop = [
+          "ALL",
+        ]
+
         volumes = [
           "local/alertmanager.yml:/etc/alertmanager/config.yml",
         ]
@@ -135,6 +143,10 @@ job "prometheus" {
 
       config {
         image = "prom/consul-exporter:latest"
+
+        cap_drop = [
+          "ALL",
+        ]
 
         args = [
           "--consul.server",

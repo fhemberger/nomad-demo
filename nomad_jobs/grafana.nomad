@@ -33,6 +33,10 @@ job "grafana" {
       config {
         image = "grafana/grafana:latest"
 
+        cap_drop = [
+          "ALL",
+        ]
+
         volumes = [
           "local:/etc/grafana:ro",
         ]

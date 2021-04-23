@@ -12,6 +12,17 @@
     - jq
     - unzip
 
+- name: Add Hashicorp GPG apt signing key
+  apt_key: url=https://apt.releases.hashicorp.com/gpg state=present
+
+- name: Add Hashicorp apt repository into sources list
+  apt_repository:
+    repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release | lower }} main"
+    state: present
+
+- name: Update apt package index
+  apt: update_cache=yes
+
 - name: Disable Ubuntu motd-news
   lineinfile:
     dest: /etc/default/motd-news

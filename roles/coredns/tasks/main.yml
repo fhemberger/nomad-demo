@@ -7,6 +7,23 @@
     state: directory
     mode: 0755
 
+- block:
+    - name: Determine latest GitHub release (local)
+      delegate_to: localhost
+      become: false
+      uri:
+        url: "https://api.github.com/repos/coredns/coredns/releases/latest"
+        body_format: json
+      register: _github_release
+      until: _github_release.status == 200
+      retries: 5
+
+    - name: Set coredns_version # noqa 204
+      set_fact: coredns_version="{{ _github_release.json.tag_name | regex_replace('^v?(.*)$', '\\1') }}"
+
+  when: (coredns_version is not defined) or (coredns_version == 'latest')
+  run_once: true
+
 - name: Download CoreDNS and verify SHA256 checksum
   delegate_to: localhost
   become: no

@@ -1,26 +1,6 @@
 ---
-- name: Create temporary download directory if it does not exist
-  delegate_to: localhost
-  run_once: true
-  become: no
-  file:
-    path: "{{ playbook_dir }}/.ansible_download_cache"
-    state: directory
-    mode: 0755
-
-- name: Download Vault and verify SHA256 checksum
-  delegate_to: localhost
-  run_once: true
-  become: no
-  get_url:
-    url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
-    dest: "{{ playbook_dir }}/.ansible_download_cache/vault_{{ vault_version }}_linux_amd64.zip"
-    checksum: "sha256:https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_SHA256SUMS"
-
-- name: Extract Vault
-  unarchive:
-    src: "{{ playbook_dir }}/.ansible_download_cache/vault_{{ vault_version }}_linux_amd64.zip"
-    dest: /usr/bin
+- name: Install Vault
+  package: name=vault state=present
 
 - name: Create vault user
   user:

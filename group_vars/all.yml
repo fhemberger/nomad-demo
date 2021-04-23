@@ -1,12 +1,8 @@
 ---
 domain: demo
 
-consul_version: "1.9.4"
-nomad_version: "1.0.4"
-vault_version: "1.6.3"
-coredns_version: "1.8.3"
 traefik_version: "2.4.8"
-openjdk_version: "15"
+openjdk_version: "16"
 
 # If multiple network interfaces exist in the VM, specify the one matching
 # the IP range defined in Vagrant.

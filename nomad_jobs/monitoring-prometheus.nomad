@@ -6,7 +6,7 @@ job "prometheus" {
     max_parallel = 1
   }
 
-  group "prometheus" {
+  group "core" {
     count = 1
 
     ephemeral_disk {
@@ -15,7 +15,8 @@ job "prometheus" {
     }
 
     network {
-      port "prometheus_ui" { to = 9090 }
+      port "prometheus_ui" {}
+      port "alertmanager_ui" {}
     }
 
     task "prometheus" {
@@ -38,12 +39,9 @@ job "prometheus" {
           "local/prometheus.yml:/etc/prometheus/prometheus.yml:ro",
         ]
 
-        ports = ["prometheus_ui"]
-      }
-
-      resources {
-        cpu    = 100
-        memory = 100
+        port_map {
+          prometheus_ui = 9090
+        }
       }
 
       service {
@@ -81,12 +79,6 @@ job "prometheus" {
         change_signal = "SIGHUP"
       }
     }
-  }
-
-  group "alertmanager" {
-    network {
-      port "alertmanager_ui" { to = 9093 }
-    }
 
     task "alertmanager" {
       driver = "docker"
@@ -103,15 +95,12 @@ job "prometheus" {
         ]
 
         volumes = [
-          "secret/alertmanager.yml:/etc/alertmanager/config.yml",
+          "local/alertmanager.yml:/etc/alertmanager/config.yml",
         ]
 
-        ports = ["alertmanager_ui"]
-      }
-
-      resources {
-        cpu    = 100
-        memory = 50
+        port_map {
+          alertmanager_ui = 9093
+        }
       }
 
       service {
@@ -136,13 +125,6 @@ job "prometheus" {
           timeout  = "2s"
         }
       }
-
-      template {
-        source        = "local/alertmanager.yml.tpl"
-        destination   = "secret/alertmanager.yml"
-        change_mode   = "signal"
-        change_signal = "SIGHUP"
-      }
     }
   }
 
@@ -150,7 +132,7 @@ job "prometheus" {
     count = 1
 
     network {
-      port "consul_exporter" { to = 9107 }
+      port "consul_exporter" {}
     }
 
     task "consul-exporter" {
@@ -168,12 +150,9 @@ job "prometheus" {
           "consul.service.consul:8500",
         ]
 
-        ports = ["consul_exporter"]
-      }
-
-      resources {
-        cpu    = 100
-        memory = 50
+        port_map {
+          consul_exporter = 9107
+        }
       }
 
       service {

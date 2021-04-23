@@ -22,7 +22,7 @@ job "grafana" {
     }
 
     network {
-      port "http" { to = 3000 }
+      port "http" {}
     }
 
     task "grafana" {
@@ -45,7 +45,9 @@ job "grafana" {
           "local:/etc/grafana:ro",
         ]
 
-        ports = ["http"]
+        port_map {
+          http = 3000
+        }
       }
 
       env {
@@ -56,7 +58,7 @@ job "grafana" {
 
       resources {
         cpu    = 100
-        memory = 50
+        memory = 100
       }
 
       service {

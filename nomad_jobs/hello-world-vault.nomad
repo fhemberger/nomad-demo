@@ -12,7 +12,7 @@ job "hello-world-vault" {
     }
 
     network {
-      port "http" { to = 8080 }
+      port "http" {}
     }
 
     task "frontend" {
@@ -25,12 +25,9 @@ job "hello-world-vault" {
           "ALL",
         ]
 
-        ports = ["http"]
-      }
-
-      resources {
-        cpu    = 100
-        memory = 50
+        port_map {
+          http = 8080
+        }
       }
 
       service {

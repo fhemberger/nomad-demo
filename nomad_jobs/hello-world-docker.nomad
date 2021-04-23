@@ -23,7 +23,7 @@ job "hello-world-docker" {
     }
 
     network {
-      port "http" { to = 80 }
+      port "http" {}
     }
 
     task "frontend" {
@@ -36,12 +36,14 @@ job "hello-world-docker" {
           "ALL",
         ]
 
-        ports = ["http"]
+        port_map {
+          http = 80
+        }
       }
 
       resources {
         cpu    = 100
-        memory = 50
+        memory = 100
       }
 
       service {

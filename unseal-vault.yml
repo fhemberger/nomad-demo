@@ -1,11 +1,9 @@
 ---
-- hosts: consul_nomad
+- hosts: vault
   become: yes
   tasks:
-    - include_vars: roles/vault/defaults/main.yml # noqa 502
-
-    - name: Get Vault status # noqa 301
-      command: "vault status -format json"
+    - name: Get Vault status # noqa no-changed-when
+      command: vault status -format json
       environment:
         VAULT_ADDR: "http://127.0.0.1:8200"
       register: _vault_status_results
@@ -15,5 +13,5 @@
       set_fact: _vault_status_parsed="{{ _vault_status_results.stdout | from_json }}"
 
     - name: Unseal Vault
-      include_tasks: roles/vault/tasks/unseal.yml
+      include_tasks: roles/vault/installation/tasks/unseal.yml
       when: _vault_status_parsed.sealed

@@ -15,3 +15,6 @@ network_interface_ipv4: "{{ hostvars[inventory_hostname]['ansible_' + network_in
 # as group variable. Otherwise use `ansible_host` from the inventory file.
 consul_nomad_ips: "{{ vagrant_consul_nomad_ips | default(groups['consul_nomad'] | map('extract', hostvars, 'ansible_host') | list) }}"
 loadbalancer_ip: "{{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer']['ansible_host']) }}"
+
+vault_unseal_keys_dir: "{{ playbook_dir }}/credentials/vault-keys"
+vault_token_dir: "{{ playbook_dir }}/credentials/vault-tokens"

@@ -1,4 +1,4 @@
 # Read-only permit
-path "kv/hello-world-vault" {
+path "kv/grafana" {
   capabilities = ["read"]
 }

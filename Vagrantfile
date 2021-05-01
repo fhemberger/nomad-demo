@@ -5,9 +5,11 @@ end
 $max_nodes = 3
 $ip_range = '10.1.10.2xx'
 $all_nodes = Array.new($max_nodes).fill { |i| "#{get_ip(i + 1)}" }
+$vault_nodes = 1
 
 $ansible_groups = {
   "consul_nomad" => ["consul-nomad-node[1:#{$max_nodes}]"],
+  "vault" => (1..$vault_nodes).map { |node| "vault#{node}" },
   "all:vars" => {
     "vagrant_consul_nomad_ips" => $all_nodes,
     "vagrant_loadbalancer_ip" => "#{get_ip(0)}"
@@ -16,6 +18,22 @@ $ansible_groups = {
 
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/focal64"
+  config.vm.network "private_network", type: "dhcp"
+
+  # Vault nodes
+  (1..$vault_nodes).each do |node|
+    config.vm.define "vault#{node}" do |vault|
+      vault.vm.hostname = "vault#{node}"
+
+      if node == $vault_nodes
+        vault.vm.provision "ansible" do |ansible|
+          ansible.playbook = "deploy-vault.yml"
+          ansible.groups = $ansible_groups
+          ansible.limit = "vault"
+        end
+      end
+    end
+  end
 
   (1..$max_nodes).each do |i|
     config.vm.define "consul-nomad-node#{i}" do |node|

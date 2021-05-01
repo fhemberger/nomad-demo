@@ -1,0 +1,11 @@
+---
+- hosts: vault
+  become: yes
+  roles:
+    - name: base
+    - name: syslog-ng
+    - name: vault/installation
+    - name: vault/nomad-token
+    - name: vault/prometheus-metric-access
+    - name: vault/secret-grafana
+    - name: vault/secret-hello-world

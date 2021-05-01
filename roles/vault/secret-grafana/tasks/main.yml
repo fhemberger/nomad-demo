@@ -1,0 +1,32 @@
+---
+- name: Enable key-value secret engine # noqa no-changed-when
+  no_log: yes
+  shell: vault secrets enable -version=1 kv || true
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: Store admin credentials for 'grafana' # noqa no-changed-when
+  no_log: yes
+  command: |
+    vault kv put kv/grafana
+      username='admin'
+      password='{{ lookup('password', playbook_dir + '/credentials/grafana_admin.creds length=8 chars=ascii_letters,digits') }}'
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: Copy 'grafana-policy'
+  copy:
+    src: "{{ playbook_dir }}/nomad_jobs/monitoring-grafana-policy.vault"
+    dest: "/home/{{ ansible_ssh_user }}/monitoring-grafana-policy.vault"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0644
+
+- name: Write 'grafana-policy' to Vault # noqa no-changed-when
+  no_log: yes
+  command: "vault policy write grafana /home/{{ ansible_ssh_user }}/monitoring-grafana-policy.vault"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"

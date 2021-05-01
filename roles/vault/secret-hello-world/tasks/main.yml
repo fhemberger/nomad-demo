@@ -1,0 +1,33 @@
+---
+- name: Enable key-value secret engine # noqa no-changed-when
+  no_log: yes
+  shell: vault secrets enable -version=1 kv || true
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: Store some demo values for 'hello-world-vault' application # noqa no-changed-when
+  no_log: yes
+  command: |
+    vault kv put kv/hello-world-vault
+      url='api.example.com'
+      username='admin'
+      password='pa$$w0rd'
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: Copy 'hello-world-vault-policy'
+  copy:
+    src: "{{ playbook_dir }}/nomad_jobs/hello-world-vault-policy.vault"
+    dest: "/home/{{ ansible_ssh_user }}/hello-world-vault-policy.vault"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0644
+
+- name: Write 'hello-world-vault-policy' to Vault # noqa no-changed-when
+  no_log: yes
+  command: "vault policy write hello-world-vault /home/{{ ansible_ssh_user }}/hello-world-vault-policy.vault"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"

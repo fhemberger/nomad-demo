@@ -1,12 +1,14 @@
 ---
-- name: Reading unseal key contents # noqa 301
+- name: Reading unseal key contents # noqa no-changed-when
   delegate_to: localhost
+  run_once: true
   become: no
   command: "cat {{ item }}"
   register: _vault_unseal_keys
   with_fileglob: "{{ vault_unseal_keys_dir }}/*"
 
-- name: Unseal Vault with unseal keys # noqa 301
+- name: Unseal Vault with unseal keys # noqa no-changed-when
+  run_once: true
   no_log: yes
   command: "vault operator unseal {{ item.stdout }}"
   environment:

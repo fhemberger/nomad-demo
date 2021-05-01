@@ -1,0 +1,15 @@
+---
+- name: Copy 'prometheus-policy'
+  copy:
+    src: "{{ playbook_dir }}/nomad_jobs/monitoring-prometheus-policy.vault"
+    dest: "/home/{{ ansible_ssh_user }}/monitoring-prometheus-policy.vault"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0644
+
+- name: Write 'prometheus-policy' to Vault # noqa no-changed-when
+  no_log: yes
+  command: "vault policy write prometheus /home/{{ ansible_ssh_user }}/monitoring-prometheus-policy.vault"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"

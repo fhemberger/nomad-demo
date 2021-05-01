@@ -36,8 +36,12 @@
     state: restarted
     daemon_reload: yes
     enabled: yes
+  register: _vault_service
+  until: _vault_service.status.ActiveState == "active"
+  retries: 15
+  delay: 5
 
-- name: Get Vault status # noqa 301
+- name: Get Vault status # noqa no-changed-when
   command: vault status -format json
   environment:
     VAULT_ADDR: "http://127.0.0.1:8200"
@@ -64,7 +68,7 @@
   set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
   when: _vault_status_parsed.initialized
 
-- name: Enable syslog audit device # noqa 301
+- name: Enable syslog audit device # noqa no-changed-when
   command: vault audit enable syslog
   environment:
     VAULT_ADDR: "http://127.0.0.1:8200"
@@ -73,11 +77,3 @@
   failed_when:
     - _vault_audit_enable_result.rc > 0
     - '"path already in use" not in _vault_audit_enable_result.stderr'
-
-- name: Create policy and token for Nomad
-  run_once: true
-  include_tasks: nomad.yml
-
-- name: Setup 'hello-world-vault' demo values
-  run_once: true
-  include_tasks: demo.yml

@@ -26,7 +26,7 @@
 
 - name: Write 'grafana-policy' to Vault # noqa no-changed-when
   no_log: yes
-  command: "vault policy write grafana /home/{{ ansible_ssh_user }}/monitoring-grafana-policy.vault"
+  command: "vault policy write monitoring-grafana /home/{{ ansible_ssh_user }}/monitoring-grafana-policy.vault"
   environment:
     VAULT_ADDR: "http://127.0.0.1:8200"
     VAULT_TOKEN: "{{ vault_root_token }}"

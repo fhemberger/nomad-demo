@@ -69,7 +69,7 @@ job "grafana" {
       }
 
       vault {
-        policies      = ["grafana"]
+        policies      = ["monitoring-grafana"]
         change_mode   = "signal"
         change_signal = "SIGHUP"
       }

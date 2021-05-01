@@ -4,14 +4,14 @@ storage "raft" {
   path = "/opt/vault"
   node_id = "{{ inventory_hostname }}"
 
-{% for host in groups['vault'] %}
+{# {% for host in groups['vault'] %}
   retry_join {
-    leader_api_addr = "{{ hostvars[host]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[host]['ansible_default_ipv4']['address']) }}"
+    leader_api_addr = "http://{{ hostvars[host]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[host]['ansible_default_ipv4']['address']) }}:8200"
     # leader_ca_cert_file = "/path/to/ca1"
     # leader_client_cert_file = "/path/to/client/{{ host }}.crt"
     # leader_client_key_file = "/path/to/client/{{ host }}.key"
   }
-{% endfor %}
+{% endfor %} #}
 }
 
 # https://www.vaultproject.io/docs/configuration/listener/tcp
@@ -20,11 +20,7 @@ listener "tcp" {
   address = "127.0.0.1:8200"
   # tls_cert_file = "/path/to/fullchain.pem"
   # tls_key_file  = "/path/to/privkey.pem"
-  {# cluster_address = "127.0.0.1:8201" #}
   tls_disable = true
-  telemetry {
-    unauthenticated_metrics_access = true
-  }
 }
 
 # Listen to internal network
@@ -32,7 +28,6 @@ listener "tcp" {
   address = "{{ network_interface_ipv4 }}:8200"
   # tls_cert_file = "/path/to/fullchain.pem"
   # tls_key_file  = "/path/to/privkey.pem"
-  {# cluster_address = "{{ network_interface_ipv4 }}:8201" #}
   tls_disable = true
   telemetry {
     unauthenticated_metrics_access = true
@@ -45,8 +40,8 @@ telemetry {
 }
 
 # Advertise the non-loopback interface
-{# api_addr = "http://vault.demo" #}
-{# api_addr = "http://{{ network_interface_ipv4 }}:8200"
-cluster_addr = "http://{{ network_interface_ipv4 }}:8201" #}
+api_addr = "http://{{ vault_domain_name | default(network_interface_ipv4) }}:8200"
+cluster_addr = "http://{{ vault_domain_name | default(network_interface_ipv4) }}:8201"
+cluster_name = "vault"
 
 ui = true

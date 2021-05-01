@@ -74,7 +74,7 @@ job "prometheus" {
       }
 
       vault {
-        policies      = ["prometheus"]
+        policies      = ["monitoring-prometheus"]
         change_mode   = "signal"
         change_signal = "SIGHUP"
       }

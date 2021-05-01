@@ -143,7 +143,7 @@ Click "Run" to deploy the job to the Nomad cluster.
 If you prefer to run the demos from the command line, you can use `vagrant ssh` to login to one of the nodes and the `nomad` CLI command to deploy them directly from the VM. The three example jobs are copied to the vagrant user's home directory on all instances, the node number doesn't matter, e.g.:
 
 ```sh
-vagrant ssh consul-nomad-node1
+vagrant ssh controlplane1
 
 # Inside the VM
 nomad job run ~/nomad_jobs/hello-world-docker.nomad
@@ -158,7 +158,7 @@ Go to the [Job overview page](http://nomad.demo/ui/jobs), select a job, click "S
 Dead/completed jobs are cleaned up in accordance to the garbage collection interval (default: `1h`). You can force garbage collection using the System API endpoint which will run the global garbage collector:
 
 ```sh
-vagrant ssh consul-nomad-node1 -c 'curl -X PUT http://localhost:4646/v1/system/gc'
+vagrant ssh controlplane1 -c 'curl -X PUT http://localhost:4646/v1/system/gc'
 ```
 
 If you wish to lower the GC interval permanently for jobs, you can use the [`job_gc_threshold`](https://www.nomadproject.io/docs/agent/configuration/server.html#job_gc_threshold) configuration parameter within Nomad's [server config stanza](https://github.com/fhemberger/nomad-demo/blob/master/roles/nomad/templates/nomad.hcl.j2#L27).
@@ -255,15 +255,34 @@ Contributions and bug fixes are always welcome!
 
 ---
 
-<sup id="f1">1</sup> Deployment is also possible _without_ Vagrant if the VMs are provided elsewhere. All you need is an Ansible inventory file in the following format:
+<sup id="f1">1</sup> Deployment is also possible _without_ Vagrant if the VMs are provided by other means. All you need is an Ansible inventory file in the following format:
 
 ```
-loadbalancer           ansible_host=your.vm.ip.address
+loadbalancer      ansible_host=your.vm.ip.address
 
-[consul_nomad]
-consul-nomad-node1     ansible_host=your.vm.ip.address
+[vault]
+vault1            ansible_host=your.vm.ip.address
 ...
-consul-nomad-nodeN     ansible_host=your.vm.ip.address
+vaultN            ansible_host=your.vm.ip.address
+
+[controlplane]
+controlplane1     ansible_host=your.vm.ip.address
+...
+controlplaneN     ansible_host=your.vm.ip.address
+
+[worker]
+worker1     ansible_host=your.vm.ip.address
+...
+workerN     ansible_host=your.vm.ip.address
 ```
 
-Afterwards run the provisioning step with `ansible-playbook -i <inventory file> playbook-consul.yml && ansible-playbook -i <inventory file> playbook.yml` [↩](#user-content-a1)
+Afterwards run the provisioning step with 
+
+```
+ansible-playbook -i <inventory file> deploy-vault.yml
+ansible-playbook -i <inventory file> deploy-controlplane.yml
+ansible-playbook -i <inventory file> deploy-nomad-worker.yml
+ansible-playbook -i <inventory file> deploy-loadbalancer.yml
+```
+
+[↩](#user-content-a1)

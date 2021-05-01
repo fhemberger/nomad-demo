@@ -1,0 +1,41 @@
+---
+- hosts: worker
+  become: yes
+  roles:
+    - name: base
+    - name: consul/installation # client only
+      vars:
+        consul_is_server: false
+    - name: nomad/driver-jre
+    - name: nomad/driver-docker
+    # - name: vault  # client only
+    - name: nomad/installation
+      vars:
+        consul_is_server: false
+
+  post_tasks:
+    - name: Disable systemd-resolved service
+      systemd:
+        name: systemd-resolved
+        state: stopped
+        enabled: no
+      tags: ['always']
+
+    - name: Set nameserver to localhost
+      copy:
+        content: "nameserver {{ loadbalancer_ip }}"
+        dest: /etc/resolv.conf
+        mode: 0644
+      tags: ['always']
+
+    - name: Restart Docker to pick up DNS change
+      systemd:
+        name: docker
+        state: restarted
+      tags: ['docker']
+
+
+- hosts: localhost
+  tasks:
+    - name: Run all jobs on Nomad # noqa no-changed-when
+      command: vagrant ssh controlplane1 -c 'for job in nomad_jobs/*.nomad; do nomad job run "$job"; done'

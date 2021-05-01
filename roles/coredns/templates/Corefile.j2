@@ -1,8 +1,8 @@
+{%- set network_interface_ipv4 = hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 consul {
   # Point `consul` to `consul.service.consul`
   rewrite name exact consul consul.service.consul
-
-  forward . {{ consul_nomad_ips | join(':8600 ') }}:8600
+  forward . {{ groups['controlplane'] | map('extract', hostvars, ['ansible_' + network_interface, 'ipv4', 'address']) | list | join(':8600 ') }}:8600
 
   log
   errors

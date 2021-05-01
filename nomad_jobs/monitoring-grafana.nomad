@@ -51,9 +51,27 @@ job "grafana" {
       }
 
       env {
-        GF_INSTALL_PLUGINS         = "grafana-piechart-panel"
-        GF_SERVER_ROOT_URL         = "http://grafana.demo"
-        GF_SECURITY_ADMIN_PASSWORD = "admin"
+        GF_INSTALL_PLUGINS           = "grafana-piechart-panel"
+        GF_SERVER_ROOT_URL           = "http://grafana.demo"
+        GF_SECURITY_DISABLE_GRAVATAR = "true"
+      }
+
+      template {
+        data = <<EOF
+          {{ with secret "kv/grafana" }}
+          GF_SECURITY_ADMIN_USER="{{ .Data.username }}"
+          GF_SECURITY_ADMIN_PASSWORD="{{ .Data.password }}"
+          {{ end }}
+        EOF
+
+        destination = "secrets/vault.env"
+        env         = true
+      }
+
+      vault {
+        policies      = ["grafana"]
+        change_mode   = "signal"
+        change_signal = "SIGHUP"
       }
 
       resources {

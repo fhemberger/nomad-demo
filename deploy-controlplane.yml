@@ -1,0 +1,10 @@
+---
+- hosts: controlplane
+  become: yes
+  roles:
+    - name: base
+    - name: consul/installation
+    #- name: vault  # client only
+    - name: nomad/installation
+      vars:
+        consul_is_client: false

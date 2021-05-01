@@ -1,3 +1,4 @@
+{%- set network_interface_ipv4 = hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 datacenter = "dc1"
 data_dir = "/opt/nomad"
 
@@ -8,19 +9,11 @@ advertise {
   serf = "{{ network_interface_ipv4 }}:4648"
 }
 
-{% if nomad_is_client %}
-{# loopback interface is `lo` on Linux, but `lo0` on macOS/BSD #}
-client {
-  enabled = true
-  network_interface = "{{ network_interface | default(ansible_interfaces | select('match', '^lo\d?') | first) }}"
-}
-{% endif %}
-
 consul {
   address = "127.0.0.1:8500"
   # If the configuration is separated for server and client nodes, the tag
   # "controlplane" should only be used on the server nodes.
-  tags = ["controlplane"]
+  {% if nomad_is_server %}tags = ["controlplane"]{% endif %}
 }
 
 {% if nomad_is_server %}
@@ -28,12 +21,20 @@ server {
   enabled = true
   # MUST be 16 bytes, Base64-encoded
   encrypt = "{{ lookup('password', '/tmp/nomadhash length=16') | b64encode }}"
-  bootstrap_expect = {{ groups['consul_nomad'] | length }}
+  bootstrap_expect = {{ groups['controlplane'] | length }}
   server_join {
-    retry_join = {{ consul_nomad_ips | to_json }}
+    retry_join = {{ groups['controlplane'] | map('extract', hostvars, ['ansible_' + network_interface, 'ipv4', 'address']) | list | to_json }}
     retry_max = 3
     retry_interval = "15s"
   }
+}
+{% endif %}
+
+{% if nomad_is_client %}
+{# loopback interface is `lo` on Linux, but `lo0` on macOS/BSD #}
+client {
+  enabled = true
+  network_interface = "{{ network_interface | default(ansible_interfaces | select('match', '^lo\d?') | first) }}"
 }
 {% endif %}
 

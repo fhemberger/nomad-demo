@@ -1,19 +1,15 @@
-def get_ip(index = 1)
-  $ip_range.sub('xx', (index).to_s)
-end
-
-$max_nodes = 3
-$ip_range = '10.1.10.2xx'
-$all_nodes = Array.new($max_nodes).fill { |i| "#{get_ip(i + 1)}" }
 $vault_nodes = 1
+$controlplane_nodes = 3
+$worker_nodes = 1
+$loadbalancer_ip = "10.1.10.20"
 
 $ansible_groups = {
-  "consul_nomad" => ["consul-nomad-node[1:#{$max_nodes}]"],
   "vault" => (1..$vault_nodes).map { |node| "vault#{node}" },
+  "controlplane" => (1..$controlplane_nodes).map { |node| "controlplane#{node}" },
+  "worker" => (1..$worker_nodes).map { |node| "worker#{node}" },
   "all:vars" => {
-    "vagrant_consul_nomad_ips" => $all_nodes,
-    "vagrant_loadbalancer_ip" => "#{get_ip(0)}"
-  }
+    "vagrant_loadbalancer_ip" => $loadbalancer_ip,
+  },
 }
 
 Vagrant.configure(2) do |config|
@@ -35,49 +31,59 @@ Vagrant.configure(2) do |config|
     end
   end
 
-  (1..$max_nodes).each do |i|
-    config.vm.define "consul-nomad-node#{i}" do |node|
-      node_ip_address = "#{get_ip(i)}"
-      node.vm.network "private_network", ip: node_ip_address
-      node.vm.hostname = "consul-nomad-node#{i}"
+  # Consul/Nomad controlplane nodes
+  (1..$controlplane_nodes).each do |node|
+    config.vm.define "controlplane#{node}" do |controlplane|
+      controlplane.vm.hostname = "controlplane#{node}"
+
+      if node == $controlplane_nodes
+        controlplane.vm.provision "ansible" do |ansible|
+          ansible.playbook = "deploy-controlplane.yml"
+          ansible.groups = $ansible_groups
+          ansible.limit = "controlplane"
+        end
+      end
     end
   end
 
+  # Nomad worker nodes
+  (1..$worker_nodes).each do |node|
+    config.vm.define "worker#{node}" do |worker|
+      worker.vm.hostname = "worker#{node}"
+
+      # Increase memory for Parallels Desktop
+      worker.vm.provider "parallels" do |p, o|
+        p.memory = "1024"
+      end
+
+      # Increase memory for Virtualbox
+      worker.vm.provider "virtualbox" do |vb|
+        vb.memory = "1024"
+      end
+
+      # Increase memory for VMware
+      ["vmware_fusion", "vmware_workstation"].each do |p|
+        worker.vm.provider p do |v|
+          v.vmx["memsize"] = "1024"
+        end
+      end
+
+      if node == $worker_nodes
+        worker.vm.provision "ansible" do |ansible|
+          ansible.playbook = "deploy-nomad-worker.yml"
+          ansible.groups = $ansible_groups
+        end
+      end
+    end
+  end
+
+  # Loadbalancer and DNS
   config.vm.define "loadbalancer" do |lb|
-    node_ip_address = "#{get_ip(0)}"
-    lb.vm.network "private_network", ip: node_ip_address
+    lb.vm.network "private_network", ip: $loadbalancer_ip
     lb.vm.hostname = "loadbalancer"
-  end
-
-  # First, we need our Consul cluster up and running
-  config.vm.provision "consul", type: "ansible", run: "never" do |ansible|
-    ansible.playbook = "playbook-consul.yml"
-    ansible.groups = $ansible_groups
-    ansible.limit = "consul_nomad"
-  end
-
-  # Vault requires a running Consul cluster with an elected leader
-  # Nomad in turn requires tokens from Vault
-  # This playbook also includes the load balancer and DNS configuration
-  config.vm.provision "all", type: "ansible", run: "never" do |ansible|
-    ansible.playbook = "playbook.yml"
-    ansible.groups = $ansible_groups
-  end
-
-  # Increase memory for Parallels Desktop
-  config.vm.provider "parallels" do |p, o|
-    p.memory = "1024"
-  end
-
-  # Increase memory for Virtualbox
-  config.vm.provider "virtualbox" do |vb|
-    vb.memory = "1024"
-  end
-
-  # Increase memory for VMware
-  ["vmware_fusion", "vmware_workstation"].each do |p|
-    config.vm.provider p do |v|
-      v.vmx["memsize"] = "1024"
+    lb.vm.provision "ansible" do |ansible|
+      ansible.playbook = "deploy-loadbalancer.yml"
+      ansible.groups = $ansible_groups
     end
   end
 end

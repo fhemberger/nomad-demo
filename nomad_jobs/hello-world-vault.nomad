@@ -45,7 +45,7 @@ job "hello-world-vault" {
 
       template {
         data = <<EOF
-          {{ with secret "kv/hello-vault" }}
+          {{ with secret "kv/hello-world-vault" }}
           VAULT_SECRET_URL="{{ .Data.url }}"
           VAULT_SECRET_USERNAME="{{ .Data.username }}"
           VAULT_SECRET_PASSWORD="{{ .Data.password }}"
@@ -57,7 +57,7 @@ job "hello-world-vault" {
       }
 
       vault {
-        policies      = ["hello-vault"]
+        policies      = ["hello-world-vault"]
         change_mode   = "signal"
         change_signal = "SIGHUP"
       }

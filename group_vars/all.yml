@@ -8,13 +8,9 @@ openjdk_version: "16"
 # the IP range defined in Vagrant.
 network_interface: enp0s8
 
-# Set interface manually (see above) or fall back to default IPv4 address.
-network_interface_ipv4: "{{ hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}" # noqa 204
-
-# When provisioned with Vagrant, use the list `vagrant_consul_nomad_ips` passed
-# as group variable. Otherwise use `ansible_host` from the inventory file.
-consul_nomad_ips: "{{ vagrant_consul_nomad_ips | default(groups['consul_nomad'] | map('extract', hostvars, 'ansible_host') | list) }}"
-loadbalancer_ip: "{{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer']['ansible_host']) }}"
+# When provisioned with Vagrant, use the list `vagrant_loadbalancer_ip` passed
+# as group variable. Otherwise use the IP address from the given interface.
+loadbalancer_ip: "{{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer']['ansible_' + network_interface]['ipv4']['address']) }}"
 
 vault_unseal_keys_dir: "{{ playbook_dir }}/credentials/vault-keys"
 vault_token_dir: "{{ playbook_dir }}/credentials/vault-tokens"

@@ -11,11 +11,9 @@
     state: present
 
 - name: Install syslog-ng-core
-  package:
-    name: syslog-ng-core
-    state: present
+  package: name=syslog-ng-core state=present
 
-- name: Extract major and minor version (reqired for config file) # noqa 301
+- name: Extract major and minor version (reqired for config file) # noqa no-changed-when
   shell: |
     set -o pipefail
     syslog-ng --version | grep -Po 'Config version: \K\d+\.\d+'
@@ -28,11 +26,11 @@
 
 - name: Deploy syslog-ng client config on Vault nodes
   include_tasks: client.yml
-  when: "'consul_nomad' in group_names"
+  when: "'vault' in group_names"
 
 - name: Deploy syslog-ng upstream config on load balancer
   include_tasks: upstream.yml
-  when: "'consul_nomad' not in group_names"
+  when: "'vault' not in group_names"
 
 - name: Copy systemd service
   copy:

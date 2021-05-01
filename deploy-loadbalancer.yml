@@ -1,0 +1,13 @@
+---
+- hosts: loadbalancer
+  become: yes
+  roles:
+    - name: base
+    - name: coredns
+    - name: traefik
+      # NOTE: I'm "abusing" the load balancer VM to collect Vault
+      # audit logs just to avoid the need of another VM for this demo.
+      #
+      # OF COURSE AUDIT LOGS OF YOUR SECRET MANAGEMENT
+      # *NEVER* BELONG ON AN OUTSIDE FACING MACHINE!
+    - name: syslog-ng

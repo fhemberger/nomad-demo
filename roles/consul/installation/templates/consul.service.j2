@@ -1,20 +1,29 @@
 {%- set network_interface_ipv4 = hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 [Unit]
 Description="HashiCorp Consul - A service mesh solution"
-Documentation=https://www.consul.io/
+Documentation=https://www.consul.io/docs/
 Requires=network-online.target
 After=network-online.target
 ConditionFileNotEmpty=/etc/consul.d/consul.hcl
 
+# https://www.freedesktop.org/software/systemd/man/systemd.service.html
 [Service]
 Type=notify
-User=consul
-Group=consul
 ExecStart=/usr/bin/consul agent -bind='{{ network_interface_ipv4 }}' -config-dir=/etc/consul.d/
 ExecReload=/usr/bin/consul reload
-KillMode=process
 Restart=on-failure
+
+# Exec
+# https://www.freedesktop.org/software/systemd/man/systemd.exec.html
+User=consul
+Group=consul
+
+# Process Properties
 LimitNOFILE=65536
+
+# Kill
+# https://www.freedesktop.org/software/systemd/man/systemd.kill.html
+KillMode=process
 
 [Install]
 WantedBy=multi-user.target

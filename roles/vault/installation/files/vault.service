@@ -7,30 +7,42 @@ ConditionFileNotEmpty=/etc/vault.d/vault.hcl
 StartLimitIntervalSec=60
 StartLimitBurst=3
 
+# https://www.freedesktop.org/software/systemd/man/systemd.service.html
 [Service]
+ExecStart=/usr/bin/vault server -config=/etc/vault.d/vault.hcl
+ExecReload=/bin/kill --signal HUP $MAINPID
+RestartSec=5
+TimeoutStopSec=30
+Restart=on-failure
+
+# Exec
+# https://www.freedesktop.org/software/systemd/man/systemd.exec.html
 User=vault
 Group=vault
+
+# Capabilities
+CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
+AmbientCapabilities=CAP_IPC_LOCK
+Capabilities=CAP_IPC_LOCK+ep
+
+# Security
+NoNewPrivileges=yes
+SecureBits=keep-caps
+
+# Process Properties
+LimitNOFILE=65536
+LimitMEMLOCK=infinity
+
+# Sandboxing
 ProtectSystem=full
 ProtectHome=read-only
 PrivateTmp=yes
 PrivateDevices=yes
-SecureBits=keep-caps
-AmbientCapabilities=CAP_IPC_LOCK
-Capabilities=CAP_IPC_LOCK+ep
-CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
-NoNewPrivileges=yes
-ExecStart=/usr/bin/vault server -config=/etc/vault.d/vault.hcl
-ExecReload=/bin/kill --signal HUP $MAINPID
+
+# Kill
+# https://www.freedesktop.org/software/systemd/man/systemd.kill.html
 KillMode=process
 KillSignal=SIGINT
-Restart=on-failure
-RestartSec=5
-TimeoutStopSec=30
-StartLimitInterval=60
-StartLimitIntervalSec=60
-StartLimitBurst=3
-LimitNOFILE=65536
-LimitMEMLOCK=infinity
 
 [Install]
 WantedBy=multi-user.target

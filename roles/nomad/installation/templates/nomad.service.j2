@@ -1,0 +1,37 @@
+[Unit]
+Description="HashiCorp Nomad"
+Documentation=https://nomadproject.io/docs/
+Wants=network-online.target
+After=network-online.target
+ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl
+StartLimitIntervalSec=10
+StartLimitBurst=3
+
+# https://www.freedesktop.org/software/systemd/man/systemd.service.html
+[Service]
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/usr/bin/nomad agent -config /etc/nomad.d
+RestartSec=2
+Restart=on-failure
+
+# Exec
+# https://www.freedesktop.org/software/systemd/man/systemd.exec.html
+{% if nomad_is_server %}
+User=nomad
+Group=nomad
+{% endif %}
+
+# Process Properties
+LimitNOFILE=infinity
+LimitNPROC=infinity
+
+# Kill
+# https://www.freedesktop.org/software/systemd/man/systemd.kill.html
+KillMode=process
+KillSignal=SIGINT
+
+# Other
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target

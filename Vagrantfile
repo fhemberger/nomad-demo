@@ -25,7 +25,6 @@ Vagrant.configure(2) do |config|
         vault.vm.provision "ansible" do |ansible|
           ansible.playbook = "deploy-vault.yml"
           ansible.groups = $ansible_groups
-          ansible.limit = "vault"
         end
       end
     end
@@ -40,7 +39,6 @@ Vagrant.configure(2) do |config|
         controlplane.vm.provision "ansible" do |ansible|
           ansible.playbook = "deploy-controlplane.yml"
           ansible.groups = $ansible_groups
-          ansible.limit = "controlplane"
         end
       end
     end

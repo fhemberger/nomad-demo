@@ -3,7 +3,7 @@
   become: yes
   roles:
     - name: base
-    - name: consul/installation # client only
+    - name: consul/installation
       vars:
         consul_is_server: false
     - name: nomad/driver-jre
@@ -11,7 +11,7 @@
     # - name: vault  # client only
     - name: nomad/installation
       vars:
-        consul_is_server: false
+        nomad_is_server: false
 
   post_tasks:
     - name: Disable systemd-resolved service
@@ -33,9 +33,3 @@
         name: docker
         state: restarted
       tags: ['docker']
-
-
-- hosts: localhost
-  tasks:
-    - name: Run all jobs on Nomad # noqa no-changed-when
-      command: vagrant ssh controlplane1 -c 'for job in nomad_jobs/*.nomad; do nomad job run "$job"; done'

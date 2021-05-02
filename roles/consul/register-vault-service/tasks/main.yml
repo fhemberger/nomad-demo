@@ -1,0 +1,27 @@
+# NOTE: Usually you'd install a Consul client on the Vault nodes and use it to
+# register the service in Consul. But in this setup, it would create a
+# bidirectional dependency between Vault and Consul.
+#
+# Instead we are using Consul's HTTP API to keep the dependency chain simple:
+#
+#     Vault <-(depends on)- Consul <-(depends on)- Nomad
+#
+- name: Register Vault node as Consul service
+  run_once: true
+  uri:
+    url: http://127.0.0.1:8500/v1/agent/service/register
+    method: PUT
+    body_format: json
+    body:
+      id: "{{ item }}"
+      name: "vault"
+      tags: []
+      address: "{{ hostvars[item]['ansible_' + network_interface]['ipv4']['address'] }}"
+      port: 8200
+      checks:
+        - http: "https://{{ hostvars[item]['ansible_' + network_interface]['ipv4']['address'] }}:8200/sys/health"
+          tls_skip_verify: false
+          method: "HEAD"
+          interval: "10s"
+          timeout: "2s"
+  with_items: "{{ groups['vault'] }}"

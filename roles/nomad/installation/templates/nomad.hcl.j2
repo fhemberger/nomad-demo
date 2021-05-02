@@ -13,7 +13,9 @@ consul {
   address = "127.0.0.1:8500"
   # If the configuration is separated for server and client nodes, the tag
   # "controlplane" should only be used on the server nodes.
-  {% if nomad_is_server %}tags = ["controlplane"]{% endif %}
+{% if nomad_is_server %}
+  tags = ["controlplane"]
+{% endif %}
 }
 
 {% if nomad_is_server %}
@@ -50,7 +52,7 @@ telemetry {
 {% if nomad_is_server %}
 vault {
   enabled = true
-  address = "http://active.vault.service.consul:8200"
+  address = "http://vault.service.consul:8200"
   task_token_ttl = "1h"
   create_from_role = "nomad-cluster"
   token = "{{ vault_nomad_token }}"
@@ -58,7 +60,7 @@ vault {
 {% else %}
 vault {
     enabled = true
-    address = "http://active.vault.service.consul:8200"
+    address = "http://vault.service.consul:8200"
 }
 {% endif %}
 {% endif %}

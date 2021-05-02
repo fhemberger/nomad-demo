@@ -15,9 +15,8 @@
     state: directory
     mode: 0700
 
-  no_log: yes
-  run_once: true
 - name: Initialise Vault # noqa no-changed-when
+  no_log: yes
   command: "vault operator init -key-shares={{ vault_key_shares }} -key-threshold={{ vault_key_threshold }} -format json"
   environment:
     VAULT_ADDR: "http://127.0.0.1:8200"

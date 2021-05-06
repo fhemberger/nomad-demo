@@ -1,13 +1,16 @@
-{% if consul_is_server %}
-bootstrap_expect = {{ groups['controlplane'] | length }}
-{% endif %}
-# Make consul UI accessible from everywhere
-client_addr = "0.0.0.0"
 data_dir = "/opt/consul"
 datacenter = "{{ consul_datacenter }}"
+
+{# MUST be 32 bytes, Base64-encoded #}
 encrypt = "{{ lookup('password', '/tmp/consulhash length=32') | b64encode }}"
-retry_join = {{ groups['controlplane'] | map('extract', hostvars, ['ansible_' + network_interface, 'ipv4', 'address']) | list | to_json }}
+
 {% if consul_is_server %}
 server = true
-{% endif %}
+client_addr = "0.0.0.0"
+bootstrap_expect = {{ groups['controlplane'] | length }}
+retry_join = {{ groups['controlplane'] | map('extract', hostvars, ['ansible_' + network_interface, 'ipv4', 'address']) | list | to_json }}
 ui = true
+{% else %}
+client_addr = "127.0.0.1"
+retry_join = ["consul.service.consul"]
+{% endif %}

@@ -18,7 +18,7 @@
       until: _github_release.status == 200
       retries: 5
 
-    - name: Set coredns_version # noqa 204
+    - name: Set coredns_version
       set_fact: coredns_version="{{ _github_release.json.tag_name | regex_replace('^v?(.*)$', '\\1') }}"
 
   when: (coredns_version is not defined) or (coredns_version == 'latest')

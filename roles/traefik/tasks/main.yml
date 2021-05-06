@@ -18,7 +18,7 @@
       until: _github_release.status == 200
       retries: 5
 
-    - name: Set traefik_version # noqa 204
+    - name: Set traefik_version
       set_fact: traefik_version="{{ _github_release.json.tag_name | regex_replace('^v?(.*)$', '\\1') }}"
 
   when: (traefik_version is not defined) or (traefik_version == 'latest')

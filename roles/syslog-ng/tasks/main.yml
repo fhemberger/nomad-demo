@@ -1,10 +1,10 @@
 ---
-- name: Add apt key # noqa 204
+- name: Add apt key
   apt_key:
     url: "https://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_{{ ansible_distribution_version }}/Release.key"
     state: present
 
-- name: Add apt repository # noqa 204
+- name: Add apt repository
   apt_repository:
     repo: "deb https://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_{{ ansible_distribution_version }} ./"
     filename: syslog-ng

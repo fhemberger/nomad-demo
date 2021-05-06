@@ -2,7 +2,8 @@
 - hosts: worker
   become: yes
   roles:
-    - name: base
+    - name: base/apt
+    - name: base/copy-root-ca
     - name: consul/installation
       vars:
         consul_is_server: false

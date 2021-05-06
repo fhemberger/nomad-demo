@@ -1,0 +1,24 @@
+---
+- name: Create local certificate directory
+  file:
+    path: /usr/local/share/ca-certificates
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Check if root certificate exists
+  delegate_to: localhost
+  become: no
+  stat: path="{{ playbook_dir }}/certificates/root_ca.crt"
+  register: _root_cert
+
+- name: Copy root certificate
+  copy:
+    src: "{{ playbook_dir }}/certificates/root_ca.crt"
+    dest: "/usr/local/share/ca-certificates/{{ domain | regex_replace('\\.', '_') }}.crt"
+    owner: root
+    group: root
+    mode: 0700
+  when: _root_cert.stat.exists
+  notify: Update CA Certificates

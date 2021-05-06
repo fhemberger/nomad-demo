@@ -1,5 +1,5 @@
 {%- set network_interface_ipv4 = hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
-datacenter = "dc1"
+datacenter = "{{ nomad_datacenter }}"
 data_dir = "/opt/nomad"
 
 bind_addr = "0.0.0.0"
@@ -11,8 +11,7 @@ advertise {
 
 consul {
   address = "127.0.0.1:8500"
-  # If the configuration is separated for server and client nodes, the tag
-  # "controlplane" should only be used on the server nodes.
+
 {% if nomad_is_server %}
   tags = ["controlplane"]
 {% endif %}

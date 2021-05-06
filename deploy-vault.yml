@@ -1,10 +1,18 @@
 ---
+- hosts: localhost
+  become: no
+  connection: local
+  roles:
+    - name: base/create-root-ca
+
 - hosts: vault
   become: yes
   roles:
-    - name: base
+    - name: base/apt
+    - name: base/copy-root-ca
     - name: syslog-ng
     - name: vault/installation
+    - name: vault/intermediate-ca
     - name: vault/nomad-token
     - name: vault/prometheus-metric-access
     - name: vault/secret-grafana

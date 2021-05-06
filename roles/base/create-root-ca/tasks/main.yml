@@ -1,0 +1,44 @@
+---
+- name: Create certificate directory if it does not exist
+  delegate_to: localhost
+  become: no
+  file:
+    path: "{{ playbook_dir }}/certificates"
+    state: directory
+    mode: 0700
+
+- name: Create CA key
+  delegate_to: localhost
+  become: no
+  openssl_privatekey:
+    path: "{{ playbook_dir }}/certificates/root_ca.key"
+    mode: 0600
+  register: ca_key
+
+- name: Create the CA CSR
+  delegate_to: localhost
+  become: no
+  openssl_csr:
+    path: "{{ playbook_dir }}/certificates/root_ca.csr"
+    privatekey_path: "{{ ca_key.filename }}"
+    common_name: "{{ organization_name }} Root CA"
+    organization_name: "{{ organization_name }}"
+    basic_constraints: "CA:TRUE"
+    basic_constraints_critical: yes
+    key_usage:
+      - keyCertSign
+      - cRLSign
+      - digitalSignature
+    mode: 0600
+  register: ca_csr
+
+- name: Sign the CA CSR
+  delegate_to: localhost
+  become: no
+  openssl_certificate:
+    path: "{{ playbook_dir }}/certificates/root_ca.crt"
+    csr_path: "{{ ca_csr.filename }}"
+    privatekey_path: "{{ ca_key.filename }}"
+    provider: selfsigned
+    mode: 0600
+  register: ca_crt

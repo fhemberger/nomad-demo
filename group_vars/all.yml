@@ -1,5 +1,7 @@
 ---
 domain: demo
+# Organization name for root and intermediate CA
+organization_name: "ACME Inc."
 
 traefik_version: "2.4.8"
 openjdk_version: "16"
@@ -14,3 +16,4 @@ loadbalancer_ip: "{{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer'][
 
 vault_unseal_keys_dir: "{{ playbook_dir }}/credentials/vault-keys"
 vault_token_dir: "{{ playbook_dir }}/credentials/vault-tokens"
+vault_addr: http://127.0.0.1:8200

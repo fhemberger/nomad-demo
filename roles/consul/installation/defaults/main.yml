@@ -1,2 +1,3 @@
 ---
 consul_is_server: true
+consul_datacenter: dc1

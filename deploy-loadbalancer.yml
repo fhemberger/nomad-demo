@@ -2,7 +2,8 @@
 - hosts: loadbalancer
   become: yes
   roles:
-    - name: base
+    - name: base/apt
+    - name: base/copy-root-ca
     - name: coredns
     - name: traefik
       # NOTE: I'm "abusing" the load balancer VM to collect Vault

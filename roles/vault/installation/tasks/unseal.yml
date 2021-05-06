@@ -12,5 +12,5 @@
   no_log: yes
   command: "vault operator unseal {{ item.stdout }}"
   environment:
-    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_ADDR: "{{ vault_addr }}"
   with_items: "{{ _vault_unseal_keys.results }}"

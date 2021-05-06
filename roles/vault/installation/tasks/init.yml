@@ -19,7 +19,7 @@
   no_log: yes
   command: "vault operator init -key-shares={{ vault_key_shares }} -key-threshold={{ vault_key_threshold }} -format json"
   environment:
-    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_ADDR: "{{ vault_addr }}"
   register: _vault_init_results
 
 - name: Parse output of 'vault init'

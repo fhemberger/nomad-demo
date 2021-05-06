@@ -5,7 +5,7 @@
     - name: Get Vault status # noqa no-changed-when
       command: vault status -format json
       environment:
-        VAULT_ADDR: "http://127.0.0.1:8200"
+        VAULT_ADDR: "{{ vault_addr }}"
       register: _vault_status_results
       failed_when: _vault_status_results.rc == 1
 

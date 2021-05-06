@@ -1,3 +1,4 @@
+---
 # NOTE: Usually you'd install a Consul client on the Vault nodes and use it to
 # register the service in Consul. But in this setup, it would create a
 # bidirectional dependency between Vault and Consul.

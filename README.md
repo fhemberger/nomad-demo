@@ -51,7 +51,7 @@ If you're working on macOS and have [Homebrew](https://brew.sh/) installed, you 
 
 ```sh
 brew cask install vagrant virtualbox
-brew install ansible
+brew install ansible python-yq
 ```
 
 Also your host system needs at least 4GB of RAM available and about 14GB of free hard disk (sorry, Vagrant VM boxes 🤷‍♂️).

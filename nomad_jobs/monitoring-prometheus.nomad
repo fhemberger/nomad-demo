@@ -1,5 +1,29 @@
+variable "datacenters" {
+  type        = list(string)
+  description = "List of datacenters to deploy to."
+  default     = ["dc1"]
+}
+
+variable "prometheus_image_tag" {
+  type        = string
+  description = "Prometheus Docker image tag to deploy."
+  default     = "latest"
+}
+
+variable "alertmanager_image_tag" {
+  type        = string
+  description = "Alertmanager Docker image tag to deploy."
+  default     = "latest"
+}
+
+variable "consul_exporter_image_tag" {
+  type        = string
+  description = "consul_exporter Docker image tag to deploy."
+  default     = "latest"
+}
+
 job "prometheus" {
-  datacenters = ["dc1"]
+  datacenters = var.datacenters
 
   update {
     stagger      = "30s"
@@ -29,7 +53,7 @@ job "prometheus" {
       }
 
       config {
-        image = "prom/prometheus:latest"
+        image = "prom/prometheus:${var.prometheus_image_tag}"
 
         cap_drop = [
           "ALL",
@@ -88,7 +112,7 @@ job "prometheus" {
       }
 
       config {
-        image = "prom/alertmanager:latest"
+        image = "prom/alertmanager:${var.alertmanager_image_tag}"
 
         cap_drop = [
           "ALL",
@@ -139,7 +163,7 @@ job "prometheus" {
       driver = "docker"
 
       config {
-        image = "prom/consul-exporter:latest"
+        image = "prom/consul-exporter:${var.consul_exporter_image_tag}"
 
         cap_drop = [
           "ALL",

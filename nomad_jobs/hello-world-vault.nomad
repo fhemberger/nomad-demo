@@ -1,3 +1,15 @@
+variable "datacenters" {
+  type        = list(string)
+  description = "List of datacenters to deploy to."
+  default     = ["dc1"]
+}
+
+variable "image_tag" {
+  type        = string
+  description = "Docker image tag to deploy."
+  default     = "latest"
+}
+
 job "hello-world-vault" {
   datacenters = ["dc1"]
 
@@ -19,7 +31,7 @@ job "hello-world-vault" {
       driver = "docker"
 
       config {
-        image = "ghcr.io/fhemberger/nomad-demo-hello-world-vault"
+        image = "ghcr.io/fhemberger/nomad-demo-hello-world-vault:${var.image_tag}"
 
         cap_drop = [
           "ALL",

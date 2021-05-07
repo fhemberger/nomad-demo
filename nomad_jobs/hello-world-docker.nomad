@@ -1,5 +1,17 @@
+variable "datacenters" {
+  type        = list(string)
+  description = "List of datacenters to deploy to."
+  default     = ["dc1"]
+}
+
+variable "image_tag" {
+  type        = string
+  description = "Docker image tag to deploy."
+  default     = "latest"
+}
+
 job "hello-world-docker" {
-  datacenters = ["dc1"]
+  datacenters = var.datacenters
   type        = "service"
 
   # Specify this job to have rolling updates, with 30 second intervals.
@@ -30,7 +42,7 @@ job "hello-world-docker" {
       driver = "docker"
 
       config {
-        image = "rancher/hello-world"
+        image = "rancher/hello-world:${var.image_tag}"
 
         cap_drop = [
           "ALL",

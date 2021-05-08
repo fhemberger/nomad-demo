@@ -70,6 +70,17 @@
     VAULT_ADDR: "{{ vault_addr }}"
     VAULT_TOKEN: "{{ vault_root_token }}"
 
+- name: Create Vault PKI role # noqa no-changed-when
+  delegate_to: localhost
+  become: no
+  command: |
+    vault write pki_int/roles/vault.{{ domain }}
+    allowed_domains="vault.{{ domain }}"
+    max_ttl="720h"
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
 - name: Create Consul PKI role # noqa no-changed-when
   delegate_to: localhost
   become: no

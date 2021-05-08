@@ -9,8 +9,8 @@ StartLimitBurst=3
 
 # https://www.freedesktop.org/software/systemd/man/systemd.service.html
 [Service]
-ExecReload=/bin/kill -HUP $MAINPID
 ExecStart=/usr/bin/nomad agent -config /etc/nomad.d
+ExecReload=/bin/kill -HUP $MAINPID
 RestartSec=2
 Restart=on-failure
 

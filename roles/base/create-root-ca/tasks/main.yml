@@ -1,6 +1,7 @@
 ---
 - name: Create certificate directory if it does not exist
   delegate_to: localhost
+  run_once: true
   become: no
   file:
     path: "{{ playbook_dir }}/certificates"
@@ -9,6 +10,7 @@
 
 - name: Create CA key
   delegate_to: localhost
+  run_once: true
   become: no
   openssl_privatekey:
     path: "{{ playbook_dir }}/certificates/root_ca.key"
@@ -17,6 +19,7 @@
 
 - name: Create the CA CSR
   delegate_to: localhost
+  run_once: true
   become: no
   openssl_csr:
     path: "{{ playbook_dir }}/certificates/root_ca.csr"
@@ -34,6 +37,7 @@
 
 - name: Sign the CA CSR
   delegate_to: localhost
+  run_once: true
   become: no
   openssl_certificate:
     path: "{{ playbook_dir }}/certificates/root_ca.crt"

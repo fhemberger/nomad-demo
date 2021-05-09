@@ -1,13 +1,11 @@
 ---
-- hosts: localhost
-  become: no
-  connection: local
-  roles:
-    - name: base/create-root-ca
-
 - hosts: vault
   become: yes
   roles:
+    # Create self-signed root CA for entire project
+    - name: base/create-root-ca
+
+    # Vault specific setup
     - name: base/apt
     - name: base/copy-root-ca
     - name: syslog-ng

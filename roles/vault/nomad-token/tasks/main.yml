@@ -9,8 +9,8 @@
     mode: 0644
 
 - name: Write 'nomad-server-policy' to Vault # noqa no-changed-when
-  no_log: yes
   run_once: true
+  no_log: yes
   command: "vault policy write nomad-server /home/{{ ansible_ssh_user }}/nomad-server-policy.vault"
   environment:
     VAULT_ADDR: "{{ vault_addr }}"
@@ -30,8 +30,8 @@
       set_fact: vault_nomad_token="{{ lookup('file', vault_token_dir + '/nomad-token') }}"
 
     - name: Check if Nomad token is still valid
-      # no_log: yes
       run_once: true
+      no_log: yes
       command: "vault token lookup -format json {{ vault_nomad_token }}"
       environment:
         VAULT_ADDR: "{{ vault_addr }}"
@@ -40,16 +40,16 @@
       failed_when: false
 
     - name: Parse output of 'vault token lookup'
-      no_log: yes
       run_once: true
+      no_log: yes
       set_fact: vault_nomad_token_valid=True
       when: _vault_nomad_token_lookup_results.rc == 0
   when: _vault_nomad_token_file.stat.exists
 
 - block:
     - name: Create new token based on 'nomad-server' policy
-      no_log: yes
       run_once: true
+      no_log: yes
       command: vault token create -policy nomad-server -period 72h -orphan -format json
       environment:
         VAULT_ADDR: "{{ vault_addr }}"
@@ -57,13 +57,13 @@
       register: _vault_nomad_token_create_results
 
     - name: Parse output of 'vault token create'
-      no_log: yes
       run_once: true
+      no_log: yes
       set_fact: _vault_nomad_token_parsed="{{ _vault_nomad_token_create_results.stdout | from_json }}"
 
     - name: Save Nomad token
-      no_log: yes
       run_once: true
+      no_log: yes
       set_fact: vault_nomad_token="{{ _vault_nomad_token_parsed.auth.client_token }}"
 
     - name: Write nomad token to file
@@ -91,8 +91,8 @@
 # While this is totally fine in the context of this demo, you might want to
 # reconsider this setting for a production environment.
 - name: Create Nomad cluster role # noqa no-changed-when
-  no_log: yes
   run_once: true
+  no_log: yes
   command: "vault write /auth/token/roles/nomad-cluster @/home/{{ ansible_ssh_user }}/nomad-cluster-role.json"
   environment:
     VAULT_ADDR: "{{ vault_addr }}"

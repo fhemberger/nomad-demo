@@ -1,20 +1,22 @@
 ---
 - name: Enable intermediate PKI secret engine # noqa no-changed-when
-  delegate_to: localhost
-  become: no
+  run_once: true
   command: |
     vault secrets enable
-    -path=pki_int pki
+    -path=pki_int
     -description "Intermediate PKI secret storage"
     -max-lease-ttl=43800h
-  failed_when: false
+    pki
+  register: _vault_pki_int_enable_result
+  failed_when:
+    - _vault_pki_int_enable_result.rc > 0
+    - '"path is already in use" not in _vault_pki_int_enable_result.stderr'
   environment:
     VAULT_ADDR: "{{ vault_addr }}"
     VAULT_TOKEN: "{{ vault_root_token }}"
 
 - name: Create intermediate CA CSR # noqa no-changed-when
-  delegate_to: localhost
-  become: no
+  run_once: true
   command: |
     vault write -format=json
     pki_int/intermediate/generate/internal
@@ -28,6 +30,7 @@
 - name: Copy using inline content # noqa no-changed-when
   delegate_to: localhost
   become: no
+  run_once: true
   copy:
     content: "{{ vault_pki_int_csr.stdout | from_json | json_query('data.csr') }}"
     dest: "{{ playbook_dir }}/certificates/pki_intermediate.csr"
@@ -39,6 +42,7 @@
 - name: Sign the intermediate CA CSR # noqa no-changed-when
   delegate_to: localhost
   become: no
+  run_once: true
   command: |
     openssl x509 -req
     -in {{ playbook_dir }}/certificates/pki_intermediate.csr
@@ -48,20 +52,25 @@
     -CAcreateserial
     -out {{ playbook_dir }}/certificates/pki_intermediate.crt
 
+- name: Copy pki_intermediate.crt
+  run_once: true
+  copy:
+    src: "{{ playbook_dir }}/certificates/pki_intermediate.crt"
+    dest: /etc/vault.d/pki_intermediate.crt
+    mode: 0600
+
 - name: Store intermediate CA certificate in Vault # noqa no-changed-when
-  delegate_to: localhost
-  become: no
+  run_once: true
   command: |
     vault write
     pki_int/intermediate/set-signed
-    certificate=@{{ playbook_dir }}/certificates/pki_intermediate.crt
+    certificate=@/etc/vault.d/pki_intermediate.crt
   environment:
     VAULT_ADDR: "{{ vault_addr }}"
     VAULT_TOKEN: "{{ vault_root_token }}"
 
 - name: Set URL configuration # noqa no-changed-when
-  delegate_to: localhost
-  become: no
+  run_once: true
   command: |
     vault write pki_int/config/urls
     issuing_certificates="{{ vault_addr }}/v1/pki_int/ca"
@@ -70,20 +79,8 @@
     VAULT_ADDR: "{{ vault_addr }}"
     VAULT_TOKEN: "{{ vault_root_token }}"
 
-- name: Create Vault PKI role # noqa no-changed-when
-  delegate_to: localhost
-  become: no
-  command: |
-    vault write pki_int/roles/vault.{{ domain }}
-    allowed_domains="vault.{{ domain }}"
-    max_ttl="720h"
-  environment:
-    VAULT_ADDR: "{{ vault_addr }}"
-    VAULT_TOKEN: "{{ vault_root_token }}"
-
 - name: Create Consul PKI role # noqa no-changed-when
-  delegate_to: localhost
-  become: no
+  run_once: true
   command: |
     vault write pki_int/roles/{{ consul_datacenter | default('dc1') }}.consul
     allowed_domains="{{ consul_datacenter | default('dc1') }}.consul"
@@ -94,8 +91,7 @@
     VAULT_TOKEN: "{{ vault_root_token }}"
 
 - name: Create Nomad PKI role # noqa no-changed-when
-  delegate_to: localhost
-  become: no
+  run_once: true
   command: |
     vault write pki_int/roles/{{ nomad_datacenter | default('dc1') }}.nomad
     allowed_domains="{{ nomad_datacenter | default('dc1') }}.nomad"
@@ -109,8 +105,7 @@
 # for your public facing services, e.g. from Let's Encrypt.
 # This can be setup in the Traefik loadbalancer instead
 - name: "Create {{ domain }} PKI role" # noqa no-changed-when
-  delegate_to: localhost
-  become: no
+  run_once: true
   command: |
     vault write pki_int/roles/{{ domain }}
     allowed_domains="{{ domain }}"

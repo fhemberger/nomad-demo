@@ -1,3 +1,4 @@
 .ansible_download_cache
-credentials/*
+certificates
+credentials
 !nomad_jobs/artifacts/hello-world-java/HelloWorld.jar

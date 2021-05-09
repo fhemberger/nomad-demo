@@ -30,7 +30,7 @@ job "prometheus" {
     max_parallel = 1
   }
 
-  group "core" {
+  group "prometheus" {
     count = 1
 
     ephemeral_disk {
@@ -40,7 +40,6 @@ job "prometheus" {
 
     network {
       port "prometheus_ui" {}
-      port "alertmanager_ui" {}
     }
 
     task "prometheus" {
@@ -103,6 +102,12 @@ job "prometheus" {
         change_signal = "SIGHUP"
       }
     }
+  }
+
+  group "alertmanager" {
+    network {
+      port "alertmanager_ui" {}
+    }
 
     task "alertmanager" {
       driver = "docker"
@@ -119,7 +124,7 @@ job "prometheus" {
         ]
 
         volumes = [
-          "local/alertmanager.yml:/etc/alertmanager/config.yml",
+          "secret/alertmanager.yml:/etc/alertmanager/config.yml",
         ]
 
         port_map {
@@ -148,6 +153,19 @@ job "prometheus" {
           interval = "10s"
           timeout  = "2s"
         }
+      }
+
+      template {
+        source        = "local/alertmanager.yml.tpl"
+        destination   = "secret/alertmanager.yml"
+        change_mode   = "signal"
+        change_signal = "SIGHUP"
+      }
+
+      vault {
+        policies      = ["monitoring-alertmanager"]
+        change_mode   = "signal"
+        change_signal = "SIGHUP"
       }
     }
   }

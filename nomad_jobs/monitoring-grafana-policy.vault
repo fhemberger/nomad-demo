@@ -1,4 +1,3 @@
-# Read-only permit
-path "kv/grafana" {
+path "kv/monitoring/grafana" {
   capabilities = ["read"]
 }

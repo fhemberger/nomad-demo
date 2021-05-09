@@ -75,7 +75,7 @@ job "grafana" {
 
       template {
         data = <<EOF
-          {{ with secret "kv/grafana" }}
+          {{ with secret "kv/monitoring/grafana" }}
           GF_SECURITY_ADMIN_USER="{{ .Data.username }}"
           GF_SECURITY_ADMIN_PASSWORD="{{ .Data.password }}"
           {{ end }}

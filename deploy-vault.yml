@@ -15,5 +15,6 @@
     - name: vault/intermediate-ca
     - name: vault/nomad-token
     - name: vault/prometheus-metric-access
+    - name: vault/secret-alertmanager
     - name: vault/secret-grafana
     - name: vault/secret-hello-world

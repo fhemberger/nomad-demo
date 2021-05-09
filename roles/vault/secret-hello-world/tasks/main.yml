@@ -17,7 +17,7 @@
     VAULT_ADDR: "{{ vault_addr }}"
     VAULT_TOKEN: "{{ vault_root_token }}"
 
-- name: Copy 'hello-world-vault-policy'
+- name: Copy 'hello-world-vault' policy
   copy:
     src: "{{ playbook_dir }}/nomad_jobs/hello-world-vault-policy.vault"
     dest: "/home/{{ ansible_ssh_user }}/hello-world-vault-policy.vault"
@@ -25,7 +25,7 @@
     group: "{{ ansible_ssh_user }}"
     mode: 0644
 
-- name: Write 'hello-world-vault-policy' to Vault # noqa no-changed-when
+- name: Write 'hello-world-vault' policy to Vault # noqa no-changed-when
   no_log: yes
   command: "vault policy write hello-world-vault /home/{{ ansible_ssh_user }}/hello-world-vault-policy.vault"
   environment:

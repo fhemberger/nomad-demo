@@ -1,0 +1,3 @@
+path "kv/monitoring/alertmanager/*" {
+  capabilities = ["read", "list"]
+}

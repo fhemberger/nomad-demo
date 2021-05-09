@@ -12,12 +12,12 @@ advertise {
 consul {
   address = "127.0.0.1:8500"
 
-{% if nomad_is_server %}
+{% if nomad_mode == 'server' %}
   tags = ["controlplane"]
 {% endif %}
 }
 
-{% if nomad_is_server %}
+{% if nomad_mode == 'server' %}
 server {
   enabled = true
   # MUST be 16 bytes, Base64-encoded
@@ -31,7 +31,7 @@ server {
 }
 {% endif %}
 
-{% if nomad_is_client %}
+{% if nomad_mode == 'client' %}
 {# loopback interface is `lo` on Linux, but `lo0` on macOS/BSD #}
 client {
   enabled = true
@@ -48,7 +48,7 @@ telemetry {
 }
 
 {% if vault_nomad_token is defined %}
-{% if nomad_is_server %}
+{% if nomad_mode == 'server' %}
 vault {
   enabled = true
   address = "http://vault.service.consul:8200"
@@ -58,8 +58,8 @@ vault {
 }
 {% else %}
 vault {
-    enabled = true
-    address = "http://vault.service.consul:8200"
+  enabled = true
+  address = "http://vault.service.consul:8200"
 }
 {% endif %}
 {% endif %}

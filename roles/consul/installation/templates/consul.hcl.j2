@@ -4,7 +4,7 @@ datacenter = "{{ consul_datacenter }}"
 {# MUST be 32 bytes, Base64-encoded #}
 encrypt = "{{ lookup('password', '/tmp/consulhash length=32') | b64encode }}"
 
-{% if consul_is_server %}
+{% if consul_mode == 'server' %}
 server = true
 client_addr = "0.0.0.0"
 bootstrap_expect = {{ groups['controlplane'] | length }}

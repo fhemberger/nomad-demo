@@ -8,5 +8,3 @@
     - name: consul/register-vault-service
     #- name: vault  # client only
     - name: nomad/installation
-      vars:
-        nomad_is_client: false

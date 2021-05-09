@@ -16,7 +16,7 @@ Restart=on-failure
 
 # Exec
 # https://www.freedesktop.org/software/systemd/man/systemd.exec.html
-{% if nomad_is_server %}
+{% if nomad_mode == 'server' %}
 User=nomad
 Group=nomad
 {% endif %}

@@ -6,13 +6,13 @@
     - name: base/copy-root-ca
     - name: consul/installation
       vars:
-        consul_is_server: false
+        consul_mode: client
     - name: nomad/driver-jre
     - name: nomad/driver-docker
     # - name: vault  # client only
     - name: nomad/installation
       vars:
-        nomad_is_server: false
+        nomad_mode: client
 
   post_tasks:
     - name: Disable systemd-resolved service

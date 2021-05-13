@@ -1,87 +1,126 @@
-$vault_nodes = 1
-$controlplane_nodes = 3
-$worker_nodes = 1
-$loadbalancer_ip = "10.1.10.20"
+require "ipaddr"
 
-$ansible_groups = {
-  "vault" => (1..$vault_nodes).map { |node| "vault#{node}" },
-  "controlplane" => (1..$controlplane_nodes).map { |node| "controlplane#{node}" },
-  "worker" => (1..$worker_nodes).map { |node| "worker#{node}" },
-  "all:vars" => {
-    "vagrant_loadbalancer_ip" => $loadbalancer_ip,
-  },
-}
+# Number of nodes to start. Vault and the controlpane (= Consul/Nomad server)
+# should have three nodes for high availability, so the cluster can tolerate
+# one failing node without losing quorum.
+#
+VAULT_NODES = 1
+CONTROLPLANE_NODES = 3
+WORKER_NODES = 1
 
+# If these IP addresses should conflict with your existing network, please
+# choose a different value from the range of private IP addresses:
+#
+#     10.0.0.0 -  10.255.255.255
+#   172.16.0.0 -  172.31.255.255
+#  192.168.0.0 - 192.168.255.255
+#
+LOADBALANCER_IP = "10.1.10.20"
+INTERNAL_NETWORK_RANGE = "10.1.20.128/25"
+
+# Helper class: Give it a starting IP address and
+# always get the next succeeding address
+class IPList
+  def initialize(ip)
+    @current_ip = IPAddr.new(ip)
+  end
+
+  def next
+    @current_ip = @current_ip.succ
+    @current_ip.to_s
+  end
+end
+
+$internal_network_ip = IPList.new(INTERNAL_NETWORK_RANGE)
+$ansible_host_vars = {}
+
+def configure_host(host, hostname)
+  ipv4 = $internal_network_ip.next
+  host.vm.network "private_network", ip: ipv4
+  host.vm.hostname = hostname
+  $ansible_host_vars.merge!(hostname => { "vagrant_ipv4": ipv4 })
+end
+
+# Getting the right IP address for a Vagrant-VM in Ansible is not easy:
+#
+# - `ansible_host` is not suitable in Vagrant (it's always "127.0.0.1")
+#
+# - The Ubuntu Vagrant box already comes with a preset interface `enp0s3`, so
+#   `ansible_default_ipv4.address` has the same value ("10.0.2.15") __for all VMs__
+#
+# - Adding a new private network creates the interface `enp0s8`, but switching to
+#   another Vagrant box (or even a different Ubuntu version) might change the
+#   interface name. So reading a host var `ansible_enp0s8.ipv4.address`
+#   is not ideal as well.
+#
+# But as I already define both hostname and IP address in Vagrant, I decided to
+# add an additional host variable `vagrant_ipv4`for all my needs, falling back to
+# `ansible_default_ipv4.address` in case the Ansible playbook is run without Vagrant.
+#
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/focal64"
-  config.vm.network "private_network", type: "dhcp"
+
+  config.vm.define "dns" do |vagrant|
+    configure_host vagrant, "dns"
+  end
 
   # Vault nodes
-  (1..$vault_nodes).each do |node|
-    config.vm.define "vault#{node}" do |vault|
-      vault.vm.hostname = "vault#{node}"
-
-      if node == $vault_nodes
-        vault.vm.provision "ansible" do |ansible|
-          ansible.playbook = "deploy-vault.yml"
-          ansible.groups = $ansible_groups
-        end
-      end
+  (1..VAULT_NODES).each do |node|
+    config.vm.define "vault#{node}" do |vagrant|
+      configure_host vagrant, "vault#{node}"
     end
   end
 
   # Consul/Nomad controlplane nodes
-  (1..$controlplane_nodes).each do |node|
-    config.vm.define "controlplane#{node}" do |controlplane|
-      controlplane.vm.hostname = "controlplane#{node}"
-
-      if node == $controlplane_nodes
-        controlplane.vm.provision "ansible" do |ansible|
-          ansible.playbook = "deploy-controlplane.yml"
-          ansible.groups = $ansible_groups
-        end
-      end
+  (1..CONTROLPLANE_NODES).each do |node|
+    config.vm.define "controlplane#{node}" do |vagrant|
+      configure_host vagrant, "controlplane#{node}"
     end
   end
 
   # Nomad worker nodes
-  (1..$worker_nodes).each do |node|
-    config.vm.define "worker#{node}" do |worker|
-      worker.vm.hostname = "worker#{node}"
+  (1..WORKER_NODES).each do |node|
+    config.vm.define "worker#{node}" do |vagrant|
+      configure_host vagrant, "worker#{node}"
 
       # Increase memory for Parallels Desktop
-      worker.vm.provider "parallels" do |p, o|
+      vagrant.vm.provider "parallels" do |p, o|
         p.memory = "1024"
       end
 
       # Increase memory for Virtualbox
-      worker.vm.provider "virtualbox" do |vb|
+      vagrant.vm.provider "virtualbox" do |vb|
         vb.memory = "1024"
       end
 
       # Increase memory for VMware
       ["vmware_fusion", "vmware_workstation"].each do |p|
-        worker.vm.provider p do |v|
+        vagrant.vm.provider p do |v|
           v.vmx["memsize"] = "1024"
-        end
-      end
-
-      if node == $worker_nodes
-        worker.vm.provision "ansible" do |ansible|
-          ansible.playbook = "deploy-nomad-worker.yml"
-          ansible.groups = $ansible_groups
         end
       end
     end
   end
 
-  # Loadbalancer and DNS
+  # Loadbalancer
   config.vm.define "loadbalancer" do |lb|
-    lb.vm.network "private_network", ip: $loadbalancer_ip
+    lb.vm.network "private_network", ip: LOADBALANCER_IP
     lb.vm.hostname = "loadbalancer"
-    lb.vm.provision "ansible" do |ansible|
-      ansible.playbook = "deploy-loadbalancer.yml"
-      ansible.groups = $ansible_groups
-    end
+    $ansible_host_vars.merge!(lb.vm.hostname => { "vagrant_ipv4": LOADBALANCER_IP })
+  end
+
+  config.vm.provision "ansible", type: "ansible", run: "never" do |ansible|
+    ansible.limit = "all,localhost"
+    ansible.playbook = "playbook.yml"
+    ansible.host_vars = $ansible_host_vars
+    ansible.groups = {
+      "vault" => (1..VAULT_NODES).map { |node| "vault#{node}" },
+      "controlplane" => (1..CONTROLPLANE_NODES).map { |node| "controlplane#{node}" },
+      "worker" => (1..WORKER_NODES).map { |node| "worker#{node}" },
+      "all:vars" => {
+        "vagrant_loadbalancer_ip" => LOADBALANCER_IP,
+        "vagrant_internal_network_range" => INTERNAL_NETWORK_RANGE,
+      },
+    }
   end
 end

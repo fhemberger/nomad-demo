@@ -1,17 +1,28 @@
-{%- set network_interface_ipv4 = hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 consul {
   # Point `consul` to `consul.service.consul`
   rewrite name exact consul consul.service.consul
-  forward . {{ groups['controlplane'] | map('extract', hostvars, ['ansible_' + network_interface, 'ipv4', 'address']) | list | join(':8600 ') }}:8600
+  forward . {{
+    groups['controlplane'] | map('extract', hostvars, 'vagrant_ipv4') |
+    default(groups['controlplane'] | map('extract', hostvars, ['ansible_default_ipv4', 'addres'])) |
+    list |
+    join(':8600 ') }}:8600
 
   log
   errors
 }
 
 . {
-  # Point all `.demo` queries to localhost
+  # Point all `.demo` queries to load balancer
   template IN A demo {
-    answer "{% raw %}{{ .Name }}{% endraw %} 60 IN A {{ network_interface_ipv4 }}"
+    answer "{% raw %}{{ .Name }}{% endraw %} 60 IN A {{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer']['ansible_default_ipv4']['address']) }}"
+    fallthrough
+  }
+
+  # Point all `vault` queries to Vault cluster
+  template IN A vault {
+{% for host in groups['vault'] %}
+    answer "{% raw %}{{ .Name }}{% endraw %} 60 IN A {{ hostvars[host]['vagrant_ipv4'] | default(hostvars[host]['ansible_default_ipv4']['address']) }}"
+{% endfor %}
     fallthrough
   }
 

@@ -1,19 +1,30 @@
 ---
+# Services can be reached under <servicename>.<domain>, e.g. consul.demo
 domain: demo
+
 # Organization name for root and intermediate CA
 organization_name: "ACME Inc."
 
+# Application versions to install. For Consul, Vault and Nomad the most recent
+# stable versions will be installed from Hashicorp's PPA.
+consul_template_version: "latest"
+coredns_version: "latest"
 traefik_version: "2.4.8"
 openjdk_version: "16"
 
-# If multiple network interfaces exist in the VM, specify the one matching
-# the IP range defined in Vagrant.
+# Nomad: Specifies the name of the interface to force network fingerprinting on.
+# The interface attached to the default route is used. The scheduler chooses from
+# these fingerprinted IP addresses when allocating ports for tasks.
 network_interface: enp0s8
 
 # When provisioned with Vagrant, use the list `vagrant_loadbalancer_ip` passed
-# as group variable. Otherwise use the IP address from the given interface.
-loadbalancer_ip: "{{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer']['ansible_' + network_interface]['ipv4']['address']) }}"
+# as group variable. Otherwise use the IP address from the default interface.
+loadbalancer_ip: "{{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer']['ansible_default_ipv4']['address']) }}"
 
+# Specify syslog-ng upstream, where Vault audit logs are shipped
+syslog_upstream: "{{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}"
+
+# Vault configuration
 vault_unseal_keys_dir: "{{ playbook_dir }}/credentials/vault-keys"
 vault_token_dir: "{{ playbook_dir }}/credentials/vault-tokens"
 vault_addr: http://127.0.0.1:8200

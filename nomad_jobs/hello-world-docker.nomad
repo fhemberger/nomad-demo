@@ -35,7 +35,7 @@ job "hello-world-docker" {
     }
 
     network {
-      port "http" {}
+      port "http" { to = 80 }
     }
 
     task "frontend" {
@@ -48,19 +48,20 @@ job "hello-world-docker" {
           "ALL",
         ]
 
-        port_map {
-          http = 80
-        }
+        ports = ["http"]
       }
 
       resources {
         cpu    = 100
-        memory = 100
+        memory = 50
       }
 
       service {
         name = "hello-docker"
-        tags = ["http"]
+        tags = [
+          "traefik.enable=true",
+          "traefik.http.routers.hello-docker.entrypoints=web"
+        ]
         port = "http"
 
         check {

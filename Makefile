@@ -1,31 +1,40 @@
-.PHONY: fmt lint install
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := default
+.PHONY: default clean format-hcl lint-jobs lint-yaml run-jobs
 
 HCLFMT := $(shell command -v hclfmt 2> /dev/null)
 VAULT_NODES := $(shell grep "^\$$vault_nodes" Vagrantfile | awk '{print $$NF}')
 
+NOMAD_JOBS := $(wildcard nomad_jobs/*.nomad)
+VAULT_POLICIES := $(wildcard nomad_jobs/*.vault)
+
+DOMAIN := $(shell grep -oP 'domain: \K\w+' group_vars/all.yml)
+
 default:
 	vagrant up
+	vagrant provision --provision-with ansible
 
 
-# Delete cached Vagrant machine info
-# Can contain former VM IPs which are handed over to the Ansible provisioner
 clean:
 	vagrant destroy -f
-	find .vagrant -maxdepth 1 -type f -delete
+	rm -f .vagrant/ssh_config
 	rm -rf .vagrant/provisioners
-	rm -rf credentials
+	rm -rf certificates credentials
 
 
-format-hcl:
+format-hcl: $(NOMAD_JOBS) $(VAULT_POLICIES)
 ifndef HCLFMT
 	GO111MODULE=on go get github.com/hashicorp/hcl/v2/cmd/hclfmt
 endif
-	find nomad_jobs -maxdepth 1 \( -name \*.nomad -o -name \*.vault \) | xargs -L 1 hclfmt -w
+	hclfmt -check -w $^
 
 
-lint-nomad:
-	find nomad_jobs/*.nomad -maxdepth 0 | xargs -L 1 nomad job validate
+lint-jobs: $(NOMAD_JOBS)
+	@for job in $^; do \
+		echo -e "\n$${job}:"; \
+		nomad job validate $${job} | tr -d '\000-\011\013\014\016-\037' | tail -n +3; \
+	done
 
 
 lint-yaml:
@@ -33,8 +42,15 @@ lint-yaml:
 	ansible-lint -v
 
 
-lint: format-hcl lint-nomad lint-yaml
+lint: format-hcl lint-jobs lint-yaml
 
 
-nomad-install:
-	find nomad_jobs/*.nomad -maxdepth 0 | xargs -L 1 nomad job run
+run-jobs:
+	@vagrant ssh-config > .vagrant/ssh_config
+	@scp -F .vagrant/ssh_config nomad_jobs/*.nomad controlplane1:/home/vagrant/nomad_jobs/
+	@vagrant ssh controlplane1 -c 'export NOMAD_VAR_grafana_url="http://grafana.$(DOMAIN)"; \
+		for job in nomad_jobs/*.nomad; do \
+			nomad job plan "$$job"; \
+			nomad job run "$$job"; \
+			echo -e "\n"; \
+		done'

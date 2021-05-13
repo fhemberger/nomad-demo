@@ -9,8 +9,31 @@ api:
   insecure: true
 
 entryPoints:
+  dns-tcp:
+   address: ":53/tcp"
+
+  dns-udp:
+   address: ":53/udp"
+
+  vault:
+    address: ":8200"
+
   web:
     address: ":80"
+    http:
+      middlewares:
+        - redirect-vault@file
+    {# http:
+      redirections:
+        entryPoint:
+          to: web-secure
+          scheme: https #}
+
+  web-secure:
+    address: ":443"
+    http:
+      middlewares:
+        - redirect-vault@file
 
 global:
   sendAnonymousUsage: false
@@ -23,7 +46,7 @@ pilot:
 
 providers:
   consulCatalog:
-    constraints: "Tag(`http`)"
+    exposedByDefault: false
     defaultRule: "Host(`{% raw %}{{ normalize .Name }}{% endraw %}.{{ domain }}`)"
     endpoint:
       address: http://consul.service.consul:8500

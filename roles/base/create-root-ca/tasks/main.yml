@@ -45,4 +45,3 @@
     privatekey_path: "{{ ca_key.filename }}"
     provider: selfsigned
     mode: 0600
-  register: ca_crt

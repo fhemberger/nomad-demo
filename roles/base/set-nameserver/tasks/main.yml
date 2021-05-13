@@ -1,0 +1,12 @@
+---
+- name: Disable systemd-resolved service
+  systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: no
+
+- name: Set nameserver
+  copy:
+    content: "nameserver {{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}"
+    dest: /etc/resolv.conf
+    mode: 0644

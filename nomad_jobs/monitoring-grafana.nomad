@@ -39,7 +39,7 @@ job "grafana" {
     }
 
     network {
-      port "http" {}
+      port "http" { to = 3000 }
     }
 
     task "grafana" {
@@ -62,9 +62,7 @@ job "grafana" {
           "local:/etc/grafana:ro",
         ]
 
-        port_map {
-          http = 3000
-        }
+        ports = ["http"]
       }
 
       env {
@@ -93,12 +91,15 @@ job "grafana" {
 
       resources {
         cpu    = 100
-        memory = 100
+        memory = 50
       }
 
       service {
         name = "grafana"
-        tags = ["http"]
+        tags = [
+          "traefik.enable=true",
+          "traefik.http.routers.grafana.entrypoints=web"
+        ]
         port = "http"
 
         check {

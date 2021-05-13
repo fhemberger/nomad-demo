@@ -28,7 +28,7 @@
   include_tasks: client.yml
   when: "'vault' in group_names"
 
-- name: Deploy syslog-ng upstream config on load balancer
+- name: Deploy syslog-ng upstream config on non-Vault node
   include_tasks: upstream.yml
   when: "'vault' not in group_names"
 

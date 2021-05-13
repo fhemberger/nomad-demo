@@ -11,7 +11,7 @@ variable "image_tag" {
 }
 
 job "hello-world-vault" {
-  datacenters = ["dc1"]
+  datacenters = var.datacenters
 
   group "web" {
     count = 1
@@ -24,7 +24,7 @@ job "hello-world-vault" {
     }
 
     network {
-      port "http" {}
+      port "http" { to = 8080 }
     }
 
     task "frontend" {
@@ -37,14 +37,20 @@ job "hello-world-vault" {
           "ALL",
         ]
 
-        port_map {
-          http = 8080
-        }
+        ports = ["http"]
+      }
+
+      resources {
+        cpu    = 100
+        memory = 50
       }
 
       service {
         name = "hello-vault"
-        tags = ["http"]
+        tags = [
+          "traefik.enable=true",
+          "traefik.http.routers.hello-vault.entrypoints=web"
+        ]
         port = "http"
 
         check {

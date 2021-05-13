@@ -64,12 +64,15 @@ job "hello-world-java" {
 
       resources {
         cpu    = 100
-        memory = 100
+        memory = 50
       }
 
       service {
         name = "hello-java"
-        tags = ["http"]
+        tags = [
+          "traefik.enable=true",
+          "traefik.http.routers.hello-java.entrypoints=web"
+        ]
         port = "http"
 
         check {

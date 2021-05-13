@@ -1,4 +1,4 @@
-{%- set network_interface_ipv4 = hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
+{%- set network_interface_ipv4 = hostvars[inventory_hostname]['vagrant_ipv4'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 # https://www.vaultproject.io/docs/configuration/storage/raft
 storage "raft" {
   path = "/opt/vault"
@@ -6,7 +6,7 @@ storage "raft" {
 
 {# {% for host in groups['vault'] %}
   retry_join {
-    leader_api_addr = "http://{{ hostvars[host]['ansible_' + network_interface]['ipv4']['address'] | default(hostvars[host]['ansible_default_ipv4']['address']) }}:8200"
+    leader_api_addr = "http://{{ hostvars[host]['vagrant_ipv4'] | default(hostvars[host]['ansible_default_ipv4']['address']) }}:8200"
     # leader_ca_cert_file = "/path/to/ca1"
     # leader_client_cert_file = "/path/to/client/{{ host }}.crt"
     # leader_client_key_file = "/path/to/client/{{ host }}.key"

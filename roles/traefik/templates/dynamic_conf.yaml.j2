@@ -1,17 +1,64 @@
 # Dynamic configuration
 http:
+  middlewares:
+    redirect-vault:
+      redirectRegex:
+        regex: "^https?://vault.{{ domain }}/(.*)"
+        replacement: "http://vault.{{ domain }}:8200/${1}"
+        permanent: true
+
   routers:
-    api:
-      rule: "Host(`traefik.{{ domain }}`)"
-      service: "api@internal"
-      entrypoints: "web"
+    # Expose Consul UI
     consul:
       rule: "Host(`consul.{{ domain }}`)"
       service: "consul"
-      entrypoints: "web"
+      entryPoints: "web"
+
+    # Expose Traefik UI
+    api:
+      rule: "Host(`traefik.{{ domain }}`)"
+      service: "api@internal"
+      entryPoints: "web"
+
+    # Expose Vault UI
+    consul:
+      rule: "Host(`vault.{{ domain }}`)"
+      service: "vault"
+      entryPoints: "web"
 
   services:
     consul:
       loadBalancer:
         servers:
           - url: "http://consul.service.consul:8500"
+
+    vault:
+      loadBalancer:
+        servers:
+          - url: "http://vault:8500"
+
+# Forward DNS queries to the internal network's DNS server
+tcp:
+  routers:
+    dns:
+      entryPoints: "dns-tcp"
+      rule: "HostSNI(`*`)"
+      service: dns
+
+  services:
+    dns:
+      loadBalancer:
+        servers:
+          - address: "{{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}:53"
+
+udp:
+  routers:
+    dns:
+      entryPoints: "dns-udp"
+      service: dns
+
+  services:
+    dns:
+      loadBalancer:
+        servers:
+          - address: "{{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}:53"

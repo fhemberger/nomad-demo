@@ -39,7 +39,7 @@ job "prometheus" {
     }
 
     network {
-      port "prometheus_ui" {}
+      port "prometheus_ui" { to = 9090 }
     }
 
     task "prometheus" {
@@ -62,16 +62,21 @@ job "prometheus" {
           "local/prometheus.yml:/etc/prometheus/prometheus.yml:ro",
         ]
 
-        port_map {
-          prometheus_ui = 9090
-        }
+        ports = ["prometheus_ui"]
+      }
+
+      resources {
+        cpu    = 100
+        memory = 100
       }
 
       service {
         name = "prometheus"
 
         tags = [
-          "http",
+          "prometheus",
+          "traefik.enable=true",
+          "traefik.http.routers.prometheus.entrypoints=web",
           # See: https://docs.traefik.io/routing/services/
           "traefik.http.services.prometheus.loadbalancer.sticky=true",
           "traefik.http.services.prometheus.loadbalancer.sticky.cookie.httponly=true",
@@ -106,7 +111,7 @@ job "prometheus" {
 
   group "alertmanager" {
     network {
-      port "alertmanager_ui" {}
+      port "alertmanager_ui" { to = 9093 }
     }
 
     task "alertmanager" {
@@ -127,17 +132,21 @@ job "prometheus" {
           "secret/alertmanager.yml:/etc/alertmanager/config.yml",
         ]
 
-        port_map {
-          alertmanager_ui = 9093
-        }
+        ports = ["alertmanager_ui"]
+      }
+
+      resources {
+        cpu    = 100
+        memory = 50
       }
 
       service {
         name = "alertmanager"
 
         tags = [
-          "http",
           "prometheus",
+          "traefik.enable=true",
+          "traefik.http.routers.alertmanager.entrypoints=web",
           # See: https://docs.traefik.io/routing/services/
           "traefik.http.services.alertmanager.loadbalancer.sticky=true",
           "traefik.http.services.alertmanager.loadbalancer.sticky.cookie.httponly=true",
@@ -174,7 +183,7 @@ job "prometheus" {
     count = 1
 
     network {
-      port "consul_exporter" {}
+      port "consul_exporter" { to = 9107 }
     }
 
     task "consul-exporter" {
@@ -192,9 +201,12 @@ job "prometheus" {
           "consul.service.consul:8500",
         ]
 
-        port_map {
-          consul_exporter = 9107
-        }
+        ports = ["consul_exporter"]
+      }
+
+      resources {
+        cpu    = 100
+        memory = 50
       }
 
       service {

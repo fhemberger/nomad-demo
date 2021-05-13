@@ -46,8 +46,8 @@
   command: |
     openssl x509 -req
     -in {{ playbook_dir }}/certificates/pki_intermediate.csr
-    -CA {{ ca_crt.filename }}
-    -CAkey {{ ca_key.filename }}
+    -CA {{ playbook_dir }}/certificates/root_ca.crt
+    -CAkey {{ playbook_dir }}/certificates/root_ca.key
     -extfile {{ role_path }}/files/openssl_intermediate_ext.cnf
     -CAcreateserial
     -out {{ playbook_dir }}/certificates/pki_intermediate.crt

@@ -22,7 +22,7 @@ filter f_vault {
 };
 
 destination d_upstream_syslog {
-  network("{{ loadbalancer_ip }}" port(514));
+  network("{{ syslog_upstream }}" port(514));
 };
 
 log {

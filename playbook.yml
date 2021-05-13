@@ -1,0 +1,64 @@
+---
+- hosts: localhost
+  become: no
+  roles:
+    # Create self-signed root CA for entire project
+    - name: base/create-root-ca
+
+- hosts: all, !localhost
+  become: yes
+  roles:
+    - name: base/apt
+    # FIXME: Firewall rules break all the things!
+    # - name: base/ufw
+    - name: base/copy-root-ca
+
+- hosts: dns
+  become: yes
+  roles:
+    - name: coredns
+      # NOTE: I'm using the DNS VM to collect Vault audit logs
+      # just to avoid the need of another VM for this demo.
+    - name: syslog-ng
+
+- hosts: vault
+  become: yes
+  roles:
+    - name: base/set-nameserver
+    - name: syslog-ng
+    - name: vault/installation
+    - name: vault/intermediate-ca
+    - name: vault/nomad-token
+    - name: vault/prometheus-metric-access
+    - name: vault/secret-alertmanager
+    - name: vault/secret-grafana
+    - name: vault/secret-hello-world
+
+- hosts: controlplane
+  become: yes
+  roles:
+    - name: base/set-nameserver
+    - name: consul/installation
+    # - name: consul/register-vault-service
+    # - name: vault  # client only
+    - name: nomad/installation
+
+- hosts: worker
+  become: yes
+  roles:
+    - name: base/set-nameserver
+    - name: consul/installation
+      vars:
+        consul_mode: client
+    - name: nomad/driver-jre
+    - name: nomad/driver-docker
+    # - name: vault  # client only
+    - name: nomad/installation
+      vars:
+        nomad_mode: client
+
+- hosts: loadbalancer
+  become: yes
+  roles:
+    - name: base/set-nameserver
+    - name: traefik

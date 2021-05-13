@@ -1,0 +1,54 @@
+---
+- name: Install ufw
+  package: name=ufw state=present
+
+- name: Set default rule - Deny all incoming traffic
+  ufw: policy=deny direction=incoming
+
+- name: Allow SSH access from RFC1918 networks to this host
+  ufw:
+    rule: allow
+    src: "{{ item }}"
+    port: "22"
+    comment: "SSH"
+  loop:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+
+- name: Allow SSH access from RFC1918 networks to this host (Vagrant ansible_port)
+  ufw:
+    rule: allow
+    src: "{{ item }}"
+    port: "'{{ ansible_port }}'"
+    comment: "SSH (Vagrant ansible_port)"
+  when:
+    - ansible_port is defined
+    - ansible_port != "22"
+  loop:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+
+- name: Allow all access from internal network and load balancer
+  ufw:
+    rule: allow
+    src: "{{ item }}"
+  loop:
+    - "{{ vagrant_internal_network_range }}"
+    - "{{ vagrant_loadbalancer_ip }}"
+  when: "'loadbalancer' not in inventory_hostname"
+
+- name: Allow access to load balancer
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+  loop:
+    - "53"
+    - "80"
+    - "443"
+    - "8200"
+  when: "'loadbalancer' in inventory_hostname"
+
+- name: Enable firewall
+  ufw: state=enabled

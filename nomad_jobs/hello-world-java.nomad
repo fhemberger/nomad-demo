@@ -22,6 +22,10 @@ job "hello-world-java" {
       mode     = "fail"
     }
 
+    network {
+      port "http" {}
+    }
+
     task "frontend" {
       driver = "java"
 
@@ -54,11 +58,7 @@ job "hello-world-java" {
 
       resources {
         cpu    = 100
-        memory = 100
-
-        network {
-          port "http" {}
-        }
+        memory = 50
       }
 
       service {

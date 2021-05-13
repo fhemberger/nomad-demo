@@ -22,6 +22,10 @@ job "hello-world-docker" {
       mode     = "fail"
     }
 
+    network {
+      port "http" { to = 80 }
+    }
+
     task "frontend" {
       driver = "docker"
 
@@ -32,18 +36,12 @@ job "hello-world-docker" {
           "ALL",
         ]
 
-        port_map {
-          http = 80
-        }
+        ports = ["http"]
       }
 
       resources {
         cpu    = 100
-        memory = 100
-
-        network {
-          port "http" {}
-        }
+        memory = 50
       }
 
       service {

@@ -21,6 +21,10 @@ job "grafana" {
       mode     = "fail"
     }
 
+    network {
+      port "http" { to = 3000 }
+    }
+
     task "grafana" {
       driver = "docker"
 
@@ -41,9 +45,7 @@ job "grafana" {
           "local:/etc/grafana:ro",
         ]
 
-        port_map {
-          http = 3000
-        }
+        ports = ["http"]
       }
 
       env {
@@ -54,11 +56,7 @@ job "grafana" {
 
       resources {
         cpu    = 100
-        memory = 100
-
-        network {
-          port "http" {}
-        }
+        memory = 50
       }
 
       service {

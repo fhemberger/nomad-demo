@@ -11,6 +11,10 @@ job "hello-world-vault" {
       mode     = "fail"
     }
 
+    network {
+      port "http" { to = 8080 }
+    }
+
     task "frontend" {
       driver = "docker"
 
@@ -21,15 +25,12 @@ job "hello-world-vault" {
           "ALL",
         ]
 
-        port_map {
-          http = 8080
-        }
+        ports = ["http"]
       }
 
       resources {
-        network {
-          port "http" {}
-        }
+        cpu    = 100
+        memory = 50
       }
 
       service {

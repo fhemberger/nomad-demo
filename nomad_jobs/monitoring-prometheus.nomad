@@ -6,12 +6,16 @@ job "prometheus" {
     max_parallel = 1
   }
 
-  group "core" {
+  group "prometheus" {
     count = 1
 
     ephemeral_disk {
       size    = 600
       migrate = true
+    }
+
+    network {
+      port "prometheus_ui" { to = 9090 }
     }
 
     task "prometheus" {
@@ -34,15 +38,12 @@ job "prometheus" {
           "local/prometheus.yml:/etc/prometheus/prometheus.yml:ro",
         ]
 
-        port_map {
-          prometheus_ui = 9090
-        }
+        ports = ["prometheus_ui"]
       }
 
       resources {
-        network {
-          port "prometheus_ui" {}
-        }
+        cpu    = 100
+        memory = 100
       }
 
       service {
@@ -80,6 +81,12 @@ job "prometheus" {
         change_signal = "SIGHUP"
       }
     }
+  }
+
+  group "alertmanager" {
+    network {
+      port "alertmanager_ui" { to = 9093 }
+    }
 
     task "alertmanager" {
       driver = "docker"
@@ -96,18 +103,15 @@ job "prometheus" {
         ]
 
         volumes = [
-          "local/alertmanager.yml:/etc/alertmanager/config.yml",
+          "secret/alertmanager.yml:/etc/alertmanager/config.yml",
         ]
 
-        port_map {
-          alertmanager_ui = 9093
-        }
+        ports = ["alertmanager_ui"]
       }
 
       resources {
-        network {
-          port "alertmanager_ui" {}
-        }
+        cpu    = 100
+        memory = 50
       }
 
       service {
@@ -132,11 +136,22 @@ job "prometheus" {
           timeout  = "2s"
         }
       }
+
+      template {
+        source        = "local/alertmanager.yml.tpl"
+        destination   = "secret/alertmanager.yml"
+        change_mode   = "signal"
+        change_signal = "SIGHUP"
+      }
     }
   }
 
   group "exporters" {
     count = 1
+
+    network {
+      port "consul_exporter" { to = 9107 }
+    }
 
     task "consul-exporter" {
       driver = "docker"
@@ -153,15 +168,12 @@ job "prometheus" {
           "consul.service.consul:8500",
         ]
 
-        port_map {
-          consul_exporter = 9107
-        }
+        ports = ["consul_exporter"]
       }
 
       resources {
-        network {
-          port "consul_exporter" {}
-        }
+        cpu    = 100
+        memory = 50
       }
 
       service {

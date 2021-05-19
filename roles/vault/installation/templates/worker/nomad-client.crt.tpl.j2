@@ -1,0 +1,5 @@
+{%- set network_interface_ipv4 = hostvars[inventory_hostname]['vagrant_ipv4'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
+{% raw %}{{ with secret{% endraw %} "pki_int/issue/{{ nomad_datacenter | default('dc1') }}.nomad" "common_name=client.{{ nomad_datacenter | default('dc1') }}.nomad" "alt_names=nomad-client.service.consul,localhost" "ip_sans={{ network_interface_ipv4 }},127.0.0.1" {% raw %}}}
+{{ .Data.certificate }}
+{{ end }}
+{% endraw %}

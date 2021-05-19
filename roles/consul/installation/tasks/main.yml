@@ -18,6 +18,17 @@
     group: consul
     mode: 0755
 
+- name: Check if Consul TLS CA, certifacte and key exists
+  stat: path="/etc/consul.d/{{ item }}"
+  with_items:
+    - "consul-{{ consul_mode }}-ca.crt"
+    - "consul-{{ consul_mode }}.crt"
+    - "consul-{{ consul_mode }}.key"
+  register: _check_consul_cert
+
+- name: Set 'consul_cert_exists'
+  set_fact: consul_cert_exists="{{ _check_consul_cert.results | sum(attribute='stat.exists') == _check_consul_cert.results | length }}"
+
 - name: Copy config
   template:
     src: "consul.hcl.j2"

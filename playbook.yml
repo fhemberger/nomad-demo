@@ -38,21 +38,25 @@
   become: yes
   roles:
     - name: base/set-nameserver
+    - name: vault/installation
+      vars:
+        vault_mode: client
     - name: consul/installation
     # - name: consul/register-vault-service
-    # - name: vault  # client only
     - name: nomad/installation
 
 - hosts: worker
   become: yes
   roles:
     - name: base/set-nameserver
+    - name: vault/installation
+      vars:
+        vault_mode: client
     - name: consul/installation
       vars:
         consul_mode: client
     - name: nomad/driver-jre
     - name: nomad/driver-docker
-    # - name: vault  # client only
     - name: nomad/installation
       vars:
         nomad_mode: client
@@ -61,4 +65,7 @@
   become: yes
   roles:
     - name: base/set-nameserver
+    - name: vault/installation
+      vars:
+        vault_mode: client
     - name: traefik

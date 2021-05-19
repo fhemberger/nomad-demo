@@ -44,4 +44,5 @@
     csr_path: "{{ ca_csr.filename }}"
     privatekey_path: "{{ ca_key.filename }}"
     provider: selfsigned
+    selfsigned_not_after: "+{{ root_ca_validity_days }}d"
     mode: 0600

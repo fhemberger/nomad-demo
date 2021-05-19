@@ -51,6 +51,15 @@
     state: directory
     mode: 0755
 
+- name: Check if Traefik TLS CA, certifacte and key exists
+  stat: path="/etc/traefik.d/{{ item }}"
+  with_items:
+    - "traefik.key"
+  register: _check_traefik_cert
+
+- name: Set 'traefik_cert_exists'
+  set_fact: traefik_cert_exists="{{ _check_traefik_cert.results | sum(attribute='stat.exists') == _check_traefik_cert.results | length }}"
+
 - name: Copy config
   template:
     src: "{{ item }}.j2"

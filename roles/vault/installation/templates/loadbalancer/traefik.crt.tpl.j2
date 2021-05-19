@@ -1,0 +1,6 @@
+{%- set network_interface_ipv4 = hostvars[inventory_hostname]['vagrant_ipv4'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
+{% raw %}{{ with secret{% endraw %} "pki_int/issue/{{ domain }}" "common_name=*.{{ domain }}" "alt_names=localhost" "ip_sans={{ network_interface_ipv4 }},127.0.0.1" {% raw %}}}
+{{ .Data.certificate }}
+{{ .Data.issuing_ca }}
+{{ end }}
+{% endraw %}

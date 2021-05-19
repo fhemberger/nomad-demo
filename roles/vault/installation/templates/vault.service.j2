@@ -9,7 +9,7 @@ StartLimitBurst=3
 
 # https://www.freedesktop.org/software/systemd/man/systemd.service.html
 [Service]
-ExecStart=/usr/bin/vault server -config=/etc/vault.d/vault.hcl
+ExecStart=/usr/bin/vault {% if vault_mode == 'server' %}server{% else %}agent{% endif %} -config=/etc/vault.d/vault.hcl
 ExecReload=/bin/kill --signal HUP $MAINPID
 RestartSec=5
 TimeoutStopSec=30
@@ -23,7 +23,6 @@ Group=vault
 # Capabilities
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 AmbientCapabilities=CAP_IPC_LOCK
-Capabilities=CAP_IPC_LOCK+ep
 
 # Security
 NoNewPrivileges=yes

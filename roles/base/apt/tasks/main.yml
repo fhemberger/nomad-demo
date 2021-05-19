@@ -16,6 +16,7 @@
     name:
       - curl
       - dnsutils
+      - jq
     state: present
 
 - name: Update apt package index

@@ -10,23 +10,12 @@
     shell: /usr/bin/false
     state: present
 
-- name: Create data directory
-  file:
-    path: /opt/vault
-    state: directory
-    owner: vault
-    group: vault
-    mode: 0755
-
-- name: Copy config
-  template:
-    src: "vault.hcl.j2"
-    dest: "/etc/vault.d/vault.hcl"
-    mode: 0644
+- name: Configure Vault
+  include_tasks: "config-{{ vault_mode }}.yml"
 
 - name: Copy systemd service
-  copy:
-    src: "vault.service"
+  template:
+    src: "vault.service.j2"
     dest: "/etc/systemd/system/vault.service"
     mode: 0644
 
@@ -41,46 +30,45 @@
   retries: 15
   delay: 5
 
-- name: Get Vault status # noqa no-changed-when
-  command: vault status -format json
-  environment:
-    VAULT_ADDR: "{{ vault_addr }}"
-  register: _vault_status_results
-  failed_when: _vault_status_results.rc == 1
+- block:
+    - name: Get Vault status # noqa no-changed-when
+      command: vault status -format json
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+      register: _vault_status_results
+      failed_when: _vault_status_results.rc == 1
 
-- name: Parse output of 'vault status'
-  set_fact: _vault_status_parsed="{{ _vault_status_results.stdout | from_json }}"
+    - name: Parse output of 'vault status'
+      set_fact: _vault_status_parsed="{{ _vault_status_results.stdout | from_json }}"
 
-- name: Initialize Vault
-  run_once: true
-  include_tasks: init.yml
-  when: not _vault_status_parsed.initialized
+    - name: Initialize Vault
+      run_once: true
+      include_tasks: init.yml
+      when: not _vault_status_parsed.initialized
 
-- name: Unseal Vault
-  include_tasks: unseal.yml
-  when: _vault_status_parsed.sealed
+    - name: Unseal Vault
+      include_tasks: unseal.yml
+      when: _vault_status_parsed.sealed
 
-- name: Load root token
-  delegate_to: localhost
-  run_once: true
-  become: no
-  no_log: yes
-  set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
-  when: _vault_status_parsed.initialized
+    - name: Load root token
+      run_once: true
+      set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
+      when: _vault_status_parsed.initialized
 
-- name: "Wait for Vault node to become initialized, unsealed and active"
-  uri: url=http://127.0.0.1:8200/v1/sys/health
-  register: _vault_health
-  until: _vault_health.status == 200
-  retries: 30
-  delay: 2
+    - name: "Wait for Vault node to become initialized, unsealed and active"
+      uri: url=http://127.0.0.1:8200/v1/sys/health
+      register: _vault_health
+      until: _vault_health.status == 200
+      retries: 30
+      delay: 2
 
-- name: Enable syslog audit device # noqa no-changed-when
-  command: vault audit enable syslog
-  environment:
-    VAULT_ADDR: "{{ vault_addr }}"
-    VAULT_TOKEN: "{{ vault_root_token }}"
-  register: _vault_audit_enable_result
-  failed_when:
-    - _vault_audit_enable_result.rc > 0
-    - '"path already in use" not in _vault_audit_enable_result.stderr'
+    - name: Enable syslog audit device # noqa no-changed-when
+      command: vault audit enable syslog
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_root_token }}"
+      register: _vault_audit_enable_result
+      failed_when:
+        - _vault_audit_enable_result.rc > 0
+        - '"path already in use" not in _vault_audit_enable_result.stderr'
+  when: vault_mode == 'server'

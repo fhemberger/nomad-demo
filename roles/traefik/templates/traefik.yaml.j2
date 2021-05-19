@@ -20,20 +20,23 @@ entryPoints:
 
   web:
     address: ":80"
+{% if not traefik_cert_exists %}
     http:
       middlewares:
         - redirect-vault@file
-    {# http:
+{% else %}
+    http:
       redirections:
         entryPoint:
           to: web-secure
-          scheme: https #}
+          scheme: https
 
   web-secure:
     address: ":443"
     http:
       middlewares:
         - redirect-vault@file
+{% endif %}
 
 global:
   sendAnonymousUsage: false

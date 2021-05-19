@@ -1,0 +1,161 @@
+vault {
+  address = "{{ vault_addr }}"
+  retry {
+    num_retries = 5
+  }
+}
+
+auto_auth {
+  method {
+    type = "approle"
+    config = {
+      role_id_file_path   = "/etc/vault.d/role_id"
+      secret_id_file_path = "/etc/vault.d/secret_id"
+    }
+  }
+
+  sink {
+    type = "file"
+    config = {
+      path = "/tmp/file-foo"
+    }
+  }
+}
+
+{# cache {
+  use_auto_auth_token = true
+} #}
+
+{% if 'controlplane' in group_names %}
+template {
+  source               = "/etc/vault.d/templates/consul-server-ca.crt.tpl"
+  destination          = "/etc/consul.d/consul-server-ca.crt"
+  command              = "/usr/bin/consul reload"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/consul-server.crt.tpl"
+  destination          = "/etc/consul.d/consul-server.crt"
+  command              = "/usr/bin/consul reload"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/consul-server.key.tpl"
+  destination          = "/etc/consul.d/consul-server.key"
+  command              = "/usr/bin/consul reload"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/nomad-server-ca.crt.tpl"
+  destination          = "/etc/nomad.d/nomad-server-ca.crt"
+  command              = "pkill --signal SIGHUP nomad"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/nomad-server.crt.tpl"
+  destination          = "/etc/nomad.d/nomad-server.crt"
+  command              = "pkill --signal SIGHUP nomad"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/nomad-server.key.tpl"
+  destination          = "/etc/nomad.d/nomad-server.key"
+  command              = "pkill --signal SIGHUP nomad"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+{% endif %}
+
+
+{% if 'loadbalancer' in group_names %}
+template {
+  source               = "/etc/vault.d/templates/traefik.crt.tpl"
+  destination          = "/etc/traefik/traefik.crt"
+  command              = "pkill --signal SIGHUP traefik"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/traefik.key.tpl"
+  destination          = "/etc/traefik/traefik.key"
+  command              = "pkill --signal SIGHUP traefik"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+{% endif %}
+
+
+{% if 'worker' in group_names %}
+template {
+  source               = "/etc/vault.d/templates/consul-client-ca.crt.tpl"
+  destination          = "/etc/consul.d/consul-client-ca.crt"
+  command              = "/usr/bin/consul reload"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/consul-client.crt.tpl"
+  destination          = "/etc/consul.d/consul-client.crt"
+  command              = "/usr/bin/consul reload"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/consul-client.key.tpl"
+  destination          = "/etc/consul.d/consul-client.key"
+  command              = "/usr/bin/consul reload"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/nomad-client-ca.crt.tpl"
+  destination          = "/etc/nomad.d/nomad-client-ca.crt"
+  command              = "pkill --signal SIGHUP nomad"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/nomad-client.crt.tpl"
+  destination          = "/etc/nomad.d/nomad-client.crt"
+  command              = "pkill --signal SIGHUP nomad"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+
+template {
+  source               = "/etc/vault.d/templates/nomad-client.key.tpl"
+  destination          = "/etc/nomad.d/nomad-client.key"
+  command              = "pkill --signal SIGHUP nomad"
+  error_on_missing_key = true
+  perms                = 0600
+  backup               = true
+}
+{% endif %}

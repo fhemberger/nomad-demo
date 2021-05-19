@@ -1,0 +1,11 @@
+path "pki_int/issue/{{ consul_datacenter | default('dc1') }}.consul" {
+  capabilities = ["update"]
+}
+
+path "pki_int/issue/{{ nomad_datacenter | default('dc1') }}.nomad" {
+  capabilities = ["update"]
+}
+
+path "pki_int/issue/{{ domain }}" {
+  capabilities = ["update"]
+}

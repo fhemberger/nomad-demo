@@ -29,6 +29,17 @@
   set_fact: vault_nomad_token="{{ lookup('file', vault_token_dir + '/nomad-token') }}"
   when: _vault_nomad_token_file.stat.exists
 
+- name: Check if Nomad TLS CA, certifacte and key exists
+  stat: path="/etc/nomad.d/{{ item }}"
+  with_items:
+    - "nomad-{{ nomad_mode }}-ca.crt"
+    - "nomad-{{ nomad_mode }}.crt"
+    - "nomad-{{ nomad_mode }}.key"
+  register: _check_nomad_cert
+
+- name: Set 'nomad_cert_exists'
+  set_fact: nomad_cert_exists="{{ _check_nomad_cert.results | sum(attribute='stat.exists') == _check_nomad_cert.results | length }}"
+
 - name: Copy config
   template:
     src: "nomad.hcl.j2"

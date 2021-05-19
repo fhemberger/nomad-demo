@@ -4,6 +4,27 @@ datacenter = "{{ consul_datacenter }}"
 {# MUST be 32 bytes, Base64-encoded #}
 encrypt = "{{ lookup('password', '/tmp/consulhash length=32') | b64encode }}"
 
+{% if consul_cert_exists %}
+ca_file = "/etc/consul.d/consul-{{ consul_mode }}-ca.crt"
+cert_file = "/etc/consul.d/consul-{{ consul_mode }}.crt"
+key_file = "/etc/consul.d/consul-{{ consul_mode }}.key"
+
+{#
+Don't ask for client certificate via HTTPS, only for RPC.
+This allows you to access the Consul UI over HTTPS in the browser.
+See: https://learn.hashicorp.com/tutorials/consul/tls-encryption-openssl-secure#step-2-option-2-verify_incoming_rpc
+#}
+verify_incoming = false
+verify_incoming_rpc = true
+verify_outgoing = true
+verify_server_hostname = true
+
+ports {
+  "http" = -1
+  "https" = 8501
+}
+{% endif %}
+
 {% if consul_mode == 'server' %}
 server = true
 client_addr = "0.0.0.0"

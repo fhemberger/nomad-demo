@@ -48,6 +48,20 @@ client {
 }
 {% endif %}
 
+{% if nomad_cert_exists %}
+tls {
+  http = true
+  rpc  = true
+
+  ca_file   = "/etc/nomad.d/nomad-{{ nomad_mode }}-ca.crt"
+  cert_file = "/etc/nomad.d/nomad-{{ nomad_mode }}.crt"
+  key_file  = "/etc/nomad.d/nomad-{{ nomad_mode }}.key"
+
+  verify_server_hostname = true
+  verify_https_client    = true
+}
+{% endif %}
+
 telemetry {
   collection_interval = "1s"
   disable_hostname = true

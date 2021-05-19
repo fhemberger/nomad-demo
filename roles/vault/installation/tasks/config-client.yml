@@ -1,0 +1,121 @@
+---
+- name: Load root token
+  run_once: true
+  set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
+
+- name: Set 'vault_addr'
+  set_fact: vault_addr="http://{{ hostvars['vault1']['vagrant_ipv4'] | default(hostvars['vault1']['ansible_default_ipv4']['address']) }}:8200"
+
+- name: Copy config
+  template:
+    src: "vault-client.hcl.j2"
+    dest: "/etc/vault.d/vault.hcl"
+    mode: 0644
+
+- name: Set template search paths for Vault client
+  set_fact: _vault_client_tempalte_paths="{{ [ playbook_dir + '/roles/vault/installation/templates/'] | product(group_names) | map('join') | list }}"
+
+- name: Find Vault client templates for host group
+  delegate_to: localhost
+  become: no
+  find: paths="{{ _vault_client_tempalte_paths }}" patterns="*.j2"
+  register: _vault_client_templates
+
+- name: Set Vault client template paths
+  set_fact: _vault_client_template_paths="{{ _vault_client_templates.files | map(attribute='path') }}"
+
+- name: Create template directory
+  file:
+    path: /etc/vault.d/templates/
+    state: directory
+    owner: vault
+    group: vault
+    mode: 0755
+
+- name: Copy templates
+  template:
+    src: "{{ item }}"
+    dest: "/etc/vault.d/templates/{{ item | basename | regex_replace('.j2$') }}"
+    mode: 0644
+  with_items: "{{ _vault_client_template_paths }}"
+
+- name: Copy 'pki-int-policy'
+  run_once: true
+  template:
+    src: "pki-int-policy.vault.j2"
+    dest: "/home/{{ ansible_ssh_user }}/pki-int-policy.vault"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0644
+
+- name: Write 'pki-int-policy' to Vault # noqa no-changed-when
+  run_once: true
+  # no_log: yes
+  command: "vault policy write pki-int /home/{{ ansible_ssh_user }}/pki-int-policy.vault"
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: Enable AppRole auth method # noqa no-changed-when
+  no_log: yes
+  command: vault auth enable approle
+  register: _vault_approle_enable_result
+  failed_when:
+    - _vault_approle_enable_result.rc > 0
+    - '"path is already in use" not in _vault_approle_enable_result.stderr'
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: Create Vault client AppRole # noqa no-changed-when
+  run_once: true
+  no_log: yes
+  # FIXME: Tune token parameters
+  command: vault write auth/approle/role/vault-client-pki-int
+    token_policies="pki-int"
+    # secret_id_ttl=10m
+    # token_num_uses=10
+    # token_ttl=20m
+    # token_max_ttl=30m
+    # secret_id_num_uses=40
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: Get Role ID # noqa no-changed-when
+  command: vault read -format json auth/approle/role/vault-client-pki-int/role-id
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+  register: _vault_role_id_results
+  failed_when: _vault_role_id_results.rc == 1
+
+- name: Parse output of Role ID
+  set_fact: _vault_role_id="{{ _vault_role_id_results.stdout | from_json | json_query('data.role_id') }}"
+
+- name: Copy Role ID
+  copy:
+    content: "{{ _vault_role_id }}"
+    dest: /etc/vault.d/role_id
+    owner: vault
+    group: vault
+    mode: 0600
+
+- name: Get Secret ID # noqa no-changed-when
+  command: vault write -format json -f auth/approle/role/vault-client-pki-int/secret-id
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+  register: _vault_secret_id_results
+  failed_when: _vault_secret_id_results.rc == 1
+
+- name: Parse output of Secret ID
+  set_fact: _vault_secret_id="{{ _vault_secret_id_results.stdout | from_json | json_query('data.secret_id') }}"
+
+- name: Copy Secret ID
+  copy:
+    content: "{{ _vault_secret_id }}"
+    dest: /etc/vault.d/secret_id
+    owner: vault
+    group: vault
+    mode: 0600

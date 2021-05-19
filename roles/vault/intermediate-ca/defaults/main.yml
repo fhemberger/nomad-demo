@@ -1,0 +1,6 @@
+---
+intermediate_ca_validity_days: 3650
+
+# Vault's TTL can be set in seconds, minutes and hours
+leaf_certificate_max_ttl_hours: 2160   # = 90 days
+leaf_certificate_ttl_hours: 720        # = 30 days

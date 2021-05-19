@@ -1,10 +1,23 @@
 # Dynamic configuration
+{% if traefik_cert_exists %}
+tls:
+  certificates:
+    - certFile: "/etc/traefik/traefik.crt"
+      keyFile: "/etc/traefik/traefik.key"
+
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "/etc/traefik/traefik.crt"
+        keyFile: "/etc/traefik/traefik.key"
+{% endif %}
+
 http:
   middlewares:
     redirect-vault:
       redirectRegex:
         regex: "^https?://vault.{{ domain }}/(.*)"
-        replacement: "http://vault.{{ domain }}:8200/${1}"
+        replacement: "http{% if traefik_cert_exists %}s{% endif %}://vault.{{ domain }}:8200/${1}"
         permanent: true
 
   routers:
@@ -12,19 +25,19 @@ http:
     consul:
       rule: "Host(`consul.{{ domain }}`)"
       service: "consul"
-      entryPoints: "web"
+      entryPoints: "web{% if traefik_cert_exists %}-secure{% endif %}"
 
     # Expose Traefik UI
     api:
       rule: "Host(`traefik.{{ domain }}`)"
       service: "api@internal"
-      entryPoints: "web"
+      entryPoints: "web{% if traefik_cert_exists %}-secure{% endif %}"
 
     # Expose Vault UI
     consul:
       rule: "Host(`vault.{{ domain }}`)"
       service: "vault"
-      entryPoints: "web"
+      entryPoints: "web{% if traefik_cert_exists %}-secure{% endif %}"
 
   services:
     consul:

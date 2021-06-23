@@ -16,19 +16,19 @@ Restart=always
 User=traefik
 
 # Capabilities
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 
-# Process Properties
-#LimitNPROC=1
+# Security
+NoNewPrivileges=true
 
 # Sandboxing
-#ProtectSystem=strict
-#ProtectHome=true
-#ReadWritePaths=/etc/traefik/acme.json
-#PrivateTmp=true
-#PrivateDevices=true
-#ProtectKernelTunables=true
-#ProtectControlGroups=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
 
 [Install]
 WantedBy=multi-user.target

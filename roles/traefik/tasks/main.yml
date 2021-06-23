@@ -49,10 +49,12 @@
   file:
     path: /etc/traefik
     state: directory
+    owner: traefik
+    group: traefik
     mode: 0755
 
 - name: Check if Traefik TLS CA, certifacte and key exists
-  stat: path="/etc/traefik.d/{{ item }}"
+  stat: path="/etc/traefik/{{ item }}"
   with_items:
     - "traefik.key"
   register: _check_traefik_cert
@@ -64,6 +66,8 @@
   template:
     src: "{{ item }}.j2"
     dest: "/etc/traefik/{{ item }}"
+    owner: traefik
+    group: traefik
     mode: 0644
   loop:
     - dynamic_conf.yaml

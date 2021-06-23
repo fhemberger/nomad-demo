@@ -1,77 +1,75 @@
 # Dynamic configuration
 {% if traefik_cert_exists %}
 tls:
-  certificates:
-    - certFile: "/etc/traefik/traefik.crt"
-      keyFile: "/etc/traefik/traefik.key"
-
   stores:
     default:
       defaultCertificate:
-        certFile: "/etc/traefik/traefik.crt"
-        keyFile: "/etc/traefik/traefik.key"
+        certFile: /etc/traefik/traefik.crt
+        keyFile: /etc/traefik/traefik.key
 {% endif %}
 
 http:
   middlewares:
     redirect-vault:
       redirectRegex:
-        regex: "^https?://vault.{{ domain }}/(.*)"
-        replacement: "http{% if traefik_cert_exists %}s{% endif %}://vault.{{ domain }}:8200/${1}"
+        regex: ^https?://vault.{{ domain }}/(.*)
+        replacement: http{% if traefik_cert_exists %}s{% endif %}://vault.{{ domain }}:8200/${1}
         permanent: true
 
   routers:
     # Expose Consul UI
     consul:
-      rule: "Host(`consul.{{ domain }}`)"
-      service: "consul"
-      entryPoints: "web{% if traefik_cert_exists %}-secure{% endif %}"
+      rule: Host(`consul.{{ domain }}`)
+      service: consul
+      entryPoints: web{% if traefik_cert_exists %}-secure{% endif %}
 
     # Expose Traefik UI
     api:
-      rule: "Host(`traefik.{{ domain }}`)"
-      service: "api@internal"
-      entryPoints: "web{% if traefik_cert_exists %}-secure{% endif %}"
+      rule: Host(`traefik.{{ domain }}`)
+      service: api@internal
+      entryPoints: web{% if traefik_cert_exists %}-secure{% endif %}
 
     # Expose Vault UI
-    consul:
-      rule: "Host(`vault.{{ domain }}`)"
-      service: "vault"
-      entryPoints: "web{% if traefik_cert_exists %}-secure{% endif %}"
+    vault:
+      rule: Host(`vault.{{ domain }}`)
+      service: vault
+      entryPoints:
+        - vault
+        - web{% if traefik_cert_exists %}-secure{% endif %}
 
   services:
     consul:
       loadBalancer:
         servers:
-          - url: "http://consul.service.consul:8500"
+          - url: http://consul.service.consul:8500
 
     vault:
       loadBalancer:
         servers:
-          - url: "http://vault:8500"
+          - url: http://vault:8200
 
 # Forward DNS queries to the internal network's DNS server
 tcp:
   routers:
     dns:
-      entryPoints: "dns-tcp"
-      rule: "HostSNI(`*`)"
+      entryPoints: dns-tcp
+      rule: HostSNI(`*`)
       service: dns
 
   services:
     dns:
       loadBalancer:
         servers:
-          - address: "{{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}:53"
+          - address: {{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}:53
 
 udp:
   routers:
     dns:
-      entryPoints: "dns-udp"
+      entryPoints: dns-udp
       service: dns
 
   services:
     dns:
       loadBalancer:
         servers:
-          - address: "{{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}:53"
+          - address: {{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}:53

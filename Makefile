@@ -66,7 +66,7 @@ lint: format-hcl lint-jobs lint-yaml
 run-jobs:
 	@vagrant ssh-config > .vagrant/ssh_config
 	@scp -F .vagrant/ssh_config nomad_jobs/*.nomad controlplane1:/home/vagrant/nomad_jobs/
-	@vagrant ssh controlplane1 -c 'export NOMAD_VAR_grafana_url="http://grafana.$(DOMAIN)"; \
+	@vagrant ssh controlplane1 -c 'export NOMAD_VAR_domain="$(DOMAIN)"; export NOMAD_VAR_grafana_url="http://grafana.$(DOMAIN)"; \
 		for job in nomad_jobs/*.nomad; do \
 			nomad job plan "$$job"; \
 			nomad job run "$$job"; \

@@ -4,6 +4,11 @@ variable "datacenters" {
   default     = ["dc1"]
 }
 
+variable "domain" {
+  type        = string
+  description = "Base domain name."
+}
+
 variable "prometheus_image_tag" {
   type        = string
   description = "Prometheus Docker image tag to deploy."
@@ -133,6 +138,10 @@ job "prometheus" {
         ]
 
         ports = ["alertmanager_ui"]
+      }
+
+      env {
+        DOMAIN = "${var.domain}"
       }
 
       resources {

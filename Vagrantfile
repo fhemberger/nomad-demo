@@ -110,6 +110,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provision "ansible", type: "ansible", run: "never" do |ansible|
+    ansible.compatibility_mode = "2.0"
     ansible.limit = "all,localhost"
     ansible.playbook = "playbook.yml"
     ansible.host_vars = $ansible_host_vars

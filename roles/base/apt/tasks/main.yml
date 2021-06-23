@@ -28,3 +28,10 @@
     state: present
     regexp: '^ENABLED='
     line: 'ENABLED=0'
+
+- name: Remove "snap" package
+  apt:
+    name: snapd
+    state: absent
+    autoremove: yes
+    purge: yes

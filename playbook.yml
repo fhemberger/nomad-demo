@@ -39,8 +39,8 @@
   roles:
     - name: base/set-nameserver
     - name: vault/installation
-      vars:
-        vault_mode: client
+      vars: [ vault_mode: client ]
+      when: vault_enable_tls | bool
     - name: consul/installation
     # - name: consul/register-vault-service
     - name: nomad/installation
@@ -50,22 +50,20 @@
   roles:
     - name: base/set-nameserver
     - name: vault/installation
-      vars:
-        vault_mode: client
+      vars: [ vault_mode: client ]
+      when: vault_enable_tls | bool
     - name: consul/installation
-      vars:
-        consul_mode: client
+      vars: [ consul_mode: client ]
     - name: nomad/driver-jre
     - name: nomad/driver-docker
     - name: nomad/installation
-      vars:
-        nomad_mode: client
+      vars: [ nomad_mode: client ]
 
 - hosts: loadbalancer
   become: yes
   roles:
     - name: base/set-nameserver
     - name: vault/installation
-      vars:
-        vault_mode: client
+      vars: [ vault_mode: client ]
+      when: vault_enable_tls | bool
     - name: traefik

@@ -28,3 +28,5 @@ syslog_upstream: "{{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['
 vault_unseal_keys_dir: "{{ playbook_dir }}/credentials/vault-keys"
 vault_token_dir: "{{ playbook_dir }}/credentials/vault-tokens"
 vault_addr: http://127.0.0.1:8200
+# Create mTLS certificates for Consul, Nomad and Traefik with Vault
+vault_enable_tls: false

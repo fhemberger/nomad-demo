@@ -41,5 +41,7 @@ RestrictNamespaces=yes
 RestrictRealtime=yes
 RestrictSUIDSGID=yes
 
+MemoryDenyWriteExecute=yes
+
 [Install]
 WantedBy=multi-user.target

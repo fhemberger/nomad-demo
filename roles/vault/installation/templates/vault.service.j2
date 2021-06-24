@@ -33,10 +33,26 @@ LimitNOFILE=65536
 LimitMEMLOCK=infinity
 
 # Sandboxing
-ProtectSystem=full
-ProtectHome=read-only
 PrivateTmp=yes
 PrivateDevices=yes
+DevicePolicy=closed
+
+{% if vault_mode == 'server' %}
+ProtectSystem=strict
+{% else %}
+# Allow access to `/etc` (writing secrets for other serivces),
+# mounts `/usr` and `/boot` read-only.
+ProtectSystem=yes
+{% endif %}
+ProtectHome=read-only
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
 
 # Kill
 # https://www.freedesktop.org/software/systemd/man/systemd.kill.html

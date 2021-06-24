@@ -18,8 +18,28 @@ Restart=on-failure
 User=consul
 Group=consul
 
+# Security
+NoNewPrivileges=yes
+
 # Process Properties
 LimitNOFILE=65536
+
+# Sandboxing
+PrivateTmp=yes
+PrivateDevices=yes
+DevicePolicy=closed
+
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+
 
 # Kill
 # https://www.freedesktop.org/software/systemd/man/systemd.kill.html

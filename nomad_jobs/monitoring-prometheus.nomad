@@ -115,8 +115,16 @@ job "prometheus" {
   }
 
   group "alertmanager" {
+    count = 2
+
+    spread {
+      attribute = "${node.unique.name}"
+      weight    = 100
+    }
+
     network {
       port "alertmanager_ui" { to = 9093 }
+      port "alertmanager_cluster" { to = 9094 }
     }
 
     task "alertmanager" {
@@ -133,11 +141,16 @@ job "prometheus" {
           "ALL",
         ]
 
+        args = [
+          "--cluster.peer",
+          "${ALERTMANAGER_CLUSTER_PEER}",
+        ]
+
         volumes = [
           "secret/alertmanager.yml:/etc/alertmanager/config.yml",
         ]
 
-        ports = ["alertmanager_ui"]
+        ports = ["alertmanager_ui", "alertmanager_cluster"]
       }
 
       env {
@@ -171,6 +184,17 @@ job "prometheus" {
           interval = "10s"
           timeout  = "2s"
         }
+      }
+
+      template {
+        data = <<EOF
+        ALERTMANAGER_CLUSTER_PEER = {{ range service "alertmanager" -}}
+          {{- ne (env "NOMAD_IP_alertmanager_cluster") .Address }}{{ .Address }}:{{ .Port }}{{ end -}}
+        {{- end }}
+        EOF
+
+        destination = "local/alertmanager.env"
+        env         = true
       }
 
       template {

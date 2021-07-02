@@ -1,0 +1,24 @@
+---
+- name: Install base dependencies
+  package:
+    name:
+      - curl
+      - dnsutils
+      - jq
+    state: present
+
+- name: Disable Ubuntu motd-news
+  lineinfile:
+    dest: /etc/default/motd-news
+    state: present
+    regexp: '^ENABLED='
+    line: 'ENABLED=0'
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Remove "snap" package
+  apt:
+    name: snapd
+    state: absent
+    autoremove: yes
+    purge: yes
+  when: ansible_distribution == 'Ubuntu'

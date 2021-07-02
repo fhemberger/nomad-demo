@@ -8,7 +8,7 @@
 - hosts: all, !localhost
   become: yes
   roles:
-    - name: base/apt
+    - name: base/prerequisites
     # FIXME: Firewall rules break all the things!
     # - name: base/ufw
     - name: base/copy-root-ca

@@ -1,0 +1,52 @@
+---
+- name: Create temporary download directory if it does not exist
+  delegate_to: localhost
+  become: no
+  file:
+    path: "{{ playbook_dir }}/.ansible_download_cache"
+    state: directory
+    mode: 0755
+
+- block:
+  - name: Determine latest GitHub release (local)
+    delegate_to: localhost
+    become: false
+    uri:
+      url: "https://api.github.com/repos/prometheus/node_exporter/releases/latest"
+      body_format: json
+    register: _github_release
+    until: _github_release.status == 200
+    retries: 5
+
+  - name: Set node_exporter_version
+    set_fact: node_exporter_version="{{ _github_release.json.tag_name | regex_replace('^v?(.*)$', '\\1') }}"
+
+  when: (node_exporter_version is not defined) or (node_exporter_version == 'latest')
+  run_once: true
+
+- name: Download node_exporter and verify SHA256 checksum
+  delegate_to: localhost
+  become: no
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: "{{ playbook_dir }}/.ansible_download_cache/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    checksum: "sha256:https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/sha256sums.txt"
+
+- name: Extract node_exporter
+  unarchive:
+    src: "{{ playbook_dir }}/.ansible_download_cache/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: "/usr/bin/node_exporter"
+    owner: nobody
+    mode: 0755
+
+- name: Copy node_exporter service template
+  template:
+    src: "node_exporter.service.j2"
+    dest: "/etc/systemd/system/node_exporter.service"
+    mode: 0644
+
+- name: Start node_exporter service
+  service:
+    name: node_exporter
+    state: restarted
+    enabled: yes

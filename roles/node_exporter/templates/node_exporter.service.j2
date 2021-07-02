@@ -1,0 +1,70 @@
+[Unit]
+Description=Prometheus node_exporter
+Documentation=https://github.com/prometheus/node_exporter
+
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=nobody
+ExecStart=/usr/bin/node_exporter {{ node_exporter_args | join(" ") }}
+
+# Security settings, use `systemd-analyze security node_exporter.service` for details.
+# The following rules reduce the exposure level from "9.0 UNSAFE" to "6.4 MEDIUM"
+# (this could probably be optimized even more).
+#
+# Ref: https://www.freedesktop.org/software/systemd/man/systemd.exec.html#Sandboxing
+
+# Ensures that the service process and all its children can never gain new privileges
+# through `execve()` (e.g. via setuid or setgid bits, or filesystem capabilities).
+# This is the simplest and most effective way to ensure that a process and its children
+# can never elevate privileges again.
+NoNewPrivileges=true
+
+# If set to "strict" the entire file system hierarchy is mounted read-only, except
+# for the API file system subtrees /dev, /proc and /sys (protect these directories
+# using PrivateDevices=, ProtectKernelTunables=, ProtectControlGroups=).
+ProtectSystem=strict
+
+# If true, the directories /home, /root, and /run/user are made inaccessible and empty
+# for processes invoked by this unit. If set to "read-only", the three directories
+# are made read-only instead.
+ProtectHome=true
+
+# Explicit module loading will be denied. This allows to turn off module load and unload
+# operations on modular kernels. It is recommended to turn this on for most services that
+# do not need special file systems or extra kernel modules to work.
+ProtectKernelModules=true
+
+# Kernel variables accessible through /proc/sys, /sys, /proc/sysrq-trigger, /proc/latency_stats,
+# /proc/acpi, /proc/timer_stats, /proc/fs and /proc/irq will be made read-only to all processes
+# of the unit. Usually, tunable kernel variables should only be written at boot-time, with the
+# sysctl.d(5) mechanism. Almost no services need to write to these at runtime; it is hence
+# recommended to turn this on for most services.
+ProtectKernelTunables=true
+
+# The Linux Control Groups (cgroups(7)) hierarchies accessible through /sys/fs/cgroup will be
+# made read-only to all processes of the unit. Except for container managers no services should
+# require write access to the control groups hierarchies; it is hence recommended to turn this on
+# for most services
+ProtectControlGroups=true
+
+# Any attempts to enable realtime scheduling in a process of the unit are refused.
+RestrictRealtime=true
+
+# Restricts the set of socket address families accessible to the processes of this unit.
+# Protects against vulnerabilities such as CVE-2016-8655
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX
+
+# Takes away the ability to create or manage any kind of namespace
+RestrictNamespaces=true
+
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

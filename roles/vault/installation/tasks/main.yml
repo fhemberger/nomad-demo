@@ -1,6 +1,43 @@
 ---
-- name: Install Vault
-  package: name=vault state=present
+- name: Create temporary download directory if it does not exist
+  delegate_to: localhost
+  run_once: true
+  become: no
+  file:
+    path: "{{ playbook_dir }}/.ansible_download_cache"
+    state: directory
+    mode: 0755
+
+- block:
+    - name: Determine latest GitHub release (local)
+      delegate_to: localhost
+      become: false
+      uri:
+        url: "https://api.github.com/repos/hashicorp/vault/releases"
+        body_format: json
+      register: _github_releases
+      until: _github_releases.status == 200
+      retries: 5
+
+    - name: Set vault_version
+      set_fact: vault_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | sort | first | regex_replace('^v?(.*)$', '\\1') }}"
+
+  when: (vault_version is not defined) or (vault_version == 'latest')
+  run_once: true
+
+- name: Download Vault and verify SHA256 checksum
+  delegate_to: localhost
+  run_once: true
+  become: no
+  get_url:
+    url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+    dest: "{{ playbook_dir }}/.ansible_download_cache/vault_{{ vault_version }}_linux_amd64.zip"
+    checksum: "sha256:https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_SHA256SUMS"
+
+- name: Extract Vault
+  unarchive:
+    src: "{{ playbook_dir }}/.ansible_download_cache/vault_{{ vault_version }}_linux_amd64.zip"
+    dest: /usr/bin
 
 - name: Create vault user
   user:

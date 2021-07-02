@@ -39,3 +39,21 @@
         enabled: yes
   when:
     - _docker_result.rc == 2
+
+- name: Copy Docker daemon settings
+  copy:
+    content: |
+      {
+        "log-driver": "journald"
+      }
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Docker
+
+- name: Clean up unused containers, images and volumes regularily
+  cron:
+    name: docker system prune
+    special_time: weekly
+    job: docker system prune -af --volumes

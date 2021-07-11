@@ -1,7 +1,7 @@
 {%- set network_interface_ipv4 = hostvars[inventory_hostname]['vagrant_ipv4'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 # https://www.vaultproject.io/docs/configuration/storage/raft
 storage "raft" {
-  path = "/opt/vault"
+  path = "{{ vault_data_dir }}"
   node_id = "{{ inventory_hostname }}"
 
 {# {% for host in groups['vault'] %}

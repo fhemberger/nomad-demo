@@ -2,3 +2,4 @@
 consul_version: latest
 consul_mode: server
 consul_datacenter: dc1
+consul_data_dir: /var/lib/consul

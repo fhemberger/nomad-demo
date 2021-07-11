@@ -1,4 +1,4 @@
-data_dir = "/opt/consul"
+data_dir = "{{ consul_data_dir }}"
 datacenter = "{{ consul_datacenter }}"
 
 {# MUST be 32 bytes, Base64-encoded #}

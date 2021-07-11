@@ -3,3 +3,4 @@ vault_version: latest
 vault_mode: server
 vault_key_shares: 1
 vault_key_threshold: 1
+vault_data_dir: /var/lib/vault

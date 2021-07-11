@@ -1,6 +1,6 @@
 {%- set network_interface_ipv4 = hostvars[inventory_hostname]['vagrant_ipv4'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 datacenter = "{{ nomad_datacenter }}"
-data_dir = "/opt/nomad"
+data_dir = "{{ nomad_data_dir }}"
 
 bind_addr = "0.0.0.0"
 advertise {

@@ -1,0 +1,21 @@
+---
+- name: Create Consul snapshot directory
+  file:
+    path: "{{ consul_snapshot_directory }}"
+    state: directory
+    mode: 0700
+
+- name: Copy systemd service
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    mode: 0644
+  loop:
+    - consul-snapshot.service
+    - consul-snapshot.timer
+
+- name: Enable Consul snapshot timer
+  systemd:
+    name: consul-snapshot.timer
+    daemon_reload: yes
+    enabled: yes

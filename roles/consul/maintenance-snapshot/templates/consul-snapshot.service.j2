@@ -1,0 +1,63 @@
+[Unit]
+Description="Hashicorp Consul - Raft snapshot"
+Documentation=https://www.consul.io/api/snapshot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Delay start to prevent backups running during boot.
+# Note that systemd-inhibit requires dbus and dbus-user-session to be installed.
+# Ref:
+# - https://www.freedesktop.org/software/systemd/man/systemd-inhibit.html
+# - https://www.consul.io/api-docs/snapshot
+ExecStartPre=sleep 1m
+ExecStart=systemd-inhibit \
+  --who="consul-snapshot" \
+  --why="Prevent interrupting scheduled backup" \
+  curl \
+  --silent \
+  --show-error \
+  --fail \
+  --output "{{ consul_snapshot_directory }}/$(date --iso-8601=seconds)_consul_snapshot.tgz" \
+  http://consul.service.consul:8500/v1/snapshot`
+
+# TODO: Trigger failure metric in current VMs node_exporter textfile collector
+# OnFailure=
+Restart=no
+
+# Security
+NoNewPrivileges=yes
+
+# Sandboxing
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths={{ consul_snapshot_directory }}
+
+LockPersonality=true
+MemoryDenyWriteExecute=yes
+
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+# Lower CPU and I/O priority.
+Nice=19
+CPUSchedulingPolicy=batch
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+IOWeight=100

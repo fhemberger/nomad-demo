@@ -1,0 +1,10 @@
+[Unit]
+Description=Run scheduled Consul Raft snapshot
+
+[Timer]
+# Ref: https://www.freedesktop.org/software/systemd/man/systemd.time.html#Calendar%20Events
+OnCalendar={{ consul_snapshot_timing }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,3 @@
+---
+nomad_snapshot_directory: /var/lib/nomad
+nomad_snapshot_timing: "daily"

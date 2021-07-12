@@ -1,0 +1,21 @@
+---
+- name: Create Nomad snapshot directory
+  file:
+    path: "{{ nomad_snapshot_directory }}"
+    state: directory
+    mode: 0700
+
+- name: Copy systemd service
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    mode: 0644
+  loop:
+    - nomad-snapshot.service
+    - nomad-snapshot.timer
+
+- name: Enable Nomad snapshot timer
+  systemd:
+    name: nomad-snapshot.timer
+    daemon_reload: yes
+    enabled: yes

@@ -1,0 +1,3 @@
+---
+consul_snapshot_directory: /var/lib/consul
+consul_snapshot_timing: "daily"

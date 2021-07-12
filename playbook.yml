@@ -43,8 +43,10 @@
       vars: [ vault_mode: client ]
       when: vault_enable_tls | bool
     - name: consul/installation
+    - name: consul/maintenance-snapshot
     # - name: consul/register-vault-service
     - name: nomad/installation
+    - name: nomad/maintenance-snapshot
 
 - hosts: worker
   become: yes

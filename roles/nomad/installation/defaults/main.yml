@@ -3,3 +3,6 @@ nomad_version: latest
 nomad_mode: server
 nomad_datacenter: dc1
 nomad_data_dir: /var/lib/nomad
+
+nomad_node_class: ""
+nomad_meta: {}

@@ -45,6 +45,16 @@ server {
 client {
   enabled = true
   network_interface = "{{ network_interface | default(ansible_interfaces | select('match', '^lo\d?') | first) }}"
+
+  {% if node_class is defined %}node_class = "{{ nomad_node_class }}"{% endif %}
+
+  {% if (nomad_meta is defined) and (nomad_meta is mapping) %}
+  meta {
+  {% for key, value in nomad_meta.items() %}
+    "{{ key }}" = {{ value | to_nice_json(ensure_ascii=False,indent=2) | indent(width=4) }}
+  {% endfor %}
+  }
+  {% endif %}
 }
 {% endif %}
 

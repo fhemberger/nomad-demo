@@ -39,7 +39,7 @@ clean:
 .PHONY: format-hcl
 format-hcl: $(NOMAD_JOBS) $(VAULT_POLICIES)
 ifndef HCLFMT
-	GO111MODULE=on go get github.com/hashicorp/hcl/v2/cmd/hclfmt
+	GO111MODULE=on go install github.com/hashicorp/hcl/v2/cmd/hclfmt@latest
 endif
 	hclfmt -check -w $^
 

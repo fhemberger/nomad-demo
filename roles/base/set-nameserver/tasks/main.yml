@@ -7,6 +7,6 @@
 
 - name: Set nameserver
   copy:
-    content: "nameserver {{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}"
+    content: "nameserver {{ hostvars['tools']['vagrant_ipv4'] | default(hostvars['tools']['ansible_default_ipv4']['address']) }}"
     dest: /etc/resolv.conf
     mode: 0644

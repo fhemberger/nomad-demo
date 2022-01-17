@@ -14,16 +14,16 @@ DOMAIN         := $(shell grep -oP 'domain: \K\w+' group_vars/all.yml)
 # Uses `script` to log output to file but preserve color output:
 # https://superuser.com/a/1434381 (macOS/BSD of course has totally different flags)
 #
-# Varant machine name "dns" is only chosen to prevent the Ansible provisioner from
+# Varant machine name "tools" is only chosen to prevent the Ansible provisioner from
 # running for each vagrant machine. The Ansible playbook is designed to configure *all* hosts.
 .PHONY: up
 up:
 	vagrant up
-	@echo "vagrant provision --provision-with ansible dns"
+	@echo "vagrant provision --provision-with ansible tools"
 ifeq (darwin, $(PLATFORM))
-	@script -Fq .vagrant/ansible-$$(date +%Y-%m-%dT%H-%M-%S).log vagrant provision --provision-with ansible dns
+	@script -Fq .vagrant/ansible-$$(date +%Y-%m-%dT%H-%M-%S).log vagrant provision --provision-with ansible tools
 else
-	@script -efq .vagrant/ansible-$$(date +%Y-%m-%dT%H-%M-%S).log -c 'vagrant provision --provision-with ansible dns'
+	@script -efq .vagrant/ansible-$$(date +%Y-%m-%dT%H-%M-%S).log -c 'vagrant provision --provision-with ansible tools'
 endif
 
 

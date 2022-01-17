@@ -60,7 +60,7 @@ tcp:
     dns:
       loadBalancer:
         servers:
-          - address: {{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}:53
+          - address: {{ hostvars['tools']['vagrant_ipv4'] | default(hostvars['tools']['ansible_default_ipv4']['address']) }}:53
 
 udp:
   routers:
@@ -72,4 +72,4 @@ udp:
     dns:
       loadBalancer:
         servers:
-          - address: {{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}:53
+          - address: {{ hostvars['tools']['vagrant_ipv4'] | default(hostvars['tools']['ansible_default_ipv4']['address']) }}:53

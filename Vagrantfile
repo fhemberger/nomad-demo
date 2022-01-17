@@ -60,8 +60,8 @@ end
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/focal64"
 
-  config.vm.define "dns" do |vagrant|
-    configure_host vagrant, "dns"
+  config.vm.define "tools" do |vagrant|
+    configure_host vagrant, "tools"
   end
 
   # Vault nodes

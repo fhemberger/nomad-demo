@@ -14,7 +14,7 @@
     - name: base/copy-root-ca
     - name: node_exporter
 
-- hosts: dns
+- hosts: tools
   become: yes
   roles:
     - name: coredns

@@ -22,7 +22,7 @@ network_interface: enp0s8
 loadbalancer_ip: "{{ vagrant_loadbalancer_ip | default(hostvars['loadbalancer']['ansible_default_ipv4']['address']) }}"
 
 # Specify syslog-ng upstream, where Vault audit logs are shipped
-syslog_upstream: "{{ hostvars['dns']['vagrant_ipv4'] | default(hostvars['dns']['ansible_default_ipv4']['address']) }}"
+syslog_upstream: "{{ hostvars['tools']['vagrant_ipv4'] | default(hostvars['tools']['ansible_default_ipv4']['address']) }}"
 
 # Vault configuration
 vault_unseal_keys_dir: "{{ playbook_dir }}/credentials/vault-keys"

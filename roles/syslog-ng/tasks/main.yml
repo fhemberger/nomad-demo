@@ -1,12 +1,12 @@
 ---
 - name: Add apt key
   apt_key:
-    url: "https://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_{{ ansible_distribution_version }}/Release.key"
+    url: "https://ose-repo.syslog-ng.com/apt/syslog-ng-ose-pub.asc"
     state: present
 
 - name: Add apt repository
   apt_repository:
-    repo: "deb https://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_{{ ansible_distribution_version }} ./"
+    repo: "deb https://ose-repo.syslog-ng.com/apt/ stable ubuntu-{{ ansible_distribution_release }}"
     filename: syslog-ng
     state: present
 

@@ -8,15 +8,10 @@ VAULT_NODES = 1
 CONTROLPLANE_NODES = 3
 WORKER_NODES = 1
 
-# If these IP addresses should conflict with your existing network, please
-# choose a different value from the range of private IP addresses:
-#
-#     10.0.0.0 -  10.255.255.255
-#   172.16.0.0 -  172.31.255.255
-#  192.168.0.0 - 192.168.255.255
-#
-LOADBALANCER_IP = "10.1.10.20"
-INTERNAL_NETWORK_RANGE = "10.1.20.128/25"
+# VirtualBox enforces host-only networks to be in the 192.168.56.0/21 IP range
+# by default.
+LOADBALANCER_IP = "192.168.56.20"
+INTERNAL_NETWORK_RANGE = "192.168.56.128/25"
 
 # Helper class: Give it a starting IP address and
 # always get the next succeeding address

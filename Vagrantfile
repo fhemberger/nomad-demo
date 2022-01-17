@@ -78,21 +78,9 @@ Vagrant.configure(2) do |config|
     config.vm.define "worker#{node}" do |vagrant|
       configure_host vagrant, "worker#{node}"
 
-      # Increase memory for Parallels Desktop
-      vagrant.vm.provider "parallels" do |p, o|
-        p.memory = "1024"
-      end
-
       # Increase memory for Virtualbox
       vagrant.vm.provider "virtualbox" do |vb|
         vb.memory = "1024"
-      end
-
-      # Increase memory for VMware
-      ["vmware_fusion", "vmware_workstation"].each do |p|
-        vagrant.vm.provider p do |v|
-          v.vmx["memsize"] = "1024"
-        end
       end
     end
   end

@@ -1,10 +1,14 @@
 ---
+- name: Update apt cache
+  apt: update_cache=yes
+
 - name: Install base dependencies
   package:
     name:
       - curl
       - dnsutils
       - jq
+      - unzip
     state: present
 
 - name: Disable Ubuntu motd-news

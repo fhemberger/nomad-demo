@@ -18,9 +18,9 @@
   become: yes
   roles:
     - name: coredns
-      # NOTE: I'm using the DNS VM to collect Vault audit logs
-      # just to avoid the need of another VM for this demo.
     - name: syslog-ng
+    - name: consul/maintenance-snapshot
+    - name: nomad/maintenance-snapshot
 
 - hosts: vault
   become: yes
@@ -43,10 +43,8 @@
       vars: [ vault_mode: client ]
       when: vault_enable_tls | bool
     - name: consul/installation
-    - name: consul/maintenance-snapshot
     # - name: consul/register-vault-service
     - name: nomad/installation
-    - name: nomad/maintenance-snapshot
 
 - hosts: worker
   become: yes

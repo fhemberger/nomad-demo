@@ -35,9 +35,11 @@
 - name: Extract node_exporter
   unarchive:
     src: "{{ playbook_dir }}/.ansible_download_cache/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
-    dest: "/usr/bin/node_exporter"
+    dest: /usr/bin
     owner: nobody
+    exclude: [ LICENSE, NOTICE ]
     mode: 0755
+    extra_opts: [ --strip-components=1 ]
 
 - name: Copy node_exporter service template
   template:

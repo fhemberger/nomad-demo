@@ -33,6 +33,7 @@ PrivateTmp=yes
 PrivateDevices=yes
 DevicePolicy=closed
 
+ReadWritePaths=/etc/nomad.d {{ nomad_data_dir }}
 ProtectSystem=strict
 ProtectHome=read-only
 # Allow Nomad to manage cgroups

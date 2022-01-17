@@ -29,6 +29,7 @@ PrivateTmp=yes
 PrivateDevices=yes
 DevicePolicy=closed
 
+ReadWritePaths=/etc/consul.d {{ consul_data_dir }}
 ProtectSystem=strict
 ProtectHome=read-only
 ProtectControlGroups=yes

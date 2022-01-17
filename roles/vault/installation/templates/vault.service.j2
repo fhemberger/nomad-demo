@@ -38,12 +38,12 @@ PrivateDevices=yes
 DevicePolicy=closed
 
 {% if vault_mode == 'server' %}
-ProtectSystem=strict
+ReadWritePaths=/etc/vault.d {{ vault_data_dir }}
 {% else %}
-# Allow access to `/etc` (writing secrets for other serivces),
-# mounts `/usr` and `/boot` read-only.
-ProtectSystem=yes
+# Allow access to application config directories to write TLS certificates
+ReadWritePaths=/etc/vault.d {{ vault_data_dir }} {% if 'loadbalancer' in group_names %}/etc/traefik{% else %}/etc/consul.d /etc/nomad.d{% endif %}
 {% endif %}
+ProtectSystem=strict
 ProtectHome=read-only
 ProtectControlGroups=yes
 ProtectKernelModules=yes

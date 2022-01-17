@@ -36,6 +36,7 @@
   unarchive:
     src: "{{ playbook_dir }}/.ansible_download_cache/traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
     dest: /usr/bin
+    exclude: [ CHANGELOG.md, LICENSE.md ]
 
 - name: Create traefik user
   user:

@@ -1,0 +1,2 @@
+---
+ufw_allow_ssh_from: 0.0.0.0/0

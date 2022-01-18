@@ -101,8 +101,8 @@ Vagrant.configure(2) do |config|
       "vault" => (1..VAULT_NODES).map { |node| "vault#{node}" },
       "controlplane" => (1..CONTROLPLANE_NODES).map { |node| "controlplane#{node}" },
       "worker" => (1..WORKER_NODES).map { |node| "worker#{node}" },
-      "loadbalancer" => "loadbalancer",
       "all:vars" => {
+        "vagrant" => true,
         "vagrant_loadbalancer_ip" => LOADBALANCER_IP,
         "vagrant_internal_network_range" => INTERNAL_NETWORK_RANGE,
       },

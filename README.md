@@ -18,7 +18,7 @@ Consul is a service networking solution to connect services across any runtime p
 
 ## Overview
 
-<img src=".images/vm-overview.png" align="left" alt="Overview of the created VMs and the deployed components">
+<img src=".images/vm-overview.drawio.svg" align="left" alt="Overview of the created VMs and the deployed components">
 
 [Traefik](https://docs.traefik.io/): Load balancer using Consul Catalog service discovery. All services registered in Consul with the tag `http` will be exposed as `<service name>.demo`. In context of this demo setup, you'll have to adjust your `/etc/hosts` file accordingly ([see below](#user-content-etc-hosts)).
 
@@ -67,11 +67,11 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    ```
 
 2. **Create and provision virtual machines with Vagrant:**  
-   Vagrant will create four virtual machines with IPs _10.1.10.20–23_. If your local network already uses this address range, you can define an alternate range in the `Vagrantfile` before continuing with the installation.
+   Vagrant will create virtual machines with IPs _192.168.56.20_ (load balancer) and _192.168.56.128_ onwards for the rest of the stack. If your local network already uses this address range, you can define an alternate range in the `Vagrantfile` before continuing with the installation.
 
    As there are some logical dependencies in the setup, it is split up in multiple parts:
 
-     1. Create the four VMs in VirtualBox
+     1. Create the VMs in VirtualBox
      2. Setup the Consul cluster and elect a leader
      3. Setup Vault (which requires the working Consul cluster),  
         Nomad (which in turn requires a token from Vault) and the load balancer VM.
@@ -90,16 +90,16 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    On your machine, add the following lines to your `/etc/hosts`. If you changed the IP range before in your `Vagrantfile`, make sure to adjust it here as well:
 
    ```
-   10.1.10.20 traefik.demo
-   10.1.10.20 consul.demo
-   10.1.10.20 nomad.demo
-   10.1.10.20 vault.demo
-   10.1.10.20 grafana.demo
-   10.1.10.20 prometheus.demo
-   10.1.10.20 alertmanager.demo
-   10.1.10.20 hello-docker.demo
-   10.1.10.20 hello-java.demo
-   10.1.10.20 hello-vault.demo
+   192.168.56.20 traefik.demo
+   192.168.56.20 consul.demo
+   192.168.56.20 nomad.demo
+   192.168.56.20 vault.demo
+   192.168.56.20 grafana.demo
+   192.168.56.20 prometheus.demo
+   192.168.56.20 alertmanager.demo
+   192.168.56.20 hello-docker.demo
+   192.168.56.20 hello-java.demo
+   192.168.56.20 hello-vault.demo
    ```
 
 To check if everything is working correctly, go to http://traefik.demo, you should see the UI of the load balancer with a list of registered services:

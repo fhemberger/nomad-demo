@@ -31,7 +31,7 @@ client_addr = "0.0.0.0"
 bootstrap_expect = {{ groups['controlplane'] | length }}
 retry_join = {{
   groups['controlplane'] | map('extract', hostvars, 'vagrant_ipv4') |
-    default(groups['controlplane'] | map('extract', hostvars, ['ansible_default_ipv4', 'addres'])) |
+    default(groups['controlplane'] | map('extract', hostvars, ['ansible_default_ipv4', 'address'])) |
     list |
     to_json }}
 ui = true

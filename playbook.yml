@@ -44,6 +44,7 @@
     - name: consul/installation
     - name: consul/consul-esm
     - name: consul/register-vault-service
+    - name: consul/register-node_exporter-service
     - name: nomad/installation
 
 - hosts: worker
@@ -55,6 +56,7 @@
       when: vault_enable_tls | bool
     - name: consul/installation
       vars: [ consul_mode: client ]
+    - name: consul/register-node_exporter-service
     - name: nomad/driver-jre
     - name: nomad/driver-docker
     - name: nomad/installation

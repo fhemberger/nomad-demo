@@ -1,0 +1,53 @@
+---
+# NOTE: Nodes running the Consul agent will de-register the service on sync.
+# node_exporter instances on those nodes must be registered through the
+# `/v1/agent/service/register` API endpoint.
+#
+# Also outgoing traffic from the internal Consul nodes to the loadbalancer
+# are blocked by the firewall, thus the node_exporter there can't be registered.
+- name: Register node_exporter as Consul service (only non-Consul nodes)
+  run_once: true
+  uri:
+    url: http://127.0.0.1:8500/v1/catalog/register
+    method: PUT
+    body_format: json
+    body:
+      Node: "{{ item }}"
+      Address: "{{ hostvars[item]['ansible_' + network_interface]['ipv4']['address'] }}"
+      NodeMeta:
+        external-node: "true"
+        external-probe: "true"
+      Service:
+        Service: node_exporter
+        Tags:
+          - prometheus
+        Port: 9100
+      Check:
+        Name: "node_exporter health check"
+        ServiceID: node_exporter
+        Definition:
+          HTTP: "http://{{ hostvars[item]['ansible_' + network_interface]['ipv4']['address'] }}:9100/metrics"
+          TLSSkipVerify: false
+          Interval: "10s"
+          Timeout: "2s"
+  with_items: "{{ groups['vault'] + ['tools'] }}"
+
+- name: Register node_exporter as Consul service
+  uri:
+    url: http://127.0.0.1:8500/v1/agent/service/register
+    method: PUT
+    body_format: json
+    body:
+      Name: node_exporter
+      Tags:
+        - prometheus
+      Address: "{{ hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] }}"
+      Port: 9100
+      Check:
+        Name: "node_exporter health check"
+        ServiceID: node_exporter
+        HTTP: "http://{{ hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] }}:9100/metrics"
+        TLSSkipVerify: false
+        Interval: "10s"
+        Timeout: "2s"
+  when: "('controlplane' in group_names) or ('worker' in group_names)"

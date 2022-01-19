@@ -7,22 +7,28 @@
 #
 #     Vault <-(depends on)- Consul <-(depends on)- Nomad
 #
-- name: Register Vault node as Consul service
+- name: Register Vault as Consul service
   run_once: true
   uri:
-    url: http://127.0.0.1:8500/v1/agent/service/register
+    url: http://127.0.0.1:8500/v1/catalog/register
     method: PUT
     body_format: json
     body:
-      id: "{{ item }}"
-      name: "vault"
-      tags: []
-      address: "{{ hostvars[item]['ansible_' + network_interface]['ipv4']['address'] }}"
-      port: 8200
-      checks:
-        - http: "https://{{ hostvars[item]['ansible_' + network_interface]['ipv4']['address'] }}:8200/sys/health"
-          tls_skip_verify: false
-          method: "HEAD"
-          interval: "10s"
-          timeout: "2s"
+      Node: "{{ item }}"
+      Address: "{{ hostvars[item]['ansible_' + network_interface]['ipv4']['address'] }}"
+      NodeMeta:
+        external-node: "true"
+        external-probe: "true"
+      Service:
+        Service: vault
+        Tags: []
+        Port: 8200
+      Check:
+        Name: "Vault health check"
+        ServiceID: vault
+        Definition:
+          HTTP: "http://{{ hostvars[item]['ansible_' + network_interface]['ipv4']['address'] }}:8200/v1/sys/health"
+          TLSSkipVerify: false
+          Interval: "10s"
+          Timeout: "2s"
   with_items: "{{ groups['vault'] }}"

@@ -1,16 +1,14 @@
-{%- set network_interface_ipv4 = hostvars[inventory_hostname]['vagrant_ipv4'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 [Unit]
-Description="HashiCorp Consul - A service mesh solution"
-Documentation=https://www.consul.io/docs/
-Requires=network-online.target
+Description="HashiCorp Consul ESM"
+Documentation=https://github.com/hashicorp/consul-esm
+Requires=network-online.target consul.service
 After=network-online.target
-ConditionFileNotEmpty=/etc/consul.d/consul.hcl
+ConditionFileNotEmpty=/etc/consul.d/consul-esm.hcl
 
 # https://www.freedesktop.org/software/systemd/man/systemd.service.html
 [Service]
 Type=notify
-ExecStart=/usr/bin/consul agent -bind='{{ network_interface_ipv4 }}' -config-file=/etc/consul.d/consul.hcl
-ExecReload=/usr/bin/consul reload
+ExecStart=/usr/bin/consul-esm -config-file=/etc/consul.d/consul-esm.hcl
 Restart=on-failure
 
 # Exec
@@ -29,7 +27,6 @@ PrivateTmp=yes
 PrivateDevices=yes
 DevicePolicy=closed
 
-ReadWritePaths=/etc/consul.d {{ consul_data_dir }}
 ProtectSystem=strict
 ProtectHome=read-only
 ProtectControlGroups=yes

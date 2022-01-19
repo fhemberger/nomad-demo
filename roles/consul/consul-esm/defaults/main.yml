@@ -1,0 +1,5 @@
+---
+consul_esm_version: latest
+consul_esm_datacenter: dc1
+consul_esm_service_name: consul-esm
+consul_esm_kv_path: consul-esm

@@ -1,0 +1,107 @@
+---
+- name: Create temporary download directory if it does not exist
+  delegate_to: localhost
+  run_once: true
+  become: no
+  file:
+    path: "{{ playbook_dir }}/.ansible_download_cache"
+    state: directory
+    mode: 0755
+
+- block:
+    - name: Determine latest GitHub release (local)
+      delegate_to: localhost
+      become: false
+      uri:
+        url: "https://api.github.com/repos/hashicorp/consul-esm/releases"
+        body_format: json
+      register: _github_releases
+      until: _github_releases.status == 200
+      retries: 5
+
+    - name: Set consul_esm_version
+      set_fact: consul_esm_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | sort | first | regex_replace('^v?(.*)$', '\\1') }}"
+
+  when: (consul_esm_version is not defined) or (consul_esm_version == 'latest')
+  run_once: true
+
+- name: Download Consul ESM and verify SHA256 checksum
+  delegate_to: localhost
+  run_once: true
+  become: no
+  get_url:
+    url: "https://releases.hashicorp.com/consul-esm/{{ consul_esm_version }}/consul-esm_{{ consul_esm_version }}_linux_amd64.zip"
+    dest: "{{ playbook_dir }}/.ansible_download_cache/consul-esm_{{ consul_esm_version }}_linux_amd64.zip"
+    checksum: "sha256:https://releases.hashicorp.com/consul-esm/{{ consul_esm_version }}/consul-esm_{{ consul_esm_version }}_SHA256SUMS"
+
+- name: Extract Consul ESM
+  unarchive:
+    src: "{{ playbook_dir }}/.ansible_download_cache/consul-esm_{{ consul_esm_version }}_linux_amd64.zip"
+    dest: /usr/bin
+
+- name: Create consul user
+  user:
+    name: consul
+    home: /etc/consul.d
+    system: yes
+    shell: /usr/bin/false
+    state: present
+
+- name: Copy config
+  template:
+    src: "consul-esm.hcl.j2"
+    dest: "/etc/consul.d/consul-esm.hcl"
+    owner: consul
+    group: consul
+    mode: 0644
+
+- name: Add Consul ESM ACL policy rules to Consul cluster
+  run_once: true
+  vars:
+    consul_esm_policy: |
+      {% for host in groups[' controlplane '] %}
+      agent_prefix "{{ host }}" {
+        policy = "read"
+      }
+      {% endfor %}
+
+      key_prefix "{{ consul_esm_kv_path }}/" {
+        policy = "write"
+      }
+
+      node_prefix "" {
+        policy = "write"
+      }
+
+      service_prefix "{{ consul_esm_service_name }}" {
+        policy = "write"
+      }
+
+      {% for host in groups[' controlplane '] %}
+      session_prefix "{{ host }}" {
+        policy = "write"
+      }
+      {% endfor %}
+  uri:
+    url: "http://127.0.0.1:8500/v1/acl/policy?token={{ consul_acl_management_token }}"
+    method: PUT
+    body_format: json
+    body:
+      Name: consul-esm-policy
+      Rules: "{{ consul_esm_policy | to_json }}"
+  when:
+    - (consul_acl_enabled is defined) and (consul_acl_enabled | bool)
+    - (consul_acl_management_token is defined) and (consul_acl_management_token | length > 0)
+
+- name: Copy systemd service
+  template:
+    src: "consul-esm.service.j2"
+    dest: "/etc/systemd/system/consul-esm.service"
+    mode: 0644
+
+- name: Start consul-esm service
+  systemd:
+    name: consul-esm
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

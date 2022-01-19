@@ -43,6 +43,7 @@
       when: vault_enable_tls | bool
     - name: consul/installation
     # - name: consul/register-vault-service
+    - name: consul/consul-esm
     - name: nomad/installation
 
 - hosts: worker

@@ -74,7 +74,7 @@
     daemon_reload: yes
     enabled: yes
 
-- name: Get Vault status # noqa 301
+- name: Get Vault status # noqa no-changed-when
   command: vault status -format json
   environment:
     VAULT_ADDR: "http://127.0.0.1:8200"

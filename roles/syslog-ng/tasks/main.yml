@@ -15,7 +15,7 @@
     name: syslog-ng-core
     state: present
 
-- name: Extract major and minor version (reqired for config file) # noqa 301
+- name: Extract major and minor version (reqired for config file) # noqa no-changed-when
   shell: |
     set -o pipefail
     syslog-ng --version | grep -Po 'Config version: \K\d+\.\d+'

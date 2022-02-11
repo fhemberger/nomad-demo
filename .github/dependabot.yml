@@ -1,5 +1,17 @@
+---
 version: 2
 updates:
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker"
+    directory: "/.github/actions/ansible-lint"
+    schedule:
+      interval: "weekly"
+
   - package-ecosystem: "docker"
     directory: "/nomad_jobs/hello-world-vault"
     schedule:

@@ -67,7 +67,7 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    ```
 
 2. **Create and provision virtual machines with Vagrant:**  
-   Vagrant will create four virtual machines with IPs _10.1.10.20–23_. If your local network already uses this address range, you can define an alternate range in the `Vagrantfile` before continuing with the installation.
+   Vagrant will create four virtual machines with IPs _192.168.56.20–23_. If your local network already uses this address range, you can define an alternate range in the `Vagrantfile` before continuing with the installation.
 
    As there are some logical dependencies in the setup, it is split up in multiple parts:
 
@@ -80,26 +80,24 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
      <br>
 
    ```sh
-   vagrant up --no-provision \
-     && vagrant provision --provision-with consul \
-     && vagrant provision --provision-with all \
-     && ansible-playbook -i localhost playbook.yml
+   make
+   make run-jobs
    ```
 
 3. <strong id="etc-hosts">Configure host names for all services:</strong>  
    On your machine, add the following lines to your `/etc/hosts`. If you changed the IP range before in your `Vagrantfile`, make sure to adjust it here as well:
 
    ```
-   10.1.10.20 traefik.demo
-   10.1.10.20 consul.demo
-   10.1.10.20 nomad.demo
-   10.1.10.20 vault.demo
-   10.1.10.20 grafana.demo
-   10.1.10.20 prometheus.demo
-   10.1.10.20 alertmanager.demo
-   10.1.10.20 hello-docker.demo
-   10.1.10.20 hello-java.demo
-   10.1.10.20 hello-vault.demo
+   192.168.56.20 traefik.demo
+   192.168.56.20 consul.demo
+   192.168.56.20 nomad.demo
+   192.168.56.20 vault.demo
+   192.168.56.20 grafana.demo
+   192.168.56.20 prometheus.demo
+   192.168.56.20 alertmanager.demo
+   192.168.56.20 hello-docker.demo
+   192.168.56.20 hello-java.demo
+   192.168.56.20 hello-vault.demo
    ```
 
 To check if everything is working correctly, go to http://traefik.demo, you should see the UI of the load balancer with a list of registered services:
@@ -118,6 +116,10 @@ Sites available after installation:
 - http://grafana.demo - Grafana Dashboards
 - http://prometheus.demo - Prometheus metrics UI
 - http://alertmanager.demo - Prometheus Alertmanager UI
+
+### Removing all demo resources
+
+Run `make clean` to shut down and delete all created VMs. Afterwards remove the demo host names from `/etc/hosts`.
 
 
 ## Working with Nomad
@@ -255,7 +257,7 @@ Contributions and bug fixes are always welcome!
 
 ---
 
-<sup id="f1">1</sup> Deployment is also possible _without_ Vagrant if the VMs are provided elsewhere. All you need is an Ansible inventory file in the following format:
+<sup id="f1">1</sup> Deployment is also possible _without_ Vagrant if the VMs are provided by other means. All you need is an Ansible inventory file in the following format:
 
 ```
 loadbalancer           ansible_host=your.vm.ip.address

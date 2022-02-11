@@ -1,7 +1,24 @@
 ---
+- hosts: loadbalancer
+  become: yes
+  roles:
+    - name: base
+    - name: coredns
+    - name: traefik
+      # NOTE: I'm "abusing" the load balancer VM to collect Vault
+      # audit logs just to avoid the need of another VM for this demo.
+      #
+      # OF COURSE AUDIT LOGS OF YOUR SECRET MANAGEMENT
+      # *NEVER* BELONG ON AN OUTSIDE FACING MACHINE!
+    - name: syslog-ng
+      tags: ['syslog-ng']
+
+
 - hosts: consul_nomad
   become: yes
   roles:
+    - name: base
+    - name: consul
     - name: jre
     - name: docker
       tags: ['docker']
@@ -32,24 +49,3 @@
         name: docker
         state: restarted
       tags: ['docker']
-
-
-- hosts: loadbalancer
-  become: yes
-  roles:
-    - name: base
-    - name: coredns
-    - name: traefik
-      # NOTE: I'm "abusing" the load balancer VM to collect Vault
-      # audit logs just to avoid the need of another VM for this demo.
-      #
-      # OF COURSE AUDIT LOGS OF YOUR SECRET MANAGEMENT
-      # *NEVER* BELONG ON AN OUTSIDE FACING MACHINE!
-    - name: syslog-ng
-      tags: ['syslog-ng']
-
-
-- hosts: localhost
-  tasks:
-    - name: Run all jobs on Nomad # noqa 301
-      command: vagrant ssh consul-nomad-node1 -c 'for job in nomad_jobs/*.nomad; do nomad job run "$job"; done'

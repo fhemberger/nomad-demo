@@ -82,16 +82,6 @@
     group: "{{ ansible_ssh_user }}"
     mode: 0755
 
-- name: Copy example jobs config
-  copy:
-    src: "{{ item }}"
-    dest: "/home/{{ ansible_ssh_user }}/nomad_jobs/{{ item | basename }}"
-    owner: "{{ ansible_ssh_user }}"
-    group: "{{ ansible_ssh_user }}"
-    mode: 0644
-  with_fileglob:
-    - "{{ playbook_dir }}/nomad_jobs/*.nomad"
-
 - name: Copy systemd service
   copy:
     src: "nomad.service"

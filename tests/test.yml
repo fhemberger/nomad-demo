@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  become: no
+  gather_facts: no
+
+  pre_tasks:
+    - include_vars: file=../group_vars/all.yml
+
+  tasks:
+    - name: Check if core components are reachable through the load balancer
+      uri: url="http://{{ item }}.{{ domain }}" timeout=5
+      ignore_errors: yes
+      loop:
+        - traefik
+        - consul
+        - nomad
+        - vault
+
+    - name: Verify health checks
+      vars:
+        hosts: |
+          {#- Consul health check -#}
+          {% for host in groups['consul_nomad'] %}
+          http://consul.{{ domain }}/v1/health/node/{{ host }}
+          {% endfor %}
+
+          {#- Nomad health check -#}
+          {% for host in groups['consul_nomad'] %}
+          http://{{ hostvars[host]['ansible_' + network_interface]['ipv4']['address'] }}:4646/v1/agent/health
+          {% endfor %}
+
+          {#- Vault health check -#}
+          http://vault.{{ domain }}/v1/sys/health?standbyok=true
+      uri: url="{{ item }}" timeout=5
+      ignore_errors: yes
+      loop: "{{ hosts.splitlines() }}"

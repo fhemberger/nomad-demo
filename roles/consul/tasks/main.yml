@@ -8,6 +8,23 @@
     state: directory
     mode: 0755
 
+- block:
+    - name: Determine latest GitHub release (local)
+      delegate_to: localhost
+      become: false
+      uri:
+        url: "https://api.github.com/repos/hashicorp/consul/releases"
+        body_format: json
+      register: _github_releases
+      until: _github_releases.status == 200
+      retries: 5
+
+    - name: Set consul_version
+      set_fact: consul_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
+
+  when: (consul_version is not defined) or (consul_version == 'latest')
+  run_once: true
+
 - name: Download Consul and verify SHA256 checksum
   delegate_to: localhost
   run_once: true

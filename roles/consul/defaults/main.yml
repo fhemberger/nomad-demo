@@ -1,2 +1,3 @@
 ---
+consul_version: latest
 consul_is_server: true

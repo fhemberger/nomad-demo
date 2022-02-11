@@ -50,12 +50,16 @@
   file:
     path: /etc/traefik
     state: directory
+    owner: traefik
+    group: traefik
     mode: 0755
 
 - name: Copy config
   template:
     src: "{{ item }}.j2"
     dest: "/etc/traefik/{{ item }}"
+    owner: traefik
+    group: traefik
     mode: 0644
   loop:
     - dynamic_conf.yaml

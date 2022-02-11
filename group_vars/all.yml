@@ -1,4 +1,5 @@
 ---
+# Services can be reached under <servicename>.<domain>, e.g. consul.demo
 domain: demo
 
 # Application versions to install.

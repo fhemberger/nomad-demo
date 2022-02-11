@@ -11,9 +11,7 @@
     state: present
 
 - name: Install syslog-ng-core
-  package:
-    name: syslog-ng-core
-    state: present
+  package: name=syslog-ng-core state=present
 
 - name: Extract major and minor version (reqired for config file) # noqa no-changed-when
   shell: |

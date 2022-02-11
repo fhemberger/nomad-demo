@@ -4,8 +4,8 @@
   tasks:
     - include_vars: roles/vault/defaults/main.yml # noqa 502
 
-      command: "vault status -format json"
     - name: Get Vault status # noqa no-changed-when
+      command: vault status -format json
       environment:
         VAULT_ADDR: "http://127.0.0.1:8200"
       register: _vault_status_results

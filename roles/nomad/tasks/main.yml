@@ -49,7 +49,7 @@
 
 - name: Create data directory
   file:
-    path: /opt/nomad
+    path: "{{ nomad_data_dir }}"
     state: directory
     owner: nomad
     group: nomad

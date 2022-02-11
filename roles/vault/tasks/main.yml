@@ -49,7 +49,7 @@
 
 - name: Create data directory
   file:
-    path: /opt/vault
+    path: "{{ vault_data_dir }}"
     state: directory
     owner: vault
     group: vault

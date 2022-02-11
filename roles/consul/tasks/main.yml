@@ -49,7 +49,7 @@
 
 - name: Create data directory
   file:
-    path: /opt/consul
+    path: "{{ consul_data_dir }}"
     state: directory
     owner: consul
     group: consul

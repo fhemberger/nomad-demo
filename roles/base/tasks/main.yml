@@ -19,3 +19,10 @@
     line: 'ENABLED=0'
   when: ansible_distribution == 'Ubuntu'
 
+- name: Remove "snap" package
+  apt:
+    name: snapd
+    state: absent
+    autoremove: yes
+    purge: yes
+  when: ansible_distribution == 'Ubuntu'

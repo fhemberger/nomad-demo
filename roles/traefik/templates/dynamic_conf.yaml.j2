@@ -1,14 +1,17 @@
 # Dynamic configuration
 http:
   routers:
-    api:
-      rule: "Host(`traefik.{{ domain }}`)"
-      service: "api@internal"
-      entrypoints: "web"
+    # Expose Consul UI
     consul:
-      rule: "Host(`consul.{{ domain }}`)"
-      service: "consul"
-      entrypoints: "web"
+      rule: Host(`consul.{{ domain }}`)
+      service: consul
+      entryPoints: web
+
+    # Expose Traefik UI
+    api:
+      rule: Host(`traefik.{{ domain }}`)
+      service: api@internal
+      entryPoints: web
 
   services:
     consul:

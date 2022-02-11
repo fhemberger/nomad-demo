@@ -39,3 +39,15 @@
         enabled: yes
   when:
     - _docker_result.rc == 2
+
+- name: Copy Docker daemon settings
+  copy:
+    content: |
+      {
+        "log-driver": "journald"
+      }
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Docker

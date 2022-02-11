@@ -1,5 +1,17 @@
+variable "datacenters" {
+  type        = list(string)
+  description = "List of datacenters to deploy to."
+  default     = ["dc1"]
+}
+
+variable "image_tag" {
+  type        = string
+  description = "Docker image tag to deploy."
+  default     = "latest"
+}
+
 job "grafana" {
-  datacenters = ["dc1"]
+  datacenters = var.datacenters
 
   update {
     stagger      = "30s"
@@ -35,7 +47,7 @@ job "grafana" {
       }
 
       config {
-        image = "grafana/grafana:latest"
+        image = "grafana/grafana:${var.image_tag}"
 
         cap_drop = [
           "ALL",
@@ -49,9 +61,10 @@ job "grafana" {
       }
 
       env {
-        GF_INSTALL_PLUGINS         = "grafana-piechart-panel"
-        GF_SERVER_ROOT_URL         = "http://grafana.demo"
-        GF_SECURITY_ADMIN_PASSWORD = "admin"
+        GF_INSTALL_PLUGINS           = "grafana-piechart-panel"
+        GF_SERVER_ROOT_URL           = "http://grafana.demo"
+        GF_SECURITY_ADMIN_PASSWORD   = "admin"
+        GF_SECURITY_DISABLE_GRAVATAR = "true"
       }
 
       resources {

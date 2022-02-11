@@ -1,5 +1,17 @@
+variable "datacenters" {
+  type        = list(string)
+  description = "List of datacenters to deploy to."
+  default     = ["dc1"]
+}
+
+variable "image_tag" {
+  type        = string
+  description = "Docker image tag to deploy."
+  default     = "latest"
+}
+
 job "hello-world-vault" {
-  datacenters = ["dc1"]
+  datacenters = var.datacenters
 
   group "web" {
     count = 1
@@ -19,7 +31,7 @@ job "hello-world-vault" {
       driver = "docker"
 
       config {
-        image = "ghcr.io/fhemberger/nomad-demo-hello-world-vault"
+        image = "ghcr.io/fhemberger/nomad-demo-hello-world-vault:${var.image_tag}"
 
         cap_drop = [
           "ALL",
@@ -48,7 +60,7 @@ job "hello-world-vault" {
 
       template {
         data = <<EOF
-          {{ with secret "kv/hello-vault" }}
+          {{ with secret "kv/hello-world-vault" }}
           VAULT_SECRET_URL="{{ .Data.url }}"
           VAULT_SECRET_USERNAME="{{ .Data.username }}"
           VAULT_SECRET_PASSWORD="{{ .Data.password }}"
@@ -60,7 +72,7 @@ job "hello-world-vault" {
       }
 
       vault {
-        policies      = ["hello-vault"]
+        policies      = ["hello-world-vault"]
         change_mode   = "signal"
         change_signal = "SIGHUP"
       }

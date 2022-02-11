@@ -1,5 +1,11 @@
+variable "datacenters" {
+  type        = list(string)
+  description = "List of datacenters to deploy to."
+  default     = ["dc1"]
+}
+
 job "hello-world-java" {
-  datacenters = ["dc1"]
+  datacenters = var.datacenters
   type        = "service"
 
   # Specify this job to have rolling updates, with 30 second intervals.

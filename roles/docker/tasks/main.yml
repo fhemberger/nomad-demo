@@ -51,3 +51,9 @@
     group: root
     mode: 0644
   notify: Restart Docker
+
+- name: Clean up unused containers, images and volumes regularily
+  cron:
+    name: docker system prune
+    special_time: weekly
+    job: docker system prune -af --volumes

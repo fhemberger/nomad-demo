@@ -2,12 +2,9 @@
 # Services can be reached under <servicename>.<domain>, e.g. consul.demo
 domain: demo
 
-# Application versions to install.
-consul_version: latest
-nomad_version: latest
-vault_version: latest
-coredns_version: latest
-traefik_version: latest
+# Application versions to install, defaults to `latest` (only JDK version needs
+# to be set explicitly). Can be pinned by setting e.g. `consul_version: x.y.z`
+# (see `roles/<component>/defaults/main.yml` for variable name).
 openjdk_version: "16"
 
 # If multiple network interfaces exist in the VM, specify the one matching

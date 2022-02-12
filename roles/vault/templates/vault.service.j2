@@ -1,34 +1,43 @@
 [Unit]
-Description=HashiCorp Consul - A service mesh solution
-Documentation=https://www.consul.io/docs/
+Description=HashiCorp Vault - A tool for managing secrets
+Documentation=https://www.vaultproject.io/docs/
 Requires=network-online.target
 After=network-online.target
-ConditionFileNotEmpty=/etc/consul.d/consul.hcl
+ConditionFileNotEmpty=/etc/vault.d/vault.hcl
+StartLimitIntervalSec=60
+StartLimitBurst=3
 
 # https://www.freedesktop.org/software/systemd/man/systemd.service.html
 [Service]
-Type=notify
-ExecStart=/usr/bin/consul agent -bind='{{ network_interface_ipv4 }}' -config-file=/etc/consul.d/consul.hcl
-ExecReload=/usr/bin/consul reload
+ExecStart=/usr/bin/vault server -config=/etc/vault.d/vault.hcl
+ExecReload=/bin/kill --signal HUP $MAINPID
+RestartSec=5
+TimeoutStopSec=30
 Restart=on-failure
 
 # Exec
 # https://www.freedesktop.org/software/systemd/man/systemd.exec.html
-User=consul
-Group=consul
+User=vault
+Group=vault
+
+# Capabilities
+CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
+AmbientCapabilities=CAP_IPC_LOCK
 
 # Security
 NoNewPrivileges=yes
+SecureBits=keep-caps
 
 # Process Properties
 LimitNOFILE=65536
+LimitMEMLOCK=infinity
 
 # Sandboxing
 PrivateTmp=yes
 PrivateDevices=yes
 DevicePolicy=closed
 
-ReadWritePaths=/etc/consul.d {{ consul_data_dir }}
+ReadWritePaths=/etc/vault.d {{ vault_data_dir }}
 ProtectSystem=strict
 ProtectHome=read-only
 ProtectControlGroups=yes
@@ -45,6 +54,7 @@ MemoryDenyWriteExecute=yes
 # Kill
 # https://www.freedesktop.org/software/systemd/man/systemd.kill.html
 KillMode=process
+KillSignal=SIGINT
 
 [Install]
 WantedBy=multi-user.target

@@ -62,8 +62,8 @@
     mode: 0644
 
 - name: Copy systemd service
-  copy:
-    src: "vault.service"
+  template:
+    src: "vault.service.j2"
     dest: "/etc/systemd/system/vault.service"
     mode: 0644
 

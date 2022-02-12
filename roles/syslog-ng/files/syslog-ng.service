@@ -3,13 +3,16 @@ Description=System Logger Daemon
 Documentation=man:syslog-ng(8)
 After=network.target
 
+# https://www.freedesktop.org/software/systemd/man/systemd.service.html
 [Service]
 Type=notify
-Sockets=syslog.socket
 ExecStart=/usr/sbin/syslog-ng -F -p /var/run/syslogd.pid
 ExecReload=/bin/kill -HUP $MAINPID
-StandardOutput=null
 Restart=on-failure
+Sockets=syslog.socket
+
+# Other
+StandardOutput=null
 
 [Install]
 WantedBy=multi-user.target

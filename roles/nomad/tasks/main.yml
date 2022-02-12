@@ -83,8 +83,8 @@
     mode: 0755
 
 - name: Copy systemd service
-  copy:
-    src: "nomad.service"
+  template:
+    src: "nomad.service.j2"
     dest: "/etc/systemd/system/nomad.service"
     mode: 0644
 

@@ -33,8 +33,9 @@ PrivateTmp=yes
 PrivateDevices=yes
 DevicePolicy=closed
 
-ReadWritePaths=/etc/nomad.d {{ nomad_data_dir }}
-ProtectSystem=strict
+# Must be disabled to execute Java tasks.
+# ReadWritePaths=/etc/nomad.d {{ nomad_data_dir }}
+# ProtectSystem=strict
 ProtectHome=read-only
 # Allow Nomad to manage cgroups
 # NOTE: not sure this is actually required
@@ -43,11 +44,20 @@ ProtectKernelModules=yes
 ProtectKernelTunables=yes
 
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
-RestrictNamespaces=yes
+# Must be disabled to execute Java tasks.
+# RestrictNamespaces=yes
 RestrictRealtime=yes
-RestrictSUIDSGID=yes
+# Must be disabled to execute Java tasks.
+# RestrictSUIDSGID=yes
 
-MemoryDenyWriteExecute=yes
+# Must be disabled for Nomad to detect a Java runtime and execute Java tasks.
+#
+# From the docs:
+# »Note that this option is incompatible with programs and libraries that generate
+# program code dynamically at runtime, including JIT execution engines,
+# executable stacks, and code "trampoline" feature of various C compilers.«
+# https://www.freedesktop.org/software/systemd/man/systemd.exec.html#MemoryDenyWriteExecute=
+# MemoryDenyWriteExecute=yes
 
 # Kill
 # https://www.freedesktop.org/software/systemd/man/systemd.kill.html

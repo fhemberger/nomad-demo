@@ -1,5 +1,5 @@
 [Unit]
-Description="CoreDNS"
+Description=CoreDNS
 Documentation=https://coredns.io/manual/toc/
 After=network.target
 ConditionFileNotEmpty=/etc/coredns/Corefile

@@ -1,6 +1,6 @@
 {%- set network_interface_ipv4 = hostvars[inventory_hostname]['vagrant_ipv4'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) -%}
 [Unit]
-Description="HashiCorp Consul - A service mesh solution"
+Description=HashiCorp Consul - A service mesh solution
 Documentation=https://www.consul.io/docs/
 Requires=network-online.target
 After=network-online.target

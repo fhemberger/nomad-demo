@@ -5,11 +5,9 @@ domain: demo
 # Organization name for root and intermediate CA
 organization_name: "ACME Inc."
 
-# Application versions to install. For Consul, Vault and Nomad the most recent
-# stable versions will be installed from Hashicorp's PPA.
-consul_template_version: "latest"
-coredns_version: "latest"
-traefik_version: "2.4.8"
+# Application versions to install, defaults to `latest` (only JDK version needs
+# to be set explicitly). Can be pinned by setting e.g. `consul_version: x.y.z`
+# (see `roles/<component>/defaults/main.yml` for variable name).
 openjdk_version: "16"
 
 # Nomad: Specifies the name of the interface to force network fingerprinting on.

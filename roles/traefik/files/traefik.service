@@ -1,5 +1,5 @@
 [Unit]
-Description="Traefik Proxy"
+Description=Traefik Proxy
 Documentation=https://docs.traefik.io
 After=network-online.target
 ConditionFileNotEmpty=/etc/traefik/traefik.yaml

@@ -29,7 +29,7 @@
       no_log: yes
       set_fact: vault_nomad_token="{{ lookup('file', vault_token_dir + '/nomad-token') }}"
 
-    - name: Check if Nomad token is still valid
+    - name: Check if Nomad token is still valid # noqa no-changed-when
       # no_log: yes
       run_once: true
       command: "vault token lookup -format json {{ vault_nomad_token }}"
@@ -47,7 +47,7 @@
   when: _vault_nomad_token_file.stat.exists
 
 - block:
-    - name: Create new token based on 'nomad-server' policy
+    - name: Create new token based on 'nomad-server' policy # noqa no-changed-when
       no_log: yes
       run_once: true
       command: vault token create -policy nomad-server -period 72h -orphan -format json

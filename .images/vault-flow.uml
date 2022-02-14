@@ -1,9 +1,0 @@
-@startuml
-App->Nomad: Requires Vault access\n('hello-vault' policy in \njob manifest)
-Nomad->Vault: Requests new access token\nwith 'hello-vault' policy
-Vault->Nomad: Sends new token
-Nomad->Vault: Requests secrets (specified in\n'template' of job manifest)
-Vault->Nomad: Sends secrets
-Nomad->App: Writes secrets to ENV vars
-@enduml
-

@@ -207,7 +207,19 @@ The keys for unsealing and the user tokens to access Vault are stored under `cre
 
 #### Workflow for requesting secrets from Vault in your app
 
-![](https://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/fhemberger/nomad-demo/master/.images/vault-flow.uml)
+```mermaid
+%%{init: { 'sequence': { 'actorFontFamily': 'inherit', 'actorFontWeight': 'bold' }}}%%
+sequenceDiagram
+    participant App
+    participant Nomad
+    participant Vault
+    App->>Nomad: Requires Vault access<br>('hello-vault' policy in <br>job manifest)
+    Nomad->>Vault: Requests new access token<br>with 'hello-vault' policy
+    Vault->>Nomad: Sends new token
+    Nomad->>Vault: Requests secrets (specified in<br>'template' of job manifest)
+    Vault->>Nomad: Sends secrets
+    Nomad->>App: Writes secrets to ENV vars
+```
 
 
 ## Collecting application metrics with Prometheus

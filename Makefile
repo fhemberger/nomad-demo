@@ -16,7 +16,7 @@ DOMAIN         := $(shell grep -oP 'domain: \K\w+' group_vars/all.yml)
 # Varant machine name "loadbalancer" is only chosen to prevent the Ansible provisioner from
 # running for each Vagrant machine. The Ansible playbook is designed to configure *all* hosts.
 .PHONY: up
-up:
+up: ## DEFAULT: Start all virtual machines and provision them.
 	vagrant up
 	@echo "vagrant provision --provision-with ansible loadbalancer"
 ifeq (darwin, $(PLATFORM))
@@ -26,8 +26,12 @@ else
 endif
 
 
+help: ## Displays help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-z0-9A-Z_-]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
+
 .PHONY: clean
-clean:
+clean: ## Destroy all virtual machines and delete temporary data.
 	vagrant destroy -f
 	rm -f .vagrant/ssh_config
 	rm -f .vagrant/*.log
@@ -36,7 +40,7 @@ clean:
 
 
 .PHONY: format-hcl
-format-hcl: $(NOMAD_JOBS) $(VAULT_POLICIES)
+format-hcl: $(NOMAD_JOBS) $(VAULT_POLICIES) ## Format HCL files (Nomad jobs and Vault policies).
 ifndef HCLFMT
 	GO111MODULE=on go install github.com/hashicorp/hcl/v2/cmd/hclfmt@latest
 endif
@@ -44,7 +48,7 @@ endif
 
 
 .PHONY: lint-jobs
-lint-jobs: $(NOMAD_JOBS)
+lint-jobs: $(NOMAD_JOBS) ## Lint Nomad jobs.
 	@for job in $^; do \
 		echo -e "\n$${job}:"; \
 		nomad job validate $${job} | tr -d '\000-\011\013\014\016-\037' | tail -n +3; \
@@ -52,17 +56,17 @@ lint-jobs: $(NOMAD_JOBS)
 
 
 .PHONY: lint-yaml
-lint-yaml:
+lint-yaml: ## Lint Ansible YAML files.
 	git ls-files '*.yml' '*.yaml' | while read -r file ; do yamllint "$$file"; done
 	ansible-lint -v
 
 
 .PHONY: lint
-lint: format-hcl lint-jobs lint-yaml
+lint: format-hcl lint-jobs lint-yaml ## Combined task for format-hcl lint-jobs lint-yaml.
 
 
 .PHONY: run-jobs
-run-jobs:
+run-jobs: ## Push all Nomad jobs to the cluster, plan and run them.
 	@vagrant ssh-config > .vagrant/ssh_config
 	@scp -F .vagrant/ssh_config nomad_jobs/*.nomad consul-nomad-node1:/home/vagrant/nomad_jobs/
 	@vagrant ssh consul-nomad-node1 -c 'export NOMAD_VAR_domain="$(DOMAIN)"; export NOMAD_VAR_grafana_url="http://grafana.$(DOMAIN)"; \
@@ -74,5 +78,5 @@ run-jobs:
 
 
 .PHONY: test
-test:
+test: ## Run basic tests on deployed cluster.
 	ansible-playbook -i .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory tests/test.yml

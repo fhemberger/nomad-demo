@@ -82,6 +82,8 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    ```sh
    make
    make run-jobs
+
+   # You can run `make help` to get a list of all available tasks.
    ```
 
 3. <strong id="etc-hosts">Configure host names for all services:</strong>  

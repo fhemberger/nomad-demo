@@ -119,6 +119,10 @@ Sites available after installation:
 - http://prometheus.demo - Prometheus metrics UI
 - http://alertmanager.demo - Prometheus Alertmanager UI
 
+### Removing all demo resources
+
+Run `make clean` to shut down and delete all created VMs. Afterwards remove the demo host names from `/etc/hosts`.
+
 
 ## Working with Nomad
 

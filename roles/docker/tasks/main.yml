@@ -1,6 +1,6 @@
 ---
 - name: Check if Docker is installed on the host
-  command: docker version
+  ansible.builtin.command: docker version
   register: _docker_result
   failed_when: false
   changed_when: false
@@ -8,32 +8,32 @@
 - name: Install Docker
   block:
     - name: Add Docker GPG key
-      apt_key:
+      ansible.builtin.apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         id: 0EBFCD88
         state: present
 
     - name: Add Docker apt repository
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
         filename: docker
         state: present
 
     - name: Update repositories cache and install 'docker-ce' package to latest version # noqa 403
-      apt:
+      ansible.builtin.apt:
         name: "docker-ce"
         update_cache: yes
         state: latest
 
     - name: Add remote user to 'docker' group
-      user:
+      ansible.builtin.user:
         name: "{{ ansible_user }}"
         append: yes
         groups: docker
         state: present
 
     - name: Enable 'docker' service
-      systemd:
+      ansible.builtin.systemd:
         name: docker
         state: started
         enabled: yes
@@ -41,7 +41,7 @@
     - _docker_result.rc == 2
 
 - name: Copy Docker daemon settings
-  copy:
+  ansible.builtin.copy:
     content: |
       {
         "log-driver": "journald"
@@ -53,7 +53,7 @@
   notify: Restart Docker
 
 - name: Clean up unused containers, images and volumes regularily
-  cron:
+  ansible.builtin.cron:
     name: docker system prune
     special_time: weekly
     job: docker system prune -af --volumes

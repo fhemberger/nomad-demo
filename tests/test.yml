@@ -8,7 +8,7 @@
 
   tasks:
     - name: Check if core components are reachable through the load balancer
-      uri: url="http://{{ item }}.{{ domain }}" timeout=5
+      ansible.builtin.uri: url="http://{{ item }}.{{ domain }}" timeout=5
       ignore_errors: yes
       loop:
         - traefik
@@ -31,6 +31,6 @@
 
           {#- Vault health check -#}
           http://vault.{{ domain }}/v1/sys/health?standbyok=true
-      uri: url="{{ item }}" timeout=5
+      ansible.builtin.uri: url="{{ item }}" timeout=5
       ignore_errors: yes
       loop: "{{ hosts.splitlines() }}"

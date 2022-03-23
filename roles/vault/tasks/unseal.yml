@@ -2,13 +2,13 @@
 - name: Reading unseal key contents # noqa no-changed-when
   delegate_to: localhost
   become: no
-  command: "cat {{ item }}"
+  ansible.builtin.command: "cat {{ item }}"
   register: _vault_unseal_keys
   with_fileglob: "{{ vault_unseal_keys_dir }}/*"
 
 - name: Unseal Vault with unseal keys # noqa no-changed-when
   no_log: yes
-  command: "vault operator unseal {{ item.stdout }}"
+  ansible.builtin.command: "vault operator unseal {{ item.stdout }}"
   environment:
     VAULT_ADDR: "http://127.0.0.1:8200"
   with_items: "{{ _vault_unseal_keys.results }}"

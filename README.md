@@ -18,7 +18,7 @@ Consul is a service networking solution to connect services across any runtime p
 
 ## Overview
 
-<img src=".images/vm-overview.png" align="left" alt="Overview of the created VMs and the deployed components">
+<img src=".images/vm-overview.drawio.svg" align="left" alt="Overview of the created VMs and the deployed components">
 
 [Traefik](https://docs.traefik.io/): Load balancer using Consul Catalog service discovery. All services registered in Consul with the tag `http` will be exposed as `<service name>.demo`. In context of this demo setup, you'll have to adjust your `/etc/hosts` file accordingly ([see below](#user-content-etc-hosts)).
 
@@ -32,8 +32,8 @@ An example deployment configuration for each is included in this setup.
 
 <br clear="both"><br>
 
-```diff
--      **** REMEMBER, THIS IS JUST A DEMO SET UP AND IN NO WAY INTENDED TO RUN IN PRODUCTION! ****     -
+```
+🚨 REMEMBER, THIS IS JUST A DEMO SET UP AND IN NO WAY INTENDED TO RUN IN PRODUCTION! 🚨
 ```
 
 
@@ -54,8 +54,9 @@ brew cask install vagrant virtualbox
 brew install ansible
 ```
 
-Also your host system needs at least 4GB of RAM available and about 14GB of free hard disk (sorry, Vagrant VM boxes 🤷‍♂️).
+Your host system will need at least 6GB of RAM and about 20GB of free hard disk (sorry, Vagrant VM boxes 🤷‍♂️).
 
+Although the Vagrant boxes are running Ubuntu LTS, Debian should work just as fine (PRs gladly accepted for RedHat Linux). The setup supports both Intel (`x86_64`/`amd64`) and ARM (`arm64`) architectures.
 
 ### Installation
 
@@ -67,11 +68,11 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    ```
 
 2. **Create and provision virtual machines with Vagrant:**  
-   Vagrant will create four virtual machines with IPs _192.168.56.20–23_. If your local network already uses this address range, you can define an alternate range in the `Vagrantfile` before continuing with the installation.
+   Vagrant will create four virtual machines with IPs _192.168.56.20–23_. This is the default IP range in VirtualBox. If your local network already uses this address range, you can define an alternate range in the `Vagrantfile` before continuing with the installation.
 
    As there are some logical dependencies in the setup, it is split up in multiple parts:
 
-     1. Create the four VMs in VirtualBox
+     1. Create the four VMs in VirtualBox with Vagrant
      2. Setup the Consul cluster and elect a leader
      3. Setup Vault (which requires the working Consul cluster),  
         Nomad (which in turn requires a token from Vault) and the load balancer VM.
@@ -87,7 +88,7 @@ Also your host system needs at least 4GB of RAM available and about 14GB of free
    ```
 
 3. <strong id="etc-hosts">Configure host names for all services:</strong>  
-   On your machine, add the following lines to your `/etc/hosts`. If you changed the IP range before in your `Vagrantfile`, make sure to adjust it here as well:
+   Add the following lines to `/etc/hosts` on your machine. If you changed the IP range before in your `Vagrantfile`, make sure to adjust it here as well:
 
    ```
    192.168.56.20 traefik.demo

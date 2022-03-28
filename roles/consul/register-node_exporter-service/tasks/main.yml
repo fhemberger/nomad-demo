@@ -7,7 +7,7 @@
 # are blocked by the firewall, thus the node_exporter there can't be registered.
 - name: Register node_exporter as Consul service (only non-Consul nodes)
   run_once: true
-  uri:
+  ansible.builtin.uri:
     url: http://127.0.0.1:8500/v1/catalog/register
     method: PUT
     body_format: json
@@ -33,7 +33,7 @@
   with_items: "{{ groups['vault'] + ['tools'] }}"
 
 - name: Register node_exporter as Consul service
-  uri:
+  ansible.builtin.uri:
     url: http://127.0.0.1:8500/v1/agent/service/register
     method: PUT
     body_format: json

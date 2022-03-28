@@ -3,15 +3,15 @@
   become: yes
   tasks:
     - name: Get Vault status # noqa no-changed-when
-      command: vault status -format json
+      ansible.builtin.command: vault status -format json
       environment:
         VAULT_ADDR: "{{ vault_addr }}"
       register: _vault_status_results
       failed_when: _vault_status_results.rc == 1
 
     - name: Parse output of 'vault status'
-      set_fact: _vault_status_parsed="{{ _vault_status_results.stdout | from_json }}"
+      ansible.builtin.set_fact: _vault_status_parsed="{{ _vault_status_results.stdout | from_json }}"
 
     - name: Unseal Vault
-      include_tasks: roles/vault/installation/tasks/unseal.yml
+      ansible.builtin.include_tasks: roles/vault/installation/tasks/unseal.yml
       when: _vault_status_parsed.sealed

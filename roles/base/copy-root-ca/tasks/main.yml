@@ -1,6 +1,6 @@
 ---
 - name: Create local certificate directory
-  file:
+  ansible.builtin.file:
     path: /usr/local/share/ca-certificates
     state: directory
     owner: root
@@ -10,11 +10,11 @@
 - name: Check if root certificate exists
   delegate_to: localhost
   become: no
-  stat: path="{{ playbook_dir }}/certificates/root_ca.crt"
+  ansible.builtin.stat: path="{{ playbook_dir }}/certificates/root_ca.crt"
   register: _root_cert
 
 - name: Copy root certificate
-  copy:
+  ansible.builtin.copy:
     src: "{{ playbook_dir }}/certificates/root_ca.crt"
     dest: "/usr/local/share/ca-certificates/{{ domain | regex_replace('\\.', '_') }}.crt"
     owner: root

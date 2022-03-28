@@ -3,7 +3,7 @@
   delegate_to: localhost
   run_once: true
   become: no
-  file:
+  ansible.builtin.file:
     path: "{{ playbook_dir }}/.ansible_download_cache"
     state: directory
     mode: 0755
@@ -12,7 +12,7 @@
     - name: Determine latest GitHub release (local)
       delegate_to: localhost
       become: false
-      uri:
+      ansible.builtin.uri:
         url: "https://api.github.com/repos/hashicorp/consul-esm/releases"
         body_format: json
       register: _github_releases
@@ -20,7 +20,7 @@
       retries: 5
 
     - name: Set consul_esm_version
-      set_fact: consul_esm_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
+      ansible.builtin.set_fact: consul_esm_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
 
   when: (consul_esm_version is not defined) or (consul_esm_version == 'latest')
   run_once: true
@@ -29,26 +29,27 @@
   delegate_to: localhost
   run_once: true
   become: no
-  get_url:
+  ansible.builtin.get_url:
     url: "https://releases.hashicorp.com/consul-esm/{{ consul_esm_version }}/consul-esm_{{ consul_esm_version }}_linux_amd64.zip"
     dest: "{{ playbook_dir }}/.ansible_download_cache/consul-esm_{{ consul_esm_version }}_linux_amd64.zip"
     checksum: "sha256:https://releases.hashicorp.com/consul-esm/{{ consul_esm_version }}/consul-esm_{{ consul_esm_version }}_SHA256SUMS"
+    mode: 0644
 
 - name: Extract Consul ESM
-  unarchive:
+  ansible.builtin.unarchive:
     src: "{{ playbook_dir }}/.ansible_download_cache/consul-esm_{{ consul_esm_version }}_linux_amd64.zip"
     dest: /usr/bin
 
 - name: Create consul user
-  user:
+  ansible.builtin.user:
     name: consul
     home: /etc/consul.d
     system: yes
-    shell: /usr/bin/false
+    ansible.builtin.shell: /usr/bin/false
     state: present
 
 - name: Copy config
-  template:
+  ansible.builtin.template:
     src: "consul-esm.hcl.j2"
     dest: "/etc/consul.d/consul-esm.hcl"
     owner: consul
@@ -82,7 +83,7 @@
         policy = "write"
       }
       {% endfor %}
-  uri:
+  ansible.builtin.uri:
     url: "http://127.0.0.1:8500/v1/acl/policy?token={{ consul_acl_management_token }}"
     method: PUT
     body_format: json
@@ -94,13 +95,13 @@
     - (consul_acl_management_token is defined) and (consul_acl_management_token | length > 0)
 
 - name: Copy systemd service
-  template:
+  ansible.builtin.template:
     src: "consul-esm.service.j2"
     dest: "/etc/systemd/system/consul-esm.service"
     mode: 0644
 
 - name: Start consul-esm service
-  systemd:
+  ansible.builtin.systemd:
     name: consul-esm
     state: restarted
     daemon_reload: yes

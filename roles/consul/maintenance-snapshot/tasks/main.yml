@@ -1,12 +1,12 @@
 ---
 - name: Create Consul snapshot directory
-  file:
+  ansible.builtin.file:
     path: "{{ consul_snapshot_directory }}"
     state: directory
     mode: 0700
 
 - name: Copy systemd service
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/systemd/system/{{ item }}"
     mode: 0644
@@ -15,7 +15,7 @@
     - consul-snapshot.timer
 
 - name: Enable Consul snapshot timer
-  systemd:
+  ansible.builtin.systemd:
     name: consul-snapshot.timer
     daemon_reload: yes
     enabled: yes

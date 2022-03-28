@@ -1,10 +1,10 @@
 ---
 - name: Add OpenJDK PPA
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "ppa:openjdk-r/ppa"
     state: present
 
 - name: Install OpenJDK Java Runtime Environment (Headless)
-  package:
+  ansible.builtin.package:
     name: "openjdk-{{ openjdk_version }}-jre-headless"
     state: present

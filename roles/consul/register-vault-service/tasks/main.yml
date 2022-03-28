@@ -9,7 +9,7 @@
 #
 - name: Register Vault as Consul service
   run_once: true
-  uri:
+  ansible.builtin.uri:
     url: http://127.0.0.1:8500/v1/catalog/register
     method: PUT
     body_format: json

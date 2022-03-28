@@ -3,14 +3,14 @@
   delegate_to: localhost
   run_once: true
   become: no
-  command: "cat {{ item }}"
+  ansible.builtin.command: "cat {{ item }}"
   register: _vault_unseal_keys
   with_fileglob: "{{ vault_unseal_keys_dir }}/*"
 
 - name: Unseal Vault with unseal keys # noqa no-changed-when
   run_once: true
   no_log: yes
-  command: "vault operator unseal {{ item.stdout }}"
+  ansible.builtin.command: "vault operator unseal {{ item.stdout }}"
   environment:
     VAULT_ADDR: "{{ vault_addr }}"
   with_items: "{{ _vault_unseal_keys.results }}"

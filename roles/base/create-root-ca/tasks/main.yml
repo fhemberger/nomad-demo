@@ -3,7 +3,7 @@
   delegate_to: localhost
   run_once: true
   become: no
-  file:
+  ansible.builtin.file:
     path: "{{ playbook_dir }}/certificates"
     state: directory
     mode: 0700

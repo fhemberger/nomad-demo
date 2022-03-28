@@ -1,7 +1,7 @@
 ---
 - name: Enable intermediate PKI secret engine # noqa no-changed-when
   run_once: true
-  command: |
+  ansible.builtin.command: |
     vault secrets enable
     -path=pki_int
     -description "Intermediate PKI secret storage"
@@ -17,7 +17,7 @@
 
 - name: Create intermediate CA CSR # noqa no-changed-when
   run_once: true
-  command: |
+  ansible.builtin.command: |
     vault write -format=json
     pki_int/intermediate/generate/internal
     organization="{{ organization_name }}"
@@ -31,7 +31,7 @@
   delegate_to: localhost
   become: no
   run_once: true
-  copy:
+  ansible.builtin.copy:
     content: "{{ vault_pki_int_csr.stdout | from_json | json_query('data.csr') }}"
     dest: "{{ playbook_dir }}/certificates/pki_intermediate.csr"
     mode: 0600
@@ -43,7 +43,7 @@
   delegate_to: localhost
   become: no
   run_once: true
-  command: |
+  ansible.builtin.command: |
     openssl x509 -req
     -days {{ intermediate_ca_validity_days }}
     -in {{ playbook_dir }}/certificates/pki_intermediate.csr
@@ -55,14 +55,14 @@
 
 - name: Copy pki_intermediate.crt
   run_once: true
-  copy:
+  ansible.builtin.copy:
     src: "{{ playbook_dir }}/certificates/pki_intermediate.crt"
     dest: /etc/vault.d/pki_intermediate.crt
     mode: 0600
 
 - name: Store intermediate CA certificate in Vault # noqa no-changed-when
   run_once: true
-  command: |
+  ansible.builtin.command: |
     vault write
     pki_int/intermediate/set-signed
     certificate=@/etc/vault.d/pki_intermediate.crt
@@ -72,7 +72,7 @@
 
 - name: Set URL configuration # noqa no-changed-when
   run_once: true
-  command: |
+  ansible.builtin.command: |
     vault write pki_int/config/urls
     issuing_certificates="{{ vault_addr }}/v1/pki_int/ca"
     crl_distribution_points="{{ vault_addr }}/v1/pki_int/crl"
@@ -82,7 +82,7 @@
 
 - name: Create Consul PKI role # noqa no-changed-when
   run_once: true
-  command: |
+  ansible.builtin.command: |
     vault write pki_int/roles/{{ consul_datacenter | default('dc1') }}.consul
     allowed_domains="{{ consul_datacenter | default('dc1') }}.consul,service.consul"
     allow_subdomains=true
@@ -94,7 +94,7 @@
 
 - name: Create Nomad PKI role # noqa no-changed-when
   run_once: true
-  command: |
+  ansible.builtin.command: |
     vault write pki_int/roles/{{ nomad_datacenter | default('dc1') }}.nomad
     allowed_domains="server.{{ nomad_datacenter | default('dc1') }}.nomad,client.{{ nomad_datacenter | default('dc1') }}.nomad,nomad.service.consul"
     allow_bare_domains=true
@@ -109,7 +109,7 @@
 # This can be setup in the Traefik loadbalancer instead
 - name: "Create {{ domain }} PKI role" # noqa no-changed-when
   run_once: true
-  command: |
+  ansible.builtin.command: |
     vault write pki_int/roles/{{ domain }}
     allowed_domains="{{ domain }}"
     allow_bare_domains=true

@@ -3,7 +3,7 @@
   delegate_to: localhost
   run_once: true
   become: no
-  file:
+  ansible.builtin.file:
     path: "{{ playbook_dir }}/.ansible_download_cache"
     state: directory
     mode: 0755
@@ -12,7 +12,7 @@
     - name: Determine latest GitHub release (local)
       delegate_to: localhost
       become: false
-      uri:
+      ansible.builtin.uri:
         url: "https://api.github.com/repos/hashicorp/vault/releases"
         body_format: json
       register: _github_releases
@@ -20,7 +20,7 @@
       retries: 5
 
     - name: Set vault_version
-      set_fact: vault_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
+      ansible.builtin.set_fact: vault_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
 
   when: (vault_version is not defined) or (vault_version == 'latest')
   run_once: true
@@ -29,35 +29,36 @@
   delegate_to: localhost
   run_once: true
   become: no
-  get_url:
+  ansible.builtin.get_url:
     url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
     dest: "{{ playbook_dir }}/.ansible_download_cache/vault_{{ vault_version }}_linux_amd64.zip"
     checksum: "sha256:https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_SHA256SUMS"
+    mode: 0644
 
 - name: Extract Vault
-  unarchive:
+  ansible.builtin.unarchive:
     src: "{{ playbook_dir }}/.ansible_download_cache/vault_{{ vault_version }}_linux_amd64.zip"
     dest: /usr/bin
 
 - name: Create vault user
-  user:
+  ansible.builtin.user:
     name: vault
     home: /etc/vault.d
     system: yes
-    shell: /usr/bin/false
+    ansible.builtin.shell: /usr/bin/false
     state: present
 
 - name: Configure Vault
-  include_tasks: "config-{{ vault_mode }}.yml"
+  ansible.builtin.include_tasks: "config-{{ vault_mode }}.yml"
 
 - name: Copy systemd service
-  template:
+  ansible.builtin.template:
     src: "vault.service.j2"
     dest: "/etc/systemd/system/vault.service"
     mode: 0644
 
 - name: Start vault service
-  systemd:
+  ansible.builtin.systemd:
     name: vault
     state: restarted
     daemon_reload: yes
@@ -69,38 +70,38 @@
 
 - block:
     - name: Get Vault status # noqa no-changed-when
-      command: vault status -format json
+      ansible.builtin.command: vault status -format json
       environment:
         VAULT_ADDR: "{{ vault_addr }}"
       register: _vault_status_results
       failed_when: _vault_status_results.rc == 1
 
     - name: Parse output of 'vault status'
-      set_fact: _vault_status_parsed="{{ _vault_status_results.stdout | from_json }}"
+      ansible.builtin.set_fact: _vault_status_parsed="{{ _vault_status_results.stdout | from_json }}"
 
     - name: Initialize Vault
       run_once: true
-      include_tasks: init.yml
+      ansible.builtin.include_tasks: init.yml
       when: not _vault_status_parsed.initialized
 
     - name: Unseal Vault
-      include_tasks: unseal.yml
+      ansible.builtin.include_tasks: unseal.yml
       when: _vault_status_parsed.sealed
 
     - name: Load root token
       run_once: true
-      set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
+      ansible.builtin.set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
       when: _vault_status_parsed.initialized
 
     - name: "Wait for Vault node to become initialized, unsealed and active"
-      uri: url=http://127.0.0.1:8200/v1/sys/health
+      ansible.builtin.uri: url=http://127.0.0.1:8200/v1/sys/health
       register: _vault_health
       until: _vault_health.status == 200
       retries: 30
       delay: 2
 
     - name: Enable syslog audit device # noqa no-changed-when
-      command: vault audit enable syslog
+      ansible.builtin.command: vault audit enable syslog
       environment:
         VAULT_ADDR: "{{ vault_addr }}"
         VAULT_TOKEN: "{{ vault_root_token }}"

@@ -2,7 +2,7 @@
 - name: Create temporary download directory if it does not exist
   delegate_to: localhost
   become: no
-  file:
+  ansible.builtin.file:
     path: "{{ playbook_dir }}/.ansible_download_cache"
     state: directory
     mode: 0755
@@ -11,7 +11,7 @@
     - name: Determine latest GitHub release (local)
       delegate_to: localhost
       become: false
-      uri:
+      ansible.builtin.uri:
         url: "https://api.github.com/repos/coredns/coredns/releases/latest"
         body_format: json
       register: _github_release
@@ -19,7 +19,7 @@
       retries: 5
 
     - name: Set coredns_version
-      set_fact: coredns_version="{{ _github_release.json.tag_name | regex_replace('^v?(.*)$', '\\1') }}"
+      ansible.builtin.set_fact: coredns_version="{{ _github_release.json.tag_name | regex_replace('^v?(.*)$', '\\1') }}"
 
   when: (coredns_version is not defined) or (coredns_version == 'latest')
   run_once: true
@@ -27,50 +27,51 @@
 - name: Download CoreDNS and verify SHA256 checksum
   delegate_to: localhost
   become: no
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_amd64.tgz"
     dest: "{{ playbook_dir }}/.ansible_download_cache/coredns_{{ coredns_version }}_linux_amd64.tgz"
     checksum: "sha256:https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_amd64.tgz.SHA256"
+    mode: 0644
 
 - name: Extract CoreDNS
-  unarchive:
+  ansible.builtin.unarchive:
     src: "{{ playbook_dir }}/.ansible_download_cache/coredns_{{ coredns_version }}_linux_amd64.tgz"
     dest: /usr/bin
 
 - name: Create coredns user
-  user:
+  ansible.builtin.user:
     name: coredns
     home: /etc/coredns
     system: yes
-    shell: /usr/bin/false
+    ansible.builtin.shell: /usr/bin/false
     state: present
 
 - name: Copy config
-  template:
+  ansible.builtin.template:
     src: "Corefile.j2"
     dest: "/etc/coredns/Corefile"
     mode: 0644
 
 - name: Copy systemd service
-  copy:
+  ansible.builtin.copy:
     src: "coredns.service"
     dest: "/etc/systemd/system/coredns.service"
     mode: 0644
 
 - name: Disable systemd-resolved service
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-resolved
     state: stopped
     enabled: no
 
 - name: Set nameserver to localhost
-  copy:
+  ansible.builtin.copy:
     content: 'nameserver 127.0.0.1'
     dest: /etc/resolv.conf
     mode: 0644
 
 - name: Start coredns service
-  systemd:
+  ansible.builtin.systemd:
     name: coredns
     state: restarted
     daemon_reload: yes

@@ -1,9 +1,9 @@
 ---
 - name: Update apt cache
-  apt: update_cache=yes
+  ansible.builtin.apt: update_cache=yes
 
 - name: Install base dependencies
-  package:
+  ansible.builtin.package:
     name:
       - curl
       - dnsutils
@@ -12,7 +12,7 @@
     state: present
 
 - name: Disable Ubuntu motd-news
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/default/motd-news
     state: present
     regexp: '^ENABLED='
@@ -20,7 +20,7 @@
   when: ansible_distribution == 'Ubuntu'
 
 - name: Remove "snap" package
-  apt:
+  ansible.builtin.apt:
     name: snapd
     state: absent
     autoremove: yes

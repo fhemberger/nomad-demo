@@ -1,7 +1,7 @@
 ---
 - name: Enable key-value secret engine # noqa no-changed-when
   no_log: yes
-  command: vault secrets enable -version=1 kv
+  ansible.builtin.command: vault secrets enable -version=1 kv
   register: _vault_kv_enable_result
   failed_when:
     - _vault_kv_enable_result.rc > 0
@@ -13,7 +13,7 @@
 # EXAMPLES:
 # - name: Store SMTP credentials for 'alertmanager' # noqa no-changed-when
 #   no_log: yes
-#   command: |
+#   ansible.builtin.command: |
 #     vault kv put kv/monitoring/alertmanager/smtp
 #       smarthost='mail.example.com:25'
 #       username='admin'
@@ -24,7 +24,7 @@
 
 # - name: Store PagerDuty credentials for 'alertmanager' # noqa no-changed-when
 #   no_log: yes
-#   command: |
+#   ansible.builtin.command: |
 #     vault kv put kv/monitoring/alertmanager/pagerduty
 #       service_key='ABC1234567890'
 #   environment:
@@ -32,7 +32,7 @@
 #     VAULT_TOKEN: "{{ vault_root_token }}"
 
 - name: Copy 'monitoring-alertmanager' policy
-  copy:
+  ansible.builtin.copy:
     src: "{{ playbook_dir }}/nomad_jobs/monitoring-alertmanager-policy.vault"
     dest: "/home/{{ ansible_ssh_user }}/monitoring-alertmanager-policy.vault"
     owner: "{{ ansible_ssh_user }}"
@@ -41,7 +41,7 @@
 
 - name: Write 'monitoring-alertmanager' policy to Vault # noqa no-changed-when
   no_log: yes
-  command: "vault policy write monitoring-alertmanager /home/{{ ansible_ssh_user }}/monitoring-alertmanager-policy.vault"
+  ansible.builtin.command: "vault policy write monitoring-alertmanager /home/{{ ansible_ssh_user }}/monitoring-alertmanager-policy.vault"
   environment:
     VAULT_ADDR: "{{ vault_addr }}"
     VAULT_TOKEN: "{{ vault_root_token }}"

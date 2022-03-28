@@ -1,6 +1,6 @@
 ---
 - name: Copy config
-  template:
+  ansible.builtin.template:
     src: "syslog-ng-client.conf.j2"
     dest: "/etc/syslog-ng/syslog-ng.conf"
     mode: 0644

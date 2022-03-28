@@ -1,6 +1,6 @@
 ---
 - name: Copy 'prometheus-policy'
-  copy:
+  ansible.builtin.copy:
     src: "{{ playbook_dir }}/nomad_jobs/monitoring-prometheus-policy.vault"
     dest: "/home/{{ ansible_ssh_user }}/monitoring-prometheus-policy.vault"
     owner: "{{ ansible_ssh_user }}"
@@ -9,7 +9,7 @@
 
 - name: Write 'prometheus-policy' to Vault # noqa no-changed-when
   no_log: yes
-  command: "vault policy write monitoring-prometheus /home/{{ ansible_ssh_user }}/monitoring-prometheus-policy.vault"
+  ansible.builtin.command: "vault policy write monitoring-prometheus /home/{{ ansible_ssh_user }}/monitoring-prometheus-policy.vault"
   environment:
     VAULT_ADDR: "{{ vault_addr }}"
     VAULT_TOKEN: "{{ vault_root_token }}"

@@ -1,6 +1,6 @@
 ---
 - name: Create data directory
-  file:
+  ansible.builtin.file:
     path: "{{ vault_data_dir }}"
     state: directory
     owner: vault
@@ -9,7 +9,7 @@
   when: vault_mode == 'server'
 
 - name: Copy config
-  template:
+  ansible.builtin.template:
     src: "vault-server.hcl.j2"
     dest: "/etc/vault.d/vault.hcl"
     mode: 0644

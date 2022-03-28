@@ -1,20 +1,20 @@
 ---
 - name: Add apt key
-  apt_key:
+  ansible.builtin.apt_key:
     url: "https://ose-repo.syslog-ng.com/apt/syslog-ng-ose-pub.asc"
     state: present
 
 - name: Add apt repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb https://ose-repo.syslog-ng.com/apt/ stable ubuntu-{{ ansible_distribution_release }}"
     filename: syslog-ng
     state: present
 
 - name: Install syslog-ng-core
-  package: name=syslog-ng-core state=present
+  ansible.builtin.package: name=syslog-ng-core state=present
 
 - name: Extract major and minor version (reqired for config file) # noqa no-changed-when
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     syslog-ng --version | grep -Po 'Config version: \K\d+\.\d+'
   args:
@@ -22,24 +22,24 @@
   register: _syslog_ng_version_parsed
 
 - name: Parse output of 'syslog-ng --version'
-  set_fact: syslog_ng_version={{ _syslog_ng_version_parsed.stdout }}
+  ansible.builtin.set_fact: syslog_ng_version={{ _syslog_ng_version_parsed.stdout }}
 
 - name: Deploy syslog-ng client config on Vault nodes
-  include_tasks: client.yml
+  ansible.builtin.include_tasks: client.yml
   when: "'consul_nomad' in group_names"
 
 - name: Deploy syslog-ng upstream config on load balancer
-  include_tasks: upstream.yml
+  ansible.builtin.include_tasks: upstream.yml
   when: "'consul_nomad' not in group_names"
 
 - name: Copy systemd service
-  copy:
+  ansible.builtin.copy:
     src: "syslog-ng.service"
     dest: "/etc/systemd/system/syslog-ng.service"
     mode: 0644
 
 - name: Start syslog-ng service
-  systemd:
+  ansible.builtin.systemd:
     name: syslog-ng
     state: restarted
     daemon_reload: yes

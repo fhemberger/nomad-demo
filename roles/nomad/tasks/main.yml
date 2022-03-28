@@ -3,7 +3,7 @@
   delegate_to: localhost
   run_once: true
   become: no
-  file:
+  ansible.builtin.file:
     path: "{{ playbook_dir }}/.ansible_download_cache"
     state: directory
     mode: 0755
@@ -12,7 +12,7 @@
     - name: Determine latest GitHub release (local)
       delegate_to: localhost
       become: false
-      uri:
+      ansible.builtin.uri:
         url: "https://api.github.com/repos/hashicorp/nomad/releases"
         body_format: json
       register: _github_releases
@@ -20,7 +20,7 @@
       retries: 5
 
     - name: Set nomad_version
-      set_fact: nomad_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
+      ansible.builtin.set_fact: nomad_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
 
   when: (nomad_version is not defined) or (nomad_version == 'latest')
   run_once: true
@@ -29,18 +29,19 @@
   delegate_to: localhost
   run_once: true
   become: no
-  get_url:
+  ansible.builtin.get_url:
     url: "https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_linux_amd64.zip"
     dest: "{{ playbook_dir }}/.ansible_download_cache/nomad_{{ nomad_version }}_linux_amd64.zip"
     checksum: "sha256:https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_SHA256SUMS"
+    mode: 0644
 
 - name: Extract Nomad
-  unarchive:
+  ansible.builtin.unarchive:
     src: "{{ playbook_dir }}/.ansible_download_cache/nomad_{{ nomad_version }}_linux_amd64.zip"
     dest: /usr/bin
 
 - name: Create nomad user
-  user:
+  ansible.builtin.user:
     name: nomad
     home: /etc/nomad.d
     system: yes
@@ -48,7 +49,7 @@
     state: present
 
 - name: Create data directory
-  file:
+  ansible.builtin.file:
     path: "{{ nomad_data_dir }}"
     state: directory
     owner: nomad
@@ -58,16 +59,16 @@
 - name: Check if Nomad token for Vault exists
   delegate_to: localhost
   become: no
-  stat: path="{{ vault_token_dir }}/nomad-token"
+  ansible.builtin.stat: path="{{ vault_token_dir }}/nomad-token"
   register: _vault_nomad_token_file
 
 - name: Load Nomad token
   no_log: yes
-  set_fact: vault_nomad_token="{{ lookup('file', vault_token_dir + '/nomad-token') }}"
+  ansible.builtin.set_fact: vault_nomad_token="{{ lookup('file', vault_token_dir + '/nomad-token') }}"
   when: _vault_nomad_token_file.stat.exists
 
 - name: Copy config
-  template:
+  ansible.builtin.template:
     src: "nomad.hcl.j2"
     dest: "/etc/nomad.d/nomad.hcl"
     owner: nomad
@@ -75,7 +76,7 @@
     mode: 0644
 
 - name: Create jobs directory
-  file:
+  ansible.builtin.file:
     path: "/home/{{ ansible_ssh_user }}/nomad_jobs"
     state: directory
     owner: "{{ ansible_ssh_user }}"
@@ -83,13 +84,13 @@
     mode: 0755
 
 - name: Copy systemd service
-  template:
+  ansible.builtin.template:
     src: "nomad.service.j2"
     dest: "/etc/systemd/system/nomad.service"
     mode: 0644
 
 - name: Start nomad service
-  systemd:
+  ansible.builtin.systemd:
     name: nomad
     state: restarted
     daemon_reload: yes

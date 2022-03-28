@@ -3,7 +3,7 @@
   delegate_to: localhost
   run_once: true
   become: no
-  file:
+  ansible.builtin.file:
     path: "{{ playbook_dir }}/.ansible_download_cache"
     state: directory
     mode: 0755
@@ -12,7 +12,7 @@
     - name: Determine latest GitHub release (local)
       delegate_to: localhost
       become: false
-      uri:
+      ansible.builtin.uri:
         url: "https://api.github.com/repos/hashicorp/consul/releases"
         body_format: json
       register: _github_releases
@@ -20,7 +20,7 @@
       retries: 5
 
     - name: Set consul_version
-      set_fact: consul_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
+      ansible.builtin.set_fact: consul_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
 
   when: (consul_version is not defined) or (consul_version == 'latest')
   run_once: true
@@ -29,18 +29,19 @@
   delegate_to: localhost
   run_once: true
   become: no
-  get_url:
+  ansible.builtin.get_url:
     url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
     dest: "{{ playbook_dir }}/.ansible_download_cache/consul_{{ consul_version }}_linux_amd64.zip"
     checksum: "sha256:https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_SHA256SUMS"
+    mode: 0644
 
 - name: Extract Consul
-  unarchive:
+  ansible.builtin.unarchive:
     src: "{{ playbook_dir }}/.ansible_download_cache/consul_{{ consul_version }}_linux_amd64.zip"
     dest: /usr/bin
 
 - name: Create consul user
-  user:
+  ansible.builtin.user:
     name: consul
     home: /etc/consul.d
     system: yes
@@ -48,7 +49,7 @@
     state: present
 
 - name: Create data directory
-  file:
+  ansible.builtin.file:
     path: "{{ consul_data_dir }}"
     state: directory
     owner: consul
@@ -56,7 +57,7 @@
     mode: 0755
 
 - name: Copy config
-  template:
+  ansible.builtin.template:
     src: "consul.hcl.j2"
     dest: "/etc/consul.d/consul.hcl"
     owner: consul
@@ -64,13 +65,13 @@
     mode: 0644
 
 - name: Copy systemd service
-  template:
+  ansible.builtin.template:
     src: "consul.service.j2"
     dest: "/etc/systemd/system/consul.service"
     mode: 0644
 
 - name: Start consul service
-  systemd:
+  ansible.builtin.systemd:
     name: consul
     state: restarted
     daemon_reload: yes

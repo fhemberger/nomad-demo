@@ -1,18 +1,18 @@
 ---
 - name: Create log directory
-  file:
+  ansible.builtin.file:
     path: /var/log/vault
     state: directory
     mode: 0755
 
 - name: Copy logrotate config
-  copy:
+  ansible.builtin.copy:
     src: logrotate.conf
     dest: /etc/logrotate.d/vault
     mode: 0644
 
 - name: Copy config
-  template:
+  ansible.builtin.template:
     src: "syslog-ng-upstream.conf.j2"
     dest: "/etc/syslog-ng/syslog-ng.conf"
     mode: 0644

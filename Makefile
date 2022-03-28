@@ -52,7 +52,7 @@ endif
 lint-jobs: $(NOMAD_JOBS) ## Lint Nomad jobs.
 	@for job in $^; do \
 		echo -e "\n$${job}:"; \
-		nomad job validate $${job} | tr -d '\000-\011\013\014\016-\037' | tail -n +3; \
+		NOMAD_VAR_domain="$(DOMAIN)" NOMAD_VAR_grafana_url="http://grafana.$(DOMAIN)" nomad job validate $${job} | tr -d '\000-\011\013\014\016-\037' | tail -n +3; \
 	done
 
 

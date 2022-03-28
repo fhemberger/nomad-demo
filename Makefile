@@ -17,7 +17,7 @@ DOMAIN         := $(shell grep -oP 'domain: \K\w+' group_vars/all.yml)
 # running for each Vagrant machine. The Ansible playbook is designed to configure *all* hosts.
 .PHONY: up
 up: ## DEFAULT: Start all virtual machines and provision them.
-	vagrant up
+	vagrant up --debug &> ./vagrant.log
 	@echo "vagrant provision --provision-with ansible loadbalancer"
 ifeq (darwin, $(PLATFORM))
 	@script -Fq .vagrant/ansible-$$(date +%Y-%m-%dT%H-%M-%S).log vagrant provision --provision-with ansible loadbalancer

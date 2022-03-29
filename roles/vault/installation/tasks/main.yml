@@ -88,17 +88,16 @@
       ansible.builtin.include_tasks: unseal.yml
       when: _vault_status_parsed.sealed
 
-    - name: Load root token
-      run_once: true
-      ansible.builtin.set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
-      when: _vault_status_parsed.initialized
-
     - name: "Wait for Vault node to become initialized, unsealed and active"
       ansible.builtin.uri: url=http://127.0.0.1:8200/v1/sys/health
       register: _vault_health
       until: _vault_health.status == 200
       retries: 30
       delay: 2
+
+    - name: Load root token
+      run_once: true
+      ansible.builtin.set_fact: vault_root_token="{{ lookup('file', vault_token_dir + '/root-token') }}"
 
     - name: Enable syslog audit device # noqa no-changed-when
       ansible.builtin.command: vault audit enable syslog

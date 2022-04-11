@@ -7,6 +7,7 @@
     name:
       - curl
       - dnsutils
+      - gnupg2
       - jq
       - unzip
     state: present

@@ -1,12 +1,24 @@
 ---
-- name: Add apt key
-  ansible.builtin.apt_key:
-    url: "https://ose-repo.syslog-ng.com/apt/syslog-ng-ose-pub.asc"
-    state: present
+- name: Download GPG key
+  ansible.builtin.get_url:
+    url: https://ose-repo.syslog-ng.com/apt/syslog-ng-ose-pub.asc
+    dest: /usr/share/keyrings/syslog-ng-ose-archive-keyring.asc
+    mode: 0644
+
+- name: De-armor GPG key # noqa no-changed-when
+  ansible.builtin.command: |
+    gpg --dearmor
+    --output /usr/share/keyrings/syslog-ng-ose-archive-keyring.gpg
+    /usr/share/keyrings/syslog-ng-ose-archive-keyring.asc
+
+- name: Remove ASCII version of GPG key
+  ansible.builtin.file:
+    path: /usr/share/keyrings/syslog-ng-ose-archive-keyring.asc
+    state: absent
 
 - name: Add apt repository
   ansible.builtin.apt_repository:
-    repo: "deb https://ose-repo.syslog-ng.com/apt/ stable ubuntu-{{ ansible_distribution_release }}"
+    repo: "deb [signed-by=/usr/share/keyrings/syslog-ng-ose-archive-keyring.gpg] https://ose-repo.syslog-ng.com/apt/ stable ubuntu-{{ ansible_distribution_release }}"
     filename: syslog-ng
     state: present
 

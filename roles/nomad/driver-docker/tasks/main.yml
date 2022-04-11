@@ -7,21 +7,32 @@
 
 - name: Install Docker
   block:
-    - name: Add Docker GPG key
-      ansible.builtin.apt_key:
+    - name: Download Docker GPG key
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
-        id: 0EBFCD88
-        state: present
+        dest: /usr/share/keyrings/docker-ce-archive-keyring.asc
+        mode: 0644
+
+    - name: De-armor Docker GPG key # noqa no-changed-when
+      ansible.builtin.command: |
+        gpg --dearmor
+        --output /usr/share/keyrings/docker-ce-archive-keyring.gpg
+        /usr/share/keyrings/docker-ce-archive-keyring.asc
+
+    - name: Remove ASCII version of GPG key
+      ansible.builtin.file:
+        path: /usr/share/keyrings/docker-ce-archive-keyring.asc
+        state: absent
 
     - name: Add Docker apt repository
       ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
-        filename: docker
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-ce-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+        filename: docker-ce
         state: present
 
     - name: Update repositories cache and install 'docker-ce' package to latest version # noqa 403
       ansible.builtin.apt:
-        name: "docker-ce"
+        name: docker-ce
         update_cache: yes
         state: latest
 

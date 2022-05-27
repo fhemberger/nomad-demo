@@ -45,7 +45,7 @@ You need three components to get the setup running:
 
 1. [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 2. [Vagrant](https://www.vagrantup.com/downloads.html) <sup id="a1">[1](#f1)</sup>
-3. [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+3. [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) >= 2.10 <sup id="a2">[2](#f2)</sup>
 
 If you're working on macOS and have [Homebrew](https://brew.sh/) installed, you can setup everything with two commands:
 
@@ -284,3 +284,7 @@ consul-nomad-nodeN     ansible_host=your.vm.ip.address
 ```
 
 Afterwards run the provisioning step with `ansible-playbook -i <inventory file> playbook.yml` [↩](#user-content-a1)
+
+---
+
+<sup id="f2">2</sup> There is a [bug in older versions](https://github.com/ansible/ansible/pull/71824) regarding the new FQDN notation for builtin tasks (`ansible.builtin.module` vs. the old `module` notation) that prevents the playbook from running. [↩](#user-content-a2)

@@ -1,3 +1,7 @@
 ---
 skip_list:
+  - experimental
   - role-name
+
+warn_list:
+  - unnamed-task

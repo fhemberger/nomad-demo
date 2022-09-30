@@ -5,14 +5,14 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
 
   - package-ecosystem: "docker"
     directory: "/.github/actions/lint"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
 
   - package-ecosystem: "docker"
     directory: "/nomad_jobs/hello-world-vault"
     schedule:
-      interval: "weekly"
+      interval: "monthly"

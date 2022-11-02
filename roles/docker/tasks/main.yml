@@ -30,7 +30,7 @@
         filename: docker-ce
         state: present
 
-    - name: Update repositories cache and install 'docker-ce' package to latest version # noqa 403
+    - name: Update repositories cache and install 'docker-ce' package to latest version # noqa package-latest
       ansible.builtin.apt:
         name: docker-ce
         update_cache: yes

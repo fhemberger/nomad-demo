@@ -2,7 +2,7 @@
 - hosts: consul_nomad
   become: yes
   tasks:
-    - include_vars: roles/vault/defaults/main.yml # noqa 502
+    - include_vars: roles/vault/defaults/main.yml # noqa name[missing]
 
     - name: Get Vault status # noqa no-changed-when
       ansible.builtin.command: vault status -format json

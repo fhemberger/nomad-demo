@@ -20,7 +20,7 @@
       retries: 5
 
     - name: Set vault_version
-      ansible.builtin.set_fact: vault_version="{{ _github_releases.json | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
+      ansible.builtin.set_fact: vault_version="{{ (_github_releases.json | default([])) | json_query('[?prerelease==`false` && draft==`false`].tag_name') | community.general.version_sort | last | regex_replace('^v?(.*)$', '\\1') }}"
 
   when: (vault_version is not defined) or (vault_version == 'latest')
   run_once: true

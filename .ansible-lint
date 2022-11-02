@@ -1,7 +1,10 @@
 ---
 skip_list:
   - experimental
+  - name[play]
   - role-name
 
 warn_list:
-  - unnamed-task
+  - name[missing]
+
+offline: true

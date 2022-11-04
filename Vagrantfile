@@ -21,6 +21,10 @@ Vagrant.configure(2) do |config|
       # Increase memory for Virtualbox
       node.vm.provider "virtualbox" do |vb|
         vb.memory = "1024"
+        vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
+        vb.customize [ "modifyvm", :id, "--uartmode2", "disconnected" ]
+        vb.customize [ "modifyvm", :id, "--uartmode3", "disconnected" ]
+        vb.customize [ "modifyvm", :id, "--uartmode4", "disconnected" ]
       end
     end
   end
@@ -29,6 +33,12 @@ Vagrant.configure(2) do |config|
     node_ip_address = "#{get_ip(0)}"
     lb.vm.network "private_network", ip: node_ip_address
     lb.vm.hostname = "loadbalancer"
+    lb.vm.provider "virtualbox" do |vb|
+      vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
+      vb.customize [ "modifyvm", :id, "--uartmode2", "disconnected" ]
+      vb.customize [ "modifyvm", :id, "--uartmode3", "disconnected" ]
+      vb.customize [ "modifyvm", :id, "--uartmode4", "disconnected" ]
+    end
   end
 
   config.vm.provision "ansible", type: "ansible", run: "never" do |ansible|

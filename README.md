@@ -54,6 +54,12 @@ brew cask install vagrant virtualbox
 brew install ansible
 ```
 
+Afterwards, install dependencies for running the Ansible playbook:
+
+```sh
+ansible-galaxy collection install community.general
+```
+
 Your host system will need at least 6GB of RAM and about 20GB of free hard disk (sorry, Vagrant VM boxes 🤷‍♂️).
 
 Although the Vagrant boxes are running Ubuntu LTS, Debian should work just as fine (PRs gladly accepted for RedHat Linux). The setup supports both Intel (`x86_64`/`amd64`) and ARM (`arm64`) architectures.

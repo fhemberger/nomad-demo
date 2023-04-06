@@ -3,8 +3,11 @@ skip_list:
   - experimental
   - name[play]
   - role-name
+  # FIXME
+  - no-free-form
 
 warn_list:
   - name[missing]
+  - key-order[task]
 
 offline: true

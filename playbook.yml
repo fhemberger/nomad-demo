@@ -2,31 +2,31 @@
 - hosts: loadbalancer
   become: yes
   roles:
-    - name: base
-    - name: coredns
-    - name: traefik
+    - role: base
+    - role: coredns
+    - role: traefik
       # NOTE: I'm "abusing" the load balancer VM to collect Vault
       # audit logs just to avoid the need of another VM for this demo.
       #
       # OF COURSE AUDIT LOGS OF YOUR SECRET MANAGEMENT
       # *NEVER* BELONG ON AN OUTSIDE FACING MACHINE!
-    - name: syslog-ng
+    - role: syslog-ng
       tags: ['syslog-ng']
 
 
 - hosts: consul_nomad
   become: yes
   roles:
-    - name: base
-    - name: consul
-    - name: jre
-    - name: docker
+    - role: base
+    - role: consul
+    - role: jre
+    - role: docker
       tags: ['docker']
-    - name: syslog-ng
+    - role: syslog-ng
       tags: ['syslog-ng']
-    - name: vault
+    - role: vault
       tags: ['vault']
-    - name: nomad
+    - role: nomad
       tags: ['nomad']
 
   post_tasks:
